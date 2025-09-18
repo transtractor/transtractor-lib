@@ -5,3 +5,5 @@ edition = "2024"
 
 [dependencies]
 lopdf = "0.38"
+regex = "1.11.2"
+
