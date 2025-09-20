@@ -5,7 +5,7 @@ use regex::Regex;
 pub struct Format1;
 
 impl AmountFormat for Format1 {
-    const NUM_TERMS: usize = 1;
+    fn num_terms(&self) -> usize { 1 }
 
     fn parse(&self, amount_str: &str) -> Option<f64> {
         let re = Regex::new(r"^-?\d{1,3}(,\d{3})*\.\d{2}(-|\s)?$").unwrap();
@@ -36,7 +36,6 @@ mod tests {
     #[test]
     fn test_format1() {
         let fmt = Format1;
-        assert_eq!(Format1::NUM_TERMS, 1);
         assert_eq!(fmt.parse("1,234.56"), Some(1234.56));
         assert_eq!(fmt.parse("-1,234.56"), Some(-1234.56));
         assert_eq!(fmt.parse("1,234.56-"), Some(-1234.56));
@@ -46,5 +45,6 @@ mod tests {
         assert_eq!(fmt.parse("1234.567"), None);
         assert_eq!(fmt.parse("1234"), None);
         assert_eq!(fmt.parse("1234.56"), None);
+        assert_eq!(fmt.parse("1,000,234.56"), Some(1000234.56));
     }
 }
