@@ -4,7 +4,7 @@ use crate::formats::amount::AmountFormat;
 pub struct Format5;
 
 impl AmountFormat for Format5 {
-    fn num_terms(&self) -> usize { 1 }
+    fn num_items(&self) -> usize { 1 }
 
     fn parse(&self, currency_str: &str) -> Option<f64> {
         if currency_str.trim().eq_ignore_ascii_case("nil") {

@@ -5,7 +5,7 @@ use regex::Regex;
 pub struct Format3;
 
 impl AmountFormat for Format3 {
-    fn num_terms(&self) -> usize { 2 }
+    fn num_items(&self) -> usize { 2 }
 
     fn parse(&self, currency_str: &str) -> Option<f64> {
         let currency_str = currency_str.to_lowercase();

@@ -5,7 +5,7 @@ use regex::Regex;
 pub struct Format2;
 
 impl AmountFormat for Format2 {
-    fn num_terms(&self) -> usize { 1 }
+    fn num_items(&self) -> usize { 1 }
 
     fn parse(&self, currency_str: &str) -> Option<f64> {
         let re = Regex::new(r"^-?\$\d{1,3}(,\d{3})*\.\d{2}(-|\s)?$").unwrap();

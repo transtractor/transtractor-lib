@@ -13,8 +13,8 @@ use format5::Format5;
 
 /// Trait for amount formats.
 pub trait AmountFormat {
-    /// Number of space-delimited terms in the input string.
-    fn num_terms(&self) -> usize;
+    /// Number of space-delimited items in the input string.
+    fn num_items(&self) -> usize;
 
     /// Parse the input string and return a float if valid.
     fn parse(&self, input: &str) -> Option<f64>;
@@ -30,18 +30,18 @@ impl MultiAmountFormatParser {
     pub fn new(format_names: &[&str]) -> Self {
         // Collect (name, NUM_TERMS) pairs
         let mut formats: Vec<(&str, usize)> = format_names.iter().map(|&name| {
-            let num_terms = match name {
-                "format1" => Format1.num_terms(),
-                "format2" => Format2.num_terms(),
-                "format3" => Format3.num_terms(),
-                "format4" => Format4.num_terms(),
-                "format5" => Format5.num_terms(),
+            let num_items = match name {
+                "format1" => Format1.num_items(),
+                "format2" => Format2.num_items(),
+                "format3" => Format3.num_items(),
+                "format4" => Format4.num_items(),
+                "format5" => Format5.num_items(),
                 _ => 0,
             };
-            (name, num_terms)
+            (name, num_items)
         }).collect();
 
-        // Sort by NUM_TERMS descending
+        // Sort by num items descending
         formats.sort_by(|a, b| b.1.cmp(&a.1));
 
         // Instantiate parsers in sorted order
@@ -69,9 +69,9 @@ impl MultiAmountFormatParser {
         None
     }
 
-    /// Get the maximum number of terms among the included formats.
-    pub fn max_terms(&self) -> usize {
-        self.parsers.iter().map(|p| p.num_terms()).max().unwrap_or(0)
+    /// Get the maximum number of items among the included formats.
+    pub fn max_items(&self) -> usize {
+        self.parsers.iter().map(|p| p.num_items()).max().unwrap_or(0)
     }
 }
 
@@ -88,15 +88,15 @@ mod tests {
     }
 
     #[test]
-    fn test_max_terms() {
+    fn test_max_items() {
         let multi_fmt = MultiAmountFormatParser::new(&["format1", "format3", "format5"]);
-        // format1: 1 term, format3: 2 terms, format5: 1 term
-        assert_eq!(multi_fmt.max_terms(), 2);
+        // format1: 1 item, format3: 2 items, format5: 1 item
+        assert_eq!(multi_fmt.max_items(), 2);
 
         let multi_fmt2 = MultiAmountFormatParser::new(&["format1", "format5"]);
-        assert_eq!(multi_fmt2.max_terms(), 1);
+        assert_eq!(multi_fmt2.max_items(), 1);
 
         let multi_fmt3 = MultiAmountFormatParser::new(&[]);
-        assert_eq!(multi_fmt3.max_terms(), 0);
+        assert_eq!(multi_fmt3.max_items(), 0);
     }
 }

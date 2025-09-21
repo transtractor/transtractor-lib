@@ -12,8 +12,8 @@ pub struct AmountParser {
     pub consumed: usize,
     /// Dispatcher for multiple amount formats
     pub parser: MultiAmountFormatParser,
-    /// Maximum number of space-delimited terms in the selected formats
-    pub parser_max_terms: usize,
+    /// Maximum number of space-delimited items in the selected formats
+    pub parser_max_items: usize,
     /// A copy of the last successfully parsed text item
     pub text_item: TextItem,
 }
@@ -22,14 +22,14 @@ impl AmountParser {
     /// Create a new AmountParser with specified format names
     pub fn new(format_names: &[&str]) -> Self {
         let parser = MultiAmountFormatParser::new(format_names);
-        let parser_max_terms = parser.max_terms();
+        let parser_max_items = parser.max_items();
         AmountParser {
             value: 0.0,
             primed: false,
             ready: false,
             consumed: 0,
             parser,
-            parser_max_terms,
+            parser_max_items,
             text_item: TextItem::default(),
         }
     }
@@ -51,7 +51,7 @@ impl AmountParser {
             return 0;
         }
         // Try longest first, then shorter
-        let max = usize::min(self.parser_max_terms, items.len());
+        let max = usize::min(self.parser_max_items, items.len());
         for i in (1..=max).rev() {
             if let Some(curr_item) = TextItem::from_items(&items[0..i]) {
                 if let Some(val) = self.parser.parse(&curr_item.text) {
