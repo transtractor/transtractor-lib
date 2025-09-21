@@ -68,6 +68,11 @@ impl MultiAmountFormatParser {
         }
         None
     }
+
+    /// Get the maximum number of terms among the included formats.
+    pub fn max_terms(&self) -> usize {
+        self.parsers.iter().map(|p| p.num_terms()).max().unwrap_or(0)
+    }
 }
 
 // Example usage:
@@ -80,5 +85,18 @@ mod tests {
         assert_eq!(multi_fmt1.parse("1,234.56"), Some(1234.56));
         assert_eq!(multi_fmt1.parse("-$1,234.56"), Some(-1234.56)); // format2
         assert_eq!(multi_fmt1.parse("$1,234.56 DR"), None); // format3 not included
+    }
+
+    #[test]
+    fn test_max_terms() {
+        let multi_fmt = MultiAmountFormatParser::new(&["format1", "format3", "format5"]);
+        // format1: 1 term, format3: 2 terms, format5: 1 term
+        assert_eq!(multi_fmt.max_terms(), 2);
+
+        let multi_fmt2 = MultiAmountFormatParser::new(&["format1", "format5"]);
+        assert_eq!(multi_fmt2.max_terms(), 1);
+
+        let multi_fmt3 = MultiAmountFormatParser::new(&[]);
+        assert_eq!(multi_fmt3.max_terms(), 0);
     }
 }
