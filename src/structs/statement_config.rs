@@ -106,8 +106,8 @@ pub struct StatementConfig {
     /// Coordinate values are aligned with header by "x1", "x2"
     pub transaction_description_header_align: String,
     /// Regex patterns to exclude from being considered as part of the description.
-    /// E.g., ["/\.\./g"] to exclude "......." patterns.
-    pub transaction_description_exclude: Vec<String>,
+    /// E.g., [/\.\./g] to exclude "......." patterns.
+    pub transaction_description_exclude: Vec<Regex>,
 
     // TRANSACTION AMOUNT READ PARAMS
     /// Array of accepted formats to parse the transaction amount
