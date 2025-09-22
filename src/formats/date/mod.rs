@@ -5,6 +5,7 @@ pub mod format4;
 pub mod format5;
 pub mod generate;
 
+use crate::formats::date::{format1::Format1, format2::Format2, format3::Format3, format4::Format4, format5::Format5};
 use crate::formats::date::generate::{parse_day, parse_month, parse_year};
 
 
@@ -56,6 +57,61 @@ impl DateParts {
         let date = chrono::NaiveDate::from_ymd_opt(year, month, day)?;
         let datetime = date.and_hms_opt(0, 0, 0)?;
         Some(datetime.and_utc().timestamp_millis())
+    }
+}
+
+/// Dispatcher for multiple date formats.
+pub struct MultiDateFormatParser {
+    parsers: Vec<Box<dyn DateFormat>>,
+}
+
+impl MultiDateFormatParser {
+    /// Create a new dispatcher from a list of format names.
+    pub fn new(format_names: &[&str]) -> Self {
+        // Collect (name, num_items) pairs
+        let mut formats: Vec<(&str, usize)> = format_names.iter().map(|&name| {
+            let num_items = match name {
+                "format1" => Format1.num_items(),
+                "format2" => Format2.num_items(),
+                "format3" => Format3.num_items(),
+                "format4" => Format4.num_items(),
+                "format5" => Format5.num_items(),
+                _ => 0,
+            };
+            (name, num_items)
+        }).collect();
+
+        // Sort by num_items descending
+        formats.sort_by(|a, b| b.1.cmp(&a.1));
+
+        // Instantiate parsers in sorted order
+        let mut parsers: Vec<Box<dyn DateFormat>> = Vec::new();
+        for &(name, _) in &formats {
+            match name {
+                "format1" => parsers.push(Box::new(Format1)),
+                "format2" => parsers.push(Box::new(Format2)),
+                "format3" => parsers.push(Box::new(Format3)),
+                "format4" => parsers.push(Box::new(Format4)),
+                "format5" => parsers.push(Box::new(Format5)),
+                _ => {}
+            }
+        }
+        MultiDateFormatParser { parsers }
+    }
+
+    /// Try parsing with each format in order, returning the first successful result.
+    pub fn parse(&self, input: &str, year_str: &str) -> Option<i64> {
+        for parser in &self.parsers {
+            if let Some(val) = parser.parse(input, year_str) {
+                return Some(val);
+            }
+        }
+        None
+    }
+
+    /// Returns the maximum number of items among all formats.
+    pub fn max_items(&self) -> usize {
+        self.parsers.iter().map(|p| p.num_items()).max().unwrap_or(0)
     }
 }
 
@@ -122,5 +178,34 @@ mod tests {
             year_str: "".to_string(),
         };
         dp.to_utc_timestamp("");
+    }
+
+    #[test]
+    fn test_multi_date_format_parser() {
+        let multi_fmt = MultiDateFormatParser::new(&["format1", "format2", "format3", "format4", "format5"]);
+        // Should parse using format1
+        assert!(multi_fmt.parse("24 mar", "2023").is_some());
+        // Should parse using format2
+        assert!(multi_fmt.parse("24 march 2020", "").is_some());
+        // Should parse using format3
+        assert!(multi_fmt.parse("march 24, 2020", "").is_some());
+        // Should parse using format4
+        assert!(multi_fmt.parse("24/3/2020", "").is_some());
+        // Should parse using format5
+        assert!(multi_fmt.parse("24/3/20", "").is_some());
+        // Should not parse invalid
+        assert_eq!(multi_fmt.parse("foo", "2023"), None);
+    }
+
+    #[test]
+    fn test_max_items() {
+        let multi_fmt = MultiDateFormatParser::new(&["format1", "format3", "format5"]);
+        assert_eq!(multi_fmt.max_items(), 3);
+
+        let multi_fmt2 = MultiDateFormatParser::new(&["format1"]);
+        assert_eq!(multi_fmt2.max_items(), 2);
+
+        let multi_fmt3 = MultiDateFormatParser::new(&[]);
+        assert_eq!(multi_fmt3.max_items(), 0);
     }
 }
