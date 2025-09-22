@@ -1,4 +1,3 @@
-
 /// Parses a day string and returns the day as u32 if valid (1-31), or None if invalid.
 pub fn parse_day(day_str: &str) -> Option<u32> {
     let day = day_str.trim().parse::<u32>().ok()?;
@@ -9,28 +8,28 @@ pub fn parse_day(day_str: &str) -> Option<u32> {
     }
 }
 
-/// Parses a month string (e.g. "Jan", "March", "12") and returns the zero-based month index (0 = Jan, 11 = Dec).
+/// Parses a month string (e.g. "Jan", "March", "12") and returns the month number (1 = Jan, 12 = Dec).
 /// Returns None if the input is not a valid month.
 pub fn parse_month(month_str: &str) -> Option<u32> {
-    // If a number is passed, return it as zero-based index
+    // If a number is passed, return it as-is (1-based)
     if let Ok(num) = month_str.trim().parse::<u32>() {
         if num >= 1 && num <= 12 {
-            return Some(num - 1);
+            return Some(num);
         }
     }
     match month_str.trim().to_ascii_lowercase().as_str() {
-        "jan" | "january" => Some(0),
-        "feb" | "february" => Some(1),
-        "mar" | "march" => Some(2),
-        "apr" | "april" => Some(3),
-        "may" => Some(4),
-        "jun" | "june" => Some(5),
-        "jul" | "july" => Some(6),
-        "aug" | "august" => Some(7),
-        "sep" | "september" => Some(8),
-        "oct" | "october" => Some(9),
-        "nov" | "november" => Some(10),
-        "dec" | "december" => Some(11),
+        "jan" | "january" => Some(1),
+        "feb" | "february" => Some(2),
+        "mar" | "march" => Some(3),
+        "apr" | "april" => Some(4),
+        "may" => Some(5),
+        "jun" | "june" => Some(6),
+        "jul" | "july" => Some(7),
+        "aug" | "august" => Some(8),
+        "sep" | "september" => Some(9),
+        "oct" | "october" => Some(10),
+        "nov" | "november" => Some(11),
+        "dec" | "december" => Some(12),
         _ => None,
     }
 }
@@ -72,20 +71,20 @@ mod tests {
     // Month tests
     #[test]
     fn test_parse_month_numeric() {
-        assert_eq!(parse_month("1"), Some(0));
-        assert_eq!(parse_month("12"), Some(11));
+        assert_eq!(parse_month("1"), Some(1));
+        assert_eq!(parse_month("12"), Some(12));
         assert_eq!(parse_month("0"), None);
         assert_eq!(parse_month("13"), None);
     }
 
     #[test]
     fn test_parse_month_text() {
-        assert_eq!(parse_month("Jan"), Some(0));
-        assert_eq!(parse_month("january"), Some(0));
-        assert_eq!(parse_month("Feb"), Some(1));
-        assert_eq!(parse_month("March"), Some(2));
-        assert_eq!(parse_month("october"), Some(9));
-        assert_eq!(parse_month("DEC"), Some(11));
+        assert_eq!(parse_month("Jan"), Some(1));
+        assert_eq!(parse_month("january"), Some(1));
+        assert_eq!(parse_month("Feb"), Some(2));
+        assert_eq!(parse_month("March"), Some(3));
+        assert_eq!(parse_month("october"), Some(10));
+        assert_eq!(parse_month("DEC"), Some(12));
         assert_eq!(parse_month("foo"), None);
     }
 
