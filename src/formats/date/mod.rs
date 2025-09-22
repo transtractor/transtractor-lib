@@ -2,6 +2,7 @@ pub mod format1;
 pub mod format2;
 pub mod format3;
 pub mod format4;
+pub mod format5;
 pub mod generate;
 
 use crate::formats::date::generate::{parse_day, parse_month, parse_year};
