@@ -2,6 +2,16 @@ pub mod generate;
 
 use crate::formats::date::generate::{parse_day, parse_month, parse_year};
 
+
+/// Trait for date formats.
+pub trait DateFormat {
+    /// Number of space-delimited items in the input string.
+    fn num_items(&self) -> usize;
+
+    /// Parse the input string and return a UTC timestamp (milliseconds since epoch) if valid.
+    fn parse(&self, input: &str, year_str: &str) -> Option<i64>;
+}
+
 /// Stores day, month, and year strings and can convert to a UTC timestamp.
 #[derive(Debug, Clone)]
 pub struct DateParts {
