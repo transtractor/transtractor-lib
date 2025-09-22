@@ -11,6 +11,14 @@ pub struct DateParts {
 }
 
 impl DateParts {
+    pub fn new(day_str: String, month_str: String, year_str: String) -> Self {
+          Self {
+              day_str,
+              month_str,
+              year_str,
+          }
+      }
+    
     /// Attempts to convert the stored strings to a UTC timestamp (milliseconds since epoch).
     /// Returns None if any part is invalid.
     pub fn to_utc_timestamp(&self) -> Option<i64> {
