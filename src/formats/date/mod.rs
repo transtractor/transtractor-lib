@@ -12,21 +12,33 @@ pub struct DateParts {
 
 impl DateParts {
     pub fn new(day_str: String, month_str: String, year_str: String) -> Self {
-          Self {
-              day_str,
-              month_str,
-              year_str,
-          }
-      }
-    
+        Self {
+            day_str,
+            month_str,
+            year_str,
+        }
+    }
+
     /// Attempts to convert the stored strings to a UTC timestamp (milliseconds since epoch).
-    /// Returns None if any part is invalid.
-    pub fn to_utc_timestamp(&self) -> Option<i64> {
+    /// If self.year_str is empty, uses the input arg year_str.
+    /// If both are empty, panics.
+    /// If self.year_str is not empty, uses it even if the input arg is not empty.
+    pub fn to_utc_timestamp(&self, year_str: &str) -> Option<i64> {
         let day = parse_day(&self.day_str)? as u32;
         let month = parse_month(&self.month_str)? as u32;
-        let year = parse_year(&self.year_str)? as i32;
 
-        let date = chrono::NaiveDate::from_ymd_opt(year, month + 1, day)?;
+        // Determine which year string to use
+        let year_source = if !self.year_str.trim().is_empty() {
+            &self.year_str
+        } else if !year_str.trim().is_empty() {
+            year_str
+        } else {
+            panic!("No year string provided to to_utc_timestamp");
+        };
+
+        let year = parse_year(year_source)? as i32;
+
+        let date = chrono::NaiveDate::from_ymd_opt(year, month, day)?;
         let datetime = date.and_hms_opt(0, 0, 0)?;
         Some(datetime.and_utc().timestamp_millis())
     }
@@ -43,7 +55,7 @@ mod tests {
             month_str: "Feb".to_string(),
             year_str: "2023".to_string(),
         };
-        assert_eq!(dp.to_utc_timestamp(), Some(1676419200000)); // 2023-02-15T00:00:00Z
+        assert_eq!(dp.to_utc_timestamp(""), Some(1676419200000)); // 2023-02-15T00:00:00Z
     }
 
     #[test]
@@ -53,7 +65,7 @@ mod tests {
             month_str: "Feb".to_string(),
             year_str: "2023".to_string(),
         };
-        assert_eq!(dp.to_utc_timestamp(), None);
+        assert_eq!(dp.to_utc_timestamp(""), None);
     }
 
     #[test]
@@ -63,7 +75,7 @@ mod tests {
             month_str: "Foo".to_string(),
             year_str: "2023".to_string(),
         };
-        assert_eq!(dp.to_utc_timestamp(), None);
+        assert_eq!(dp.to_utc_timestamp(""), None);
     }
 
     #[test]
@@ -73,6 +85,27 @@ mod tests {
             month_str: "Feb".to_string(),
             year_str: "abcd".to_string(),
         };
-        assert_eq!(dp.to_utc_timestamp(), None);
+        assert_eq!(dp.to_utc_timestamp(""), None);
+    }
+
+    #[test]
+    fn test_to_utc_timestamp_uses_input_year_if_self_year_empty() {
+        let dp = DateParts {
+            day_str: "15".to_string(),
+            month_str: "Feb".to_string(),
+            year_str: "".to_string(),
+        };
+        assert_eq!(dp.to_utc_timestamp("2023"), Some(1676419200000)); // 2023-02-15T00:00:00Z
+    }
+
+    #[test]
+    #[should_panic(expected = "No year string provided to to_utc_timestamp")]
+    fn test_to_utc_timestamp_panics_if_no_year_provided() {
+        let dp = DateParts {
+            day_str: "15".to_string(),
+            month_str: "Feb".to_string(),
+            year_str: "".to_string(),
+        };
+        dp.to_utc_timestamp("");
     }
 }
