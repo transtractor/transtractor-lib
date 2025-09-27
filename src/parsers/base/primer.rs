@@ -15,17 +15,17 @@ pub struct ParserPrimer {
 impl ParserPrimer {
     /// Create a new ParserPrimer with specified terms
     pub fn new(terms: &[&str]) -> Self {
-        let terms_lower: Vec<String> = terms.iter().map(|t| t.to_lowercase()).collect();
-        let max_lookahead = terms_lower.iter().map(|t| t.split(' ').count()).max().unwrap_or(0);
+        let terms_vec: Vec<String> = terms.iter().map(|t| t.to_string()).collect();
+        let max_lookahead = terms_vec.iter().map(|t| t.split(' ').count()).max().unwrap_or(0);
         ParserPrimer {
             primed: false,
             text_item: TextItem::default(),
-            terms: terms_lower,
+            terms: terms_vec,
             max_lookahead,
         }
     }
 
-    /// Iteratively join text items and attempt to match terms
+    /// Iteratively join text items and attempt to match terms (case sensitive)
     /// Returns number of items consumed if successful, else 0
     pub fn parse_items(&mut self, items: &[TextItem]) -> usize {
         if items.is_empty() {
@@ -35,7 +35,7 @@ impl ParserPrimer {
         let max = usize::min(self.max_lookahead, items.len());
         for i in (1..=max).rev() {
             if let Some(curr_item) = TextItem::from_items(&items[0..i]) {
-                let curr_text = curr_item.text.to_lowercase();
+                let curr_text = curr_item.text.clone();
                 if self.terms.iter().any(|t| t == &curr_text) {
                     self.text_item = curr_item;
                     self.primed = true;
@@ -90,15 +90,6 @@ mod tests {
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 0);
         assert!(!parser.primed);
-    }
-
-    #[test]
-    fn test_case_insensitive_match() {
-        let mut parser = ParserPrimer::new(&["Hello"]);
-        let items = vec![make_text_item("HELLO")];
-        let consumed = parser.parse_items(&items);
-        assert_eq!(consumed, 1);
-        assert!(parser.primed);
     }
 
     #[test]
