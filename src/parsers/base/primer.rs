@@ -5,7 +5,7 @@ pub struct ParserPrimer {
     /// Parser is ready to scan for terms
     pub primed: bool,
     /// The last successfully parsed text item
-    pub text_item: TextItem,
+    pub text_item: Option<TextItem>,
     /// The set of terms to match against (lowercase)
     pub terms: Vec<String>,
     /// Number of space-delimited items in the longest term
@@ -19,10 +19,15 @@ impl ParserPrimer {
         let max_lookahead = terms_vec.iter().map(|t| t.split(' ').count()).max().unwrap_or(0);
         ParserPrimer {
             primed: false,
-            text_item: TextItem::default(),
+            text_item: None,
             terms: terms_vec,
             max_lookahead,
         }
+    }
+
+    /// Get text item, raise error if none
+    pub fn text_item(&self) -> &TextItem {
+        self.text_item.as_ref().expect("No text item available")
     }
 
     /// Iteratively join text items and attempt to match terms (case sensitive)
@@ -35,15 +40,21 @@ impl ParserPrimer {
         let max = usize::min(self.max_lookahead, items.len());
         for i in (1..=max).rev() {
             if let Some(curr_item) = TextItem::from_items(&items[0..i]) {
-                let curr_text = curr_item.text.clone();
-                if self.terms.iter().any(|t| t == &curr_text) {
-                    self.text_item = curr_item;
+                let curr_text = &curr_item.text;
+                if self.terms.iter().any(|t| t == curr_text) {
+                    self.text_item = Some(curr_item);
                     self.primed = true;
                     return i;
                 }
             }
         }
         0
+    }
+
+    /// Reset the parser
+    pub fn reset(&mut self) {
+        self.primed = false;
+        self.text_item = None;
     }
 }
 
@@ -70,7 +81,7 @@ mod tests {
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 1);
         assert!(parser.primed);
-        assert_eq!(parser.text_item.text, "hello");
+        assert_eq!(parser.text_item.as_ref().unwrap().text, "hello");
     }
 
     #[test]
@@ -80,7 +91,7 @@ mod tests {
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 2);
         assert!(parser.primed);
-        assert_eq!(parser.text_item.text, "hello world");
+        assert_eq!(parser.text_item.as_ref().unwrap().text, "hello world");
     }
 
     #[test]
@@ -90,6 +101,7 @@ mod tests {
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 0);
         assert!(!parser.primed);
+        assert!(parser.text_item.is_none());
     }
 
     #[test]
@@ -99,9 +111,9 @@ mod tests {
         parser.parse_items(&items);
         assert!(parser.primed);
         parser.primed = false;
-        parser.text_item = TextItem::default();
+        parser.text_item = None;
         assert!(!parser.primed);
-        assert_eq!(parser.text_item.text, "");
+        assert!(parser.text_item.is_none());
     }
 
     #[test]
@@ -111,5 +123,6 @@ mod tests {
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 0);
         assert!(!parser.primed);
+        assert!(parser.text_item.is_none());
     }
 }
