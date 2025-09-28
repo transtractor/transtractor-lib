@@ -44,9 +44,15 @@ impl PrimedAmountParser {
             return 0;
         }
 
-        // Try to prime (if not already primed)
+        // Primer not primed, or re-prime if term found again
+        let consumed_primer = self.primer_parser.parse_items(items);
+        if consumed_primer > 0 {
+            return consumed_primer;
+        }
+
+        // Must be primed to look for amount
         if !self.primer_parser.primed {
-            return self.primer_parser.parse_items(items);
+            return 0; // Primer not found yet
         }
 
         // Primer is primed, look for amount
