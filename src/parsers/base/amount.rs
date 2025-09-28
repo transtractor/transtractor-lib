@@ -25,6 +25,11 @@ impl AmountParser {
         }
     }
 
+    /// Get text item, raise error if none
+    pub fn text_item(&self) -> &TextItem {
+        self.text_item.as_ref().expect("No text item available")
+    }
+
     /// Reset the parser state
     pub fn reset(&mut self) {
         self.value = None;
