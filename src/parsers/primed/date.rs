@@ -86,6 +86,10 @@ impl PrimedDateParser {
         }
         consumed
     }
+
+    pub fn value(&self) -> Option<i64> {
+        self.date_parser.value
+    }
 }
 
 #[cfg(test)]
@@ -93,7 +97,7 @@ mod tests {
     use super::*;
     use crate::structs::TextItem;
 
-    fn make_text_item(text: &str, x1: i32, y1: i32, page: usize) -> TextItem {
+    fn make_text_item(text: &str, x1: i32, y1: i32, page: i32) -> TextItem {
         TextItem {
             text: text.to_string(),
             x1,

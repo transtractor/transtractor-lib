@@ -91,6 +91,15 @@ impl PrimedAmountParser {
         }
         consumed
     }
+
+    pub fn value(&self) -> Option<f64> {
+        self.amount_parser.value
+    }
+
+    /// Whether the primer term has been matched
+    pub fn is_primed(&self) -> bool {
+        self.primer_parser.primed
+    }
 }
 
 #[cfg(test)]
@@ -98,7 +107,7 @@ mod tests {
     use super::*;
     use crate::structs::TextItem;
 
-    fn make_text_item(text: &str, x1: i32, y1: i32, page: usize) -> TextItem {
+    fn make_text_item(text: &str, x1: i32, y1: i32, page: i32) -> TextItem {
         TextItem {
             text: text.to_string(),
             x1,
