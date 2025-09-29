@@ -10,6 +10,8 @@ pub struct StatementConfig {
     pub key: String,
     /// Full name of the bank (e.g., Commonwealth Bank of Australia)
     pub bank_name: String,
+    /// Account type label (e.g., "Debit", "Credit Card")
+    pub account_type: String,
     /// A set of terms on the statement that can uniquely identify the layout type.
     pub account_terms: Vec<String>,
     /// Account types that should work with this layout (e.g., "Streamline", "Everyday Offset")
@@ -196,7 +198,9 @@ impl Default for StatementConfig {
 
             transaction_description_x1_range: (-10000, 10000),
             transaction_description_x2_range: (-10000, 10000),
-            transaction_description_excluded: vec![],
+            transaction_description_header_terms: vec![],
+            transaction_description_header_align: "x1".to_string(),
+            transaction_description_exclude: vec![],
 
             transaction_amount_formats: vec![],
             transaction_amount_x1_range: (-10000, 10000),
