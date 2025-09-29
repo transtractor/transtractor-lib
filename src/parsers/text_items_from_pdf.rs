@@ -262,7 +262,7 @@ pub fn extract_text_items(pdf_path: &str) -> TextItems {
                             let x2 = x1 + advance_text_space as i32;
                             let y2 = y1 + state.font_size as i32; // simple baseline + font size box
                             if !text_decoded.is_empty() {
-                                text_items.add(&TextItem::new(text_decoded, x1, y1, x2, y2, page_num as usize));
+                                text_items.add(&TextItem::new(text_decoded, x1, y1, x2, y2, page_num as i32));
                             }
                         }
                     }
@@ -297,7 +297,7 @@ pub fn extract_text_items(pdf_path: &str) -> TextItems {
                                 let y1 = start_matrix[5] as i32;
                                 let x2 = x1 + advance_text_space as i32;
                                 let y2 = y1 + state.font_size as i32;
-                                text_items.add(&TextItem::new(collected, x1, y1, x2, y2, page_num as usize));
+                                text_items.add(&TextItem::new(collected, x1, y1, x2, y2, page_num as i32));
                             }
                         }
                     }
