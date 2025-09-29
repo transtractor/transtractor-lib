@@ -100,7 +100,7 @@ impl TextItems {
 
         // Merge items sharing identical (page,x1,x2,y1,y2) before layout serialization
         let mut merged: Vec<TextItem> = Vec::new();
-        let mut index_map: HashMap<(usize,i32,i32,i32,i32), usize> = HashMap::new();
+            let mut index_map: HashMap<(i32,i32,i32,i32,i32), usize> = HashMap::new();
         for it in &self.items {
             let key = (it.page, it.x1, it.x2, it.y1, it.y2);
             if let Some(&idx) = index_map.get(&key) {
@@ -151,7 +151,7 @@ impl TextItems {
 
     pub fn read_from_layout_text(&mut self, layout: &LayoutText) -> Result<(), ParseLayoutError> {
         self.items.clear();
-        let mut curr_page: usize = 1;
+            let mut curr_page: i32 = 1;
         for line in layout.0.lines() {
             let trimmed = line.trim();
             if trimmed.is_empty() {
@@ -164,8 +164,8 @@ impl TextItems {
                 if parts.len() != 2 || parts[0] != "Page" {
                     return Err(ParseLayoutError::UnexpectedFormat(trimmed.to_string()));
                 }
-                curr_page = parts[1]
-                    .parse::<usize>()
+                    curr_page = parts[1]
+                        .parse::<i32>()
                     .map_err(|_| ParseLayoutError::InvalidNumber(parts[1].to_string()))?;
                 continue;
             }
@@ -192,7 +192,7 @@ impl TextItems {
         Ok(())
     }
 
-    fn parse_and_push_block(&mut self, raw: &str, page: usize) -> Result<(), ParseLayoutError> {
+    fn parse_and_push_block(&mut self, raw: &str, page: i32) -> Result<(), ParseLayoutError> {
         let cleaned = raw.trim().trim_matches(|c| c == '[' || c == ']');
         if cleaned.is_empty() {
             return Ok(());

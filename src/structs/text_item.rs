@@ -11,13 +11,13 @@ pub struct TextItem {
     pub x2: i32,
     /// Ending y-coordinate of the text item
     pub y2: i32,
-    /// The page number where the text item is located
-    pub page: usize,
+    /// The page number where the text item is located (i32 for downstream interoperability)
+    pub page: i32,
 }
 
 impl TextItem {
     /// TextItem constructor
-    pub fn new(text: String, x1: i32, y1: i32, x2: i32, y2: i32, page: usize) -> Self {
+    pub fn new(text: String, x1: i32, y1: i32, x2: i32, y2: i32, page: i32) -> Self {
         TextItem { text, x1, y1, x2, y2, page }
     }
 
@@ -110,7 +110,7 @@ impl TextItem {
     }
 
     /// Get page number
-    pub fn page(&self) -> usize {
+    pub fn page(&self) -> i32 {
         self.page
     }
 }
