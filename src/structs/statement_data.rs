@@ -1,5 +1,6 @@
 use crate ::structs::ProtoTransaction;
 
+#[derive(Clone)]
 pub struct StatementData {
     pub start_date: Option<i64>,
     pub opening_balance: Option<f64>,
@@ -17,6 +18,10 @@ impl StatementData {
         }
     }
 
+    pub fn opening_balance(&self) -> Option<f64> { self.opening_balance }
+    pub fn closing_balance(&self) -> Option<f64> { self.closing_balance }
+    pub fn start_date(&self) -> Option<i64> { self.start_date }
+
     // Setters for the fields
     pub fn set_start_date(&mut self, date: i64) {
         self.start_date = Some(date);
@@ -33,4 +38,8 @@ impl StatementData {
     pub fn add_proto_transaction(&mut self, proto_tx: ProtoTransaction) {
         self.proto_transactions.push(proto_tx);
     }
+}
+
+impl Default for StatementData {
+    fn default() -> Self { Self::new() }
 }
