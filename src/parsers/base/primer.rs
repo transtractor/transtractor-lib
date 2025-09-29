@@ -64,14 +64,7 @@ mod tests {
     use crate::structs::TextItem;
 
     fn make_text_item(text: &str) -> TextItem {
-        TextItem {
-            text: text.to_string(),
-            x1: 0,
-            y1: 0,
-            x2: 0,
-            y2: 0,
-            page: 1,
-        }
+        TextItem { text: text.to_string(), x1: 0, y1: 0, x2: 0, y2: 0, page: 1 }
     }
 
     #[test]
