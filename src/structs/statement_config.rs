@@ -193,32 +193,22 @@ impl Default for StatementConfig {
             transaction_date_formats: vec![],
             transaction_date_x1_range: (-10000, 10000),
             transaction_date_x2_range: (-10000, 10000),
-            transaction_date_header_terms: vec![],
-            transaction_date_header_align: "x1".to_string(),
 
             transaction_description_x1_range: (-10000, 10000),
             transaction_description_x2_range: (-10000, 10000),
-            transaction_description_header_terms: vec![],
-            transaction_description_header_align: "x1".to_string(),
             transaction_description_exclude: vec![],
 
             transaction_amount_formats: vec![],
             transaction_amount_x1_range: (-10000, 10000),
             transaction_amount_x2_range: (-10000, 10000),
-            transaction_amount_header_terms: vec![],
-            transaction_amount_header_align: "x1".to_string(),
             transaction_amount_invert_x1_range: (-10000, -10000),
             transaction_amount_invert_x2_range: (-10000, -10000),
             transaction_amount_invert: false,
-            transaction_amount_invert_header_terms: vec![],
-            transaction_amount_invert_header_align: "x1".to_string(),
 
             transaction_balance_formats: vec![],
             transaction_balance_x1_range: (-10000, 10000),
             transaction_balance_x2_range: (-10000, 10000),
             transaction_balance_invert: false,
-            transaction_balance_header_terms: vec![],
-            transaction_balance_header_align: "x1".to_string(),
         }
     }
 }
