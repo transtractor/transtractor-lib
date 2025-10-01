@@ -1,0 +1,46 @@
+{
+  "key": "au__cba__credit_card",
+  "bank_name": "Commonwealth Bank of Australia",
+  "account_type": "Credit Card",
+  "account_terms": ["netbank.com.au", "Available credit"],
+  "account_examples": ["Low Rate Mastercard", "Low Fee Mastercard"],
+  "apply_y_patch": true,
+  "apply_y_patch_line_height": 7,
+
+  "opening_balance_terms": ["Opening balance"],
+  "opening_balance_formats": ["format2"],
+  "opening_balance_y1_tol": 2,
+  "opening_balance_invert": true,
+
+  "closing_balance_terms": ["Closing balance"],
+  "closing_balance_formats": ["format2"],
+  "closing_balance_y1_tol": 2,
+  "closing_balance_invert": true,
+
+  "start_date_terms": ["Statement period"],
+  "start_date_formats": ["format2"],
+  "start_date_y1_tol": 2,
+
+  "transaction_terms": ["Transaction Details"],
+  "transaction_terms_stop": ["Please check your"],
+  "transaction_formats": [
+    ["date", "description", "amount"],
+    ["description", "amount"]
+  ],
+  
+
+  "transaction_date_formats": ["format1"],
+  "transaction_date_x1_range": [50, 60],
+  
+
+  "transaction_description_x1_range": [50, 500],
+  "transaction_description_x2_range": [50, 500],
+  "transaction_description_exclude": [
+    "NetBank Visit.*Transaction Details"
+  ],
+
+  "transaction_amount_formats": ["format1"],
+  "transaction_amount_x1_range": [-10000, -10000],
+  "transaction_amount_x2_range": [450, 10000],
+  "transaction_amount_invert": true
+}
