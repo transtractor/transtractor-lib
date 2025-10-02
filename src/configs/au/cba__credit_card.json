@@ -27,7 +27,6 @@
     ["date", "description", "amount"],
     ["description", "amount"]
   ],
-  
 
   "transaction_date_formats": ["format1"],
   "transaction_date_x1_range": [50, 60],
