@@ -52,6 +52,10 @@ impl TextItems {
         Self { items: Vec::new() }
     }
 
+    pub fn len(&self) -> usize {
+        self.items.len()
+    }
+
     /// Split incoming text by whitespace into multiple TextItems
     pub fn add(&mut self, text_item: &TextItem) {
         for part in text_item.text.split(' ') {
