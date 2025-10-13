@@ -1,0 +1,43 @@
+{
+  "key": "cba__general__1",
+  "bank_name": "Commonwealth Bank of Australia",
+  "account_type": "General Savings or Loan",
+  "account_terms": ["CommBank", "Account Number"],
+  "account_examples": [
+    "Complete Home Loan",
+    "Streamline",
+    "Smart Access",
+    "GoalSaver",
+    "Everyday Offset"
+  ],
+
+  "opening_balance_terms": ["Opening Balance"],
+  "opening_balance_formats": ["format3", "format5"],
+  "opening_balance_y1_tol": 2,
+
+  "closing_balance_terms": ["Closing Balance"],
+  "closing_balance_formats": ["format3", "format5"],
+  "closing_balance_y1_tol": 2,
+
+  "start_date_terms": ["Statement Period"],
+  "start_date_formats": ["format2"],
+  "start_date_y1_tol": 20,
+
+  "transaction_terms": ["Date Transaction"],
+  "transaction_terms_stop": ["Opening balance", "Important Information:"],
+  "transaction_formats": [
+    ["date", "description", "amount", "balance"]
+  ],
+
+  "transaction_date_formats": ["format1"],
+  "transaction_date_x1_range": [50, 65],
+
+  "transaction_description_x1_range": [50, 300],
+  "transaction_description_x2_range": [50, 400],
+
+  "transaction_amount_formats": ["format1", "format2"],
+  "transaction_amount_x2_range": [300, 500],
+
+  "transaction_balance_formats": ["format3"],
+  "transaction_balance_x2_range": [500, 10000]
+}
