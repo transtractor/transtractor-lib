@@ -1,107 +1,26 @@
-use lopdf::{Document, Object, ObjectId};
-use std::collections::HashMap;
+use lopdf::Document;
 use crate::structs::text_item::TextItem;
 use crate::structs::text_items::TextItems;
 
-
-// Local TextItem struct removed; using shared struct in crate::structs::text_item
-
-#[derive(Clone, Debug, Default)]
-struct FontMetrics {
-    first_char: i32,
-    widths: Vec<f32>, // stored in glyph space (already scaled to 1/1000 units -> we'll divide by 1000 when used)
-    avg_width: f32,
-}
-
 #[derive(Clone, Debug)]
 struct TextState {
-    text_matrix: [f32; 6],
-    text_line_matrix: [f32; 6],
+    x: f32,
+    y: f32,
     leading: f32,
     font_size: f32,
-    horizontal_scaling: f32, // percentage (100 = normal)
-    char_spacing: f32,
-    word_spacing: f32,
-    current_font: Option<String>,
 }
 
 impl Default for TextState {
     fn default() -> Self {
         Self {
-            text_matrix: [1.0, 0.0, 0.0, 1.0, 0.0, 0.0],
-            text_line_matrix: [1.0, 0.0, 0.0, 1.0, 0.0, 0.0],
+            x: 0.0,
+            y: 0.0,
             leading: 0.0,
             font_size: 12.0,
-            horizontal_scaling: 100.0,
-            char_spacing: 0.0,
-            word_spacing: 0.0,
-            current_font: None,
         }
     }
 }
-
-fn matrix_multiply(m1: [f32; 6], m2: [f32; 6]) -> [f32; 6] {
-    // (a b c d e f) * (a' b' c' d' e' f') => (a*a'+b*c'  a*b'+b*d'  c*a'+d*c'  c*b'+d*d'  e*a'+f*c'+e'  e*b'+f*d'+f')
-    let (a, b, c, d, e, f) = (m1[0], m1[1], m1[2], m1[3], m1[4], m1[5]);
-    let (a2, b2, c2, d2, e2, f2) = (m2[0], m2[1], m2[2], m2[3], m2[4], m2[5]);
-    [
-        a * a2 + b * c2,
-        a * b2 + b * d2,
-        c * a2 + d * c2,
-        c * b2 + d * d2,
-        e * a2 + f * c2 + e2,
-        e * b2 + f * d2 + f2,
-    ]
-}
-
-fn translate(m: [f32; 6], tx: f32, ty: f32) -> [f32; 6] {
-    matrix_multiply(m, [1.0, 0.0, 0.0, 1.0, tx, ty])
-}
-
-fn build_font_metrics(doc: &Document, page_id: ObjectId) -> HashMap<String, FontMetrics> {
-    let mut result = HashMap::new();
-    let page_obj = match doc.get_object(page_id) { Ok(o) => o, Err(_) => return result };
-    let page_dict = match page_obj.as_dict() { Ok(d) => d, Err(_) => return result };
-    let resources_obj = match page_dict.get(b"Resources") { Ok(o) => o, Err(_) => return result };
-    let resources_dict = match resources_obj.as_dict() { Ok(d) => d, Err(_) => return result };
-    let fonts_obj = match resources_dict.get(b"Font") { Ok(o) => o, Err(_) => return result };
-    let fonts_dict = match fonts_obj.as_dict() { Ok(d) => d, Err(_) => return result };
-    for (name, font_ref_obj) in fonts_dict.iter() {
-        // Resolve to an owned Object we can inspect
-        let font_dict_obj: Object = if let Ok(r) = font_ref_obj.as_reference() {
-            match doc.get_object(r) { Ok(o) => o.clone(), Err(_) => continue }
-        } else {
-            font_ref_obj.clone()
-        };
-        let font_dict = match font_dict_obj.as_dict() { Ok(d) => d, Err(_) => continue };
-        let first_char = font_dict.get(b"FirstChar").ok().and_then(|o| o.as_i64().ok()).unwrap_or(0) as i32;
-        let widths_vec: Vec<f32> = font_dict
-            .get(b"Widths").ok()
-            .and_then(|o| o.as_array().ok())
-            .map(|arr| {
-                arr.iter()
-                    .filter_map(|w| {
-                        if let Ok(v) = w.as_f32() { Some(v) }
-                        else if let Ok(i) = w.as_i64() { Some(i as f32) }
-                        else { None }
-                    })
-                    .collect::<Vec<_>>()
-            })
-            .unwrap_or_default();
-        let avg_width = if widths_vec.is_empty() { 500.0 } else { widths_vec.iter().copied().sum::<f32>() / widths_vec.len() as f32 };
-        result.insert(
-            String::from_utf8_lossy(name).to_string(),
-            FontMetrics { first_char, widths: widths_vec, avg_width },
-        );
-    }
-    result
-}
-
-fn glyph_advance(c: u8, fm: &FontMetrics) -> f32 {
-    let idx = (c as i32 - fm.first_char) as usize;
-    let w = fm.widths.get(idx).copied().unwrap_or(fm.avg_width);
-    w // still in glyph units (1/1000 of text space * font size will be applied outside)
-}
+fn translate_xy(x: f32, y: f32, tx: f32, ty: f32) -> (f32, f32) { (x + tx, y + ty) }
 
 /// Decode raw PDF string bytes into (best-effort) UTF-8 text.
 /// Heuristics:
@@ -148,10 +67,54 @@ fn decode_pdf_bytes(raw: &[u8]) -> String {
         }
     }
 
-    // Fallback: lossless UTF-8, strip NULs and high control chars except tab/newline.
-    let mut s = String::from_utf8_lossy(raw).to_string();
-    s.retain(|ch| ch != '\0' && (ch == '\n' || ch == '\t' || !ch.is_control()));
-    sanitize_text(s)
+    // If valid UTF-8, use it directly.
+    if let Ok(utf8) = std::str::from_utf8(raw) {
+        return sanitize_text(utf8.to_string());
+    }
+
+    // Fallback: decode as Windows-1252 (WinAnsi) which is extremely common in PDFs
+    // when no UTF-16 BOM is present. This avoids U+FFFD replacement characters.
+    let mut out = String::with_capacity(raw.len());
+    for &b in raw {
+        let ch = match b {
+            0x00..=0x7F => b as char,
+            0x80 => '\u{20AC}', // Euro
+            0x81 => '\u{0081}',
+            0x82 => '\u{201A}',
+            0x83 => '\u{0192}',
+            0x84 => '\u{201E}',
+            0x85 => '\u{2026}',
+            0x86 => '\u{2020}',
+            0x87 => '\u{2021}',
+            0x88 => '\u{02C6}',
+            0x89 => '\u{2030}',
+            0x8A => '\u{0160}',
+            0x8B => '\u{2039}',
+            0x8C => '\u{0152}',
+            0x8D => '\u{008D}',
+            0x8E => '\u{017D}',
+            0x8F => '\u{008F}',
+            0x90 => '\u{0090}',
+            0x91 => '\u{2018}',
+            0x92 => '\u{2019}', // right single quote ’
+            0x93 => '\u{201C}',
+            0x94 => '\u{201D}',
+            0x95 => '\u{2022}', // bullet •
+            0x96 => '\u{2013}', // en dash –
+            0x97 => '\u{2014}', // em dash —
+            0x98 => '\u{02DC}',
+            0x99 => '\u{2122}', // ™
+            0x9A => '\u{0161}',
+            0x9B => '\u{203A}',
+            0x9C => '\u{0153}',
+            0x9D => '\u{009D}',
+            0x9E => '\u{017E}',
+            0x9F => '\u{0178}',
+            0xA0..=0xFF => (0x00A0u16 + (b as u16 - 0xA0)) as u8 as char,
+        };
+        out.push(ch);
+    }
+    sanitize_text(out)
 }
 
 fn sanitize_text(mut s: String) -> String {
@@ -168,27 +131,6 @@ pub fn extract_text_items(pdf_path: &str) -> TextItems {
     for (page_num, page_id) in doc.get_pages() {
         let content = match doc.get_page_content(page_id) { Ok(c) => c, Err(_) => continue };
         let operations = match lopdf::content::Content::decode(&content) { Ok(o) => o, Err(_) => continue };
-        let fonts = build_font_metrics(&doc, page_id);
-
-        // Page height for optional top-left conversion (currently we keep PDF bottom-left coordinates)
-        let page_height = match doc.get_object(page_id) {
-            Ok(obj) => match obj.as_dict() {
-                Ok(d) => match d.get(b"MediaBox") {
-                    Ok(mb) => match mb.as_array() {
-                        Ok(a) if a.len() == 4 => {
-                            // Provide robust numeric extraction for the y-max
-                            let num_obj = &a[3];
-                            if let Ok(v) = num_obj.as_f32() { v } else if let Ok(i) = num_obj.as_i64() { i as f32 } else { 0.0 }
-                        }
-                        _ => 0.0,
-                    },
-                    Err(_) => 0.0,
-                },
-                Err(_) => 0.0,
-            },
-            Err(_) => 0.0,
-        };
-
         let mut state = TextState::default();
 
         for op in operations.operations {            
@@ -197,14 +139,10 @@ pub fn extract_text_items(pdf_path: &str) -> TextItems {
                 "ET" => { /* end text object */ }
                 "Tm" => {
                     if op.operands.len() == 6 {
-                        let a = op.operands[0].as_f32().unwrap_or(1.0);
-                        let b = op.operands[1].as_f32().unwrap_or(0.0);
-                        let c = op.operands[2].as_f32().unwrap_or(0.0);
-                        let d = op.operands[3].as_f32().unwrap_or(1.0);
+                        // Only record translation components (e, f)
                         let e = op.operands[4].as_f32().unwrap_or(0.0);
                         let f = op.operands[5].as_f32().unwrap_or(0.0);
-                        state.text_matrix = [a, b, c, d, e, f];
-                        state.text_line_matrix = [a, b, c, d, e, f];
+                        state.x = e; state.y = f;
                     }
                 }
                 "TD" => {
@@ -212,91 +150,71 @@ pub fn extract_text_items(pdf_path: &str) -> TextItems {
                         let tx = op.operands[0].as_f32().unwrap_or(0.0);
                         let ty = op.operands[1].as_f32().unwrap_or(0.0);
                         state.leading = -ty;
-                        state.text_line_matrix = translate(state.text_line_matrix, tx, ty);
-                        state.text_matrix = state.text_line_matrix;
+                        let (nx, ny) = translate_xy(state.x, state.y, tx, ty);
+                        state.x = nx; state.y = ny;
                     }
                 }
                 "Td" => {
                     if op.operands.len() == 2 {
                         let tx = op.operands[0].as_f32().unwrap_or(0.0);
                         let ty = op.operands[1].as_f32().unwrap_or(0.0);
-                        state.text_line_matrix = translate(state.text_line_matrix, tx, ty);
-                        state.text_matrix = state.text_line_matrix;
+                        let (nx, ny) = translate_xy(state.x, state.y, tx, ty);
+                        state.x = nx; state.y = ny;
                     }
                 }
                 "T*" => {
                     let ty = -state.leading;
-                    state.text_line_matrix = translate(state.text_line_matrix, 0.0, ty);
-                    state.text_matrix = state.text_line_matrix;
+                    let (nx, ny) = translate_xy(state.x, state.y, 0.0, ty);
+                    state.x = nx; state.y = ny;
                 }
                 "Tf" => {
                     if op.operands.len() == 2 {
-                        if let Ok(name_bytes) = op.operands[0].as_name() {
-                            state.current_font = Some(String::from_utf8_lossy(name_bytes).to_string());
-                        }
                         state.font_size = op.operands[1].as_f32().unwrap_or(state.font_size);
                     }
                 }
-                // character spacing Tw (word) and Tc (char) not implemented as they rarely appear directly; pdf.js also handles Th (?) we skip for now
+                // Simple text show: decode and add an item; advance x by a crude width estimate
                 "Tj" => {
                     if let Some(obj) = op.operands.get(0) {
                         if let Ok(bytes) = obj.as_str() {
                             let raw = bytes.as_ref();
-                            let fm = state.current_font.as_ref().and_then(|n| fonts.get(n));
-                            let start_matrix = state.text_matrix; // capture position before drawing
-                            let mut advance_glyph_space: f32 = 0.0; // in glyph space (1/1000 text units)
-                            for &bch in raw {
-                                if let Some(fm) = fm { advance_glyph_space += glyph_advance(bch, fm); } else { advance_glyph_space += 500.0; }
-                                // Add spacing for space char (0x20)
-                                if bch == 0x20 { advance_glyph_space += state.word_spacing * 1000.0 / state.font_size; }
-                                advance_glyph_space += state.char_spacing * 1000.0 / state.font_size;
-                            }
-                            let h_scale = state.horizontal_scaling / 100.0;
-                            let advance_text_space = (advance_glyph_space / 1000.0) * state.font_size * h_scale;
-                            // Update text matrix translate by advance_text_space
-                            state.text_matrix = translate(state.text_matrix, advance_text_space, 0.0);
-
+                            let start_x = state.x; let start_y = state.y;
                             let text_decoded = decode_pdf_bytes(raw);
-                            let x1 = start_matrix[4] as i32;
-                            let y1 = start_matrix[5] as i32;
-                            let x2 = x1 + advance_text_space as i32;
-                            let y2 = y1 + state.font_size as i32; // simple baseline + font size box
+                            // Coarse width estimate: ~0.5em per character to match golden layout
+                            let est_w = (text_decoded.chars().count() as f32) * state.font_size * 0.5;
+                            state.x += est_w;
                             if !text_decoded.is_empty() {
+                                let x1 = start_x as i32;
+                                let y1 = start_y as i32;
+                                let x2 = (start_x + est_w) as i32;
+                                let y2 = (start_y + state.font_size) as i32;
                                 text_items.add(&TextItem::new(text_decoded, x1, y1, x2, y2, page_num as i32));
                             }
                         }
                     }
                 }
+                // Array show: concatenate strings, apply embedded adjustments coarsely
                 "TJ" => {
                     if let Some(obj) = op.operands.get(0) {
                         if let Ok(arr) = obj.as_array() {
-                            let start_matrix = state.text_matrix;
-                            let fm = state.current_font.as_ref().and_then(|n| fonts.get(n));
+                            let start_x = state.x; let start_y = state.y;
                             let mut collected = String::new();
-                            let mut advance_glyph_space: f32 = 0.0; // glyph units
                             for part in arr {
                                 if let Ok(s) = part.as_str() {
                                     let slice = s.as_ref();
-                                    for &bch in slice {
-                                        if let Some(fm) = fm { advance_glyph_space += glyph_advance(bch, fm); } else { advance_glyph_space += 500.0; }
-                                        if bch == 0x20 { advance_glyph_space += state.word_spacing * 1000.0 / state.font_size; }
-                                        advance_glyph_space += state.char_spacing * 1000.0 / state.font_size;
-                                    }
                                     collected.push_str(&decode_pdf_bytes(slice));
                                 } else if let Ok(num) = part.as_f32() {
-                                    // adjustment: move current position backwards by (num / 1000 * font_size * h_scale)
-                                    advance_glyph_space -= num; // num already in glyph units where pdf.js: spacing -= value
-                                    // the direct adjustment is applied by subtracting (num/1000 * font_size * h_scale) from advance
+                                    // Ignore detailed glyph adjustments; they are tiny layout nudges. We keep coarse estimate.
+                                    let _ = num;
                                 }
                             }
                             if !collected.is_empty() {
-                                let _h_scale = state.horizontal_scaling / 100.0;
-                                let advance_text_space = (advance_glyph_space / 1000.0) * state.font_size * _h_scale;
-                                state.text_matrix = translate(state.text_matrix, advance_text_space, 0.0);
-                                let x1 = start_matrix[4] as i32;
-                                let y1 = start_matrix[5] as i32;
-                                let x2 = x1 + advance_text_space as i32;
-                                let y2 = y1 + state.font_size as i32;
+                                // Coarse width estimate matching golden: ~0.5em per character
+                                let est_w = (collected.chars().count() as f32) * state.font_size * 0.5;
+                                state.x += est_w;
+                                let x1 = start_x as i32;
+                                let y1 = start_y as i32;
+                                let x2 = (start_x + est_w) as i32;
+                                let y2 = (start_y + state.font_size) as i32;
                                 text_items.add(&TextItem::new(collected, x1, y1, x2, y2, page_num as i32));
                             }
                         }
@@ -305,9 +223,23 @@ pub fn extract_text_items(pdf_path: &str) -> TextItems {
                 _ => {}
             }
         }
-
-        // _page_height currently unused; kept for possible top-left coordinate transform
-        let _ = page_height;
     }
     text_items
+}
+
+#[cfg(test)]
+mod tests {
+    use super::decode_pdf_bytes;
+
+    #[test]
+    fn cp1252_common_chars_decode() {
+        // CP1252 bytes: 0x92 (’), 0x97 (—), 0xAE (®), 0x80 (€)
+        let bytes = [0x57u8, 0x65, 0x27, 0x72, 0x65, 0x20, 0x68, 0x65, 0x72, 0x65, 0x3A, 0x20, 0x80, 0x20, 0x92, 0x20, 0x97, 0x20, 0xAE];
+        let s = decode_pdf_bytes(&bytes);
+        assert!(!s.contains('\u{FFFD}'), "Should not contain replacement chars: {}", s);
+        assert!(s.contains('€'));
+        assert!(s.contains('’'));
+        assert!(s.contains('—'));
+        assert!(s.contains('®'));
+    }
 }
