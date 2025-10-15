@@ -3,11 +3,10 @@ use crate::structs::{StatementConfig, StatementData, TextItem};
 
 pub struct OpeningBalanceParser {
     parser: PrimedAmountParser,
-    data: StatementData,
 }
 
 impl OpeningBalanceParser {
-    pub fn new(config: StatementConfig, data: StatementData) -> Self {
+    pub fn new(config: &StatementConfig) -> Self {
         // Convert Vec<String> to Vec<&str> for constructor expectations
         let primer_terms: Vec<&str> = config
             .opening_balance_terms
@@ -29,17 +28,16 @@ impl OpeningBalanceParser {
                 config.opening_balance_y1_tol,
                 config.opening_balance_invert,
             ),
-            data,
         }
     }
 
-    pub fn parse_items(&mut self, items: &[TextItem]) -> usize {
+    pub fn parse_items(&mut self, items: &[TextItem], data: &mut StatementData) -> usize {
         let consumed = self.parser.parse_items(items);
         if consumed > 0 {
             if let Some(value) = self.parser.value() {
                 // Only set if not already set to avoid overwriting a prior successful parse
-                if self.data.opening_balance().is_none() {
-                    self.data.set_opening_balance(value);
+                if data.opening_balance().is_none() {
+                    data.set_opening_balance(value);
                 }
             }
         }
@@ -80,74 +78,74 @@ mod tests {
     #[test]
     fn test_opening_balance_success() {
         let config = default_config();
-        let data = StatementData::new();
-        let mut parser = OpeningBalanceParser::new(config, data.clone());
+        let mut data = StatementData::new();
+        let mut parser = OpeningBalanceParser::new(&config);
 
         let items = vec![
             make_text_item("OPENING BALANCE", 100, 200, 1),
             make_text_item("1,234.56", 102, 202, 1),
         ];
 
-        let consumed_primer = parser.parse_items(&items);
+        let consumed_primer = parser.parse_items(&items, &mut data);
         assert_eq!(consumed_primer, 1);
         assert!(parser.parser.is_primed());
         assert!(parser.parser.value().is_none());
 
-        let consumed_amount = parser.parse_items(&items[1..]);
+        let consumed_amount = parser.parse_items(&items[1..], &mut data);
         assert_eq!(consumed_amount, 1);
         assert_eq!(parser.parser.value(), Some(1234.56));
-        assert_eq!(parser.data.opening_balance(), Some(1234.56));
+        assert_eq!(data.opening_balance(), Some(1234.56));
     }
 
     #[test]
     fn test_opening_balance_invert() {
         let mut config = default_config();
         config.opening_balance_invert = true;
-        let data = StatementData::new();
-        let mut parser = OpeningBalanceParser::new(config, data.clone());
+        let mut data = StatementData::new();
+        let mut parser = OpeningBalanceParser::new(&config);
 
         let items = vec![
             make_text_item("OPENING BALANCE", 100, 200, 1),
             make_text_item("1,234.56", 100, 200, 1),
         ];
 
-        parser.parse_items(&items);
-        let consumed = parser.parse_items(&items[1..]);
+        parser.parse_items(&items, &mut data);
+        let consumed = parser.parse_items(&items[1..], &mut data);
         assert_eq!(consumed, 1);
         assert_eq!(parser.parser.value(), Some(-1234.56));
-        assert_eq!(parser.data.opening_balance(), Some(-1234.56));
+        assert_eq!(data.opening_balance(), Some(-1234.56));
     }
 
     #[test]
     fn test_opening_balance_fail() {
         let config = default_config();
-        let data = StatementData::new();
-        let mut parser = OpeningBalanceParser::new(config, data.clone());
+        let mut data = StatementData::new();
+        let mut parser = OpeningBalanceParser::new(&config);
 
         let items = vec![
             make_text_item("NOT OPENING BALANCE", 100, 200, 1),
             make_text_item("1,234.56", 102, 202, 1),
         ];
 
-        let consumed = parser.parse_items(&items);
+        let consumed = parser.parse_items(&items, &mut data);
         assert_eq!(consumed, 0);
-        assert!(parser.data.opening_balance().is_none());
+        assert!(data.opening_balance().is_none());
     }
 
     #[test]
     fn test_opening_balance_page_fail() {
         let config = default_config();
-        let data = StatementData::new();
-        let mut parser = OpeningBalanceParser::new(config, data.clone());
+        let mut data = StatementData::new();
+        let mut parser = OpeningBalanceParser::new(&config);
 
         let items = vec![
             make_text_item("OPENING BALANCE", 100, 200, 1),
             make_text_item("1,234.56", 100, 200, 2),
         ];
 
-        parser.parse_items(&items);
-        let consumed = parser.parse_items(&items[1..]);
+        parser.parse_items(&items, &mut data);
+        let consumed = parser.parse_items(&items[1..], &mut data);
         assert_eq!(consumed, 0);
-        assert!(parser.data.opening_balance().is_none());
+        assert!(data.opening_balance().is_none());
     }
 }
