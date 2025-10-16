@@ -100,6 +100,12 @@ impl PrimedAmountParser {
     pub fn is_primed(&self) -> bool {
         self.primer_parser.primed
     }
+
+    /// Get the highest lookahead between primer and amount parsers
+    pub fn get_max_lookahead(&self) -> usize {
+        self.primer_parser.max_lookahead
+            .max(self.amount_parser.max_lookahead)
+    }
 }
 
 #[cfg(test)]

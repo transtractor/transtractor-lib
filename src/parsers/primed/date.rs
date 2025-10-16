@@ -90,6 +90,17 @@ impl PrimedDateParser {
     pub fn value(&self) -> Option<i64> {
         self.date_parser.value
     }
+
+    /// Whether the primer term has been matched
+    pub fn is_primed(&self) -> bool {
+        self.primer_parser.primed
+    }
+
+    /// Get the highest lookahead between primer and date parsers
+    pub fn get_max_lookahead(&self) -> usize {
+        self.primer_parser.max_lookahead
+            .max(self.date_parser.max_lookahead)
+    }
 }
 
 #[cfg(test)]
