@@ -38,6 +38,29 @@ impl StatementData {
     pub fn add_proto_transaction(&mut self, proto_tx: ProtoTransaction) {
         self.proto_transactions.push(proto_tx);
     }
+
+    pub fn print(&self) {
+        println!("Statement Data:");
+        if let Some(date) = self.start_date {
+            println!("  Start Date: {}", date);
+        } else {
+            println!("  Start Date: Not set");
+        }
+        if let Some(balance) = self.opening_balance {
+            println!("  Opening Balance: {:.2}", balance);
+        } else {
+            println!("  Opening Balance: Not set");
+        }
+        if let Some(balance) = self.closing_balance {
+            println!("  Closing Balance: {:.2}", balance);
+        } else {
+            println!("  Closing Balance: Not set");
+        }
+        println!("  Proto Transactions:");
+        for (i, tx) in self.proto_transactions.iter().enumerate() {
+            println!("    {}: {:?}", i + 1, tx);
+        }
+    }
 }
 
 impl Default for StatementData {
