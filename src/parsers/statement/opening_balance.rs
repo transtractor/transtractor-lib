@@ -43,6 +43,10 @@ impl OpeningBalanceParser {
         }
         consumed
     }
+
+    pub fn get_max_lookahead(&self) -> usize {
+        self.parser.get_max_lookahead()
+    }
 }
 
 #[cfg(test)]
