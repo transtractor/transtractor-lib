@@ -124,7 +124,7 @@ fn sanitize_text(mut s: String) -> String {
     s
 }
 
-pub fn extract_text_items(pdf_path: &str) -> TextItems {
+pub fn parse(pdf_path: &str) -> TextItems {
     let doc = Document::load(pdf_path).unwrap();
     let mut text_items = TextItems::new();
 
