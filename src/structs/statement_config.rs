@@ -43,25 +43,26 @@ struct StatementConfigPartial {
     transaction_formats: Option<Vec<Vec<String>>>,
     transaction_new_line_y1_tol: Option<i32>,
     transaction_start_date_required: Option<bool>,
+    transaction_x_tol: Option<i32>,
 
     transaction_date_formats: Option<Vec<String>>,
-    transaction_date_x1_range: Option<(i32, i32)>,
-    transaction_date_x2_range: Option<(i32, i32)>,
+    transaction_date_headers: Option<Vec<String>>,
+    transaction_date_alignment: Option<String>,
 
-    transaction_description_x1_range: Option<(i32, i32)>,
-    transaction_description_x2_range: Option<(i32, i32)>,
+    transaction_description_headers: Option<Vec<String>>,
+    transaction_description_alignment: Option<String>,
     transaction_description_exclude: Option<Vec<String>>,
 
     transaction_amount_formats: Option<Vec<String>>,
-    transaction_amount_x1_range: Option<(i32, i32)>,
-    transaction_amount_x2_range: Option<(i32, i32)>,
-    transaction_amount_invert_x1_range: Option<(i32, i32)>,
-    transaction_amount_invert_x2_range: Option<(i32, i32)>,
+    transaction_amount_headers: Option<Vec<String>>,
+    transaction_amount_alignment: Option<String>,
+    transaction_amount_invert_headers: Option<Vec<String>>,
+    transaction_amount_invert_alignment: Option<String>,
     transaction_amount_invert: Option<bool>,
 
     transaction_balance_formats: Option<Vec<String>>,
-    transaction_balance_x1_range: Option<(i32, i32)>,
-    transaction_balance_x2_range: Option<(i32, i32)>,
+    transaction_balance_headers: Option<Vec<String>>,
+    transaction_balance_alignment: Option<String>,
     transaction_balance_invert: Option<bool>,
 }
 
@@ -148,20 +149,22 @@ pub struct StatementConfig {
     /// Parsing transaction requires the start date value to have been read
     /// so that the year can be inferred for each transaction date.
     pub transaction_start_date_required: bool,
+    /// Tolerance for X alignment mismatch between value and header
+    pub transaction_x_tol: i32,
 
     // TRANSACTION DATE READ PARAMS
     /// Array of accepted formats to parse the transaction date
     pub transaction_date_formats: Vec<String>,
-    /// X1 coordinate range to identify the transaction date
-    pub transaction_date_x1_range: (i32, i32),
-    /// X2 coordinate range to identify the transaction date
-    pub transaction_date_x2_range: (i32, i32),
+    /// Headers that identify the transaction date column
+    pub transaction_date_headers: Vec<String>,
+    /// Alignment of the transaction date column ("x1, "x2")
+    pub transaction_date_alignment: String,
 
     // TRANSACTION DESCRIPTION READ PARAMS
-    /// X1 coordinate range to identify the transaction description
-    pub transaction_description_x1_range: (i32, i32),
-    /// X2 coordinate range to identify the transaction description
-    pub transaction_description_x2_range: (i32, i32),
+    /// Headers that identify the transaction description column
+    pub transaction_description_headers: Vec<String>,
+    /// Alignment of the transaction description column ("x1, "x2")
+    pub transaction_description_alignment: String,
     /// Regex patterns to exclude from being considered as part of the description.
     /// E.g., [/\.\./g] to exclude "......." patterns.
     pub transaction_description_exclude: Vec<Regex>,
@@ -169,25 +172,24 @@ pub struct StatementConfig {
     // TRANSACTION AMOUNT READ PARAMS
     /// Array of accepted formats to parse the transaction amount
     pub transaction_amount_formats: Vec<String>,
-    /// X1 coordinate range to identify the transaction amount
-    pub transaction_amount_x1_range: (i32, i32),
-    /// X2 coordinate range to identify the transaction amount
-    pub transaction_amount_x2_range: (i32, i32),
-    /// Invert amounts falling within X1 coordinate range
-    /// E.g., for statements where credits are on the left and debits are on the right.
-    pub transaction_amount_invert_x1_range: (i32, i32),
-    /// Invert amounts falling within X2 coordinate range
-    pub transaction_amount_invert_x2_range: (i32, i32),
+    /// Headers that identify the transaction amount column
+    pub transaction_amount_headers: Vec<String>,
+    /// Alignment of the transaction amount column ("x1, "x2")
+    pub transaction_amount_alignment: String,
+    /// Headers that identify when to invert the transaction amount sign
+    pub transaction_amount_invert_headers: Vec<String>,
+    /// Alignment of the transaction amount invert column ("x1, "x2")
+    pub transaction_amount_invert_alignment: String,
     /// Invert the sign of all transaction amounts. Often needed for credit card statements.
     pub transaction_amount_invert: bool,
 
     // TRANSACTION BALANCE READ PARAMS
     /// Array of accepted formats to parse the transaction balance amount
     pub transaction_balance_formats: Vec<String>,
-    /// X1 coordinate range to identify the transaction balance
-    pub transaction_balance_x1_range: (i32, i32),
-    /// X2 coordinate range to identify the transaction balance
-    pub transaction_balance_x2_range: (i32, i32),
+    /// Headers that identify the transaction balance column
+    pub transaction_balance_headers: Vec<String>,
+    /// Alignment of the transaction balance column ("x1, "x2")
+    pub transaction_balance_alignment: String,
     /// Invert the sign of all transaction balance amounts.
     pub transaction_balance_invert: bool,
 }
@@ -231,25 +233,26 @@ impl Default for StatementConfig {
             transaction_formats: vec![],
             transaction_new_line_y1_tol: 2,
             transaction_start_date_required: false,
+            transaction_x_tol: 5,
 
             transaction_date_formats: vec![],
-            transaction_date_x1_range: (-10000, 10000),
-            transaction_date_x2_range: (-10000, 10000),
+            transaction_date_headers: vec![],
+            transaction_date_alignment: "x1".to_string(),
 
-            transaction_description_x1_range: (-10000, 10000),
-            transaction_description_x2_range: (-10000, 10000),
+            transaction_description_headers: vec![],
+            transaction_description_alignment: "x1".to_string(),
             transaction_description_exclude: vec![],
 
             transaction_amount_formats: vec![],
-            transaction_amount_x1_range: (-10000, 10000),
-            transaction_amount_x2_range: (-10000, 10000),
-            transaction_amount_invert_x1_range: (-10000, -10000),
-            transaction_amount_invert_x2_range: (-10000, -10000),
+            transaction_amount_headers: vec![],
+            transaction_amount_alignment: "x1".to_string(),
+            transaction_amount_invert_headers: vec![],
+            transaction_amount_invert_alignment: "x1".to_string(),
             transaction_amount_invert: false,
 
             transaction_balance_formats: vec![],
-            transaction_balance_x1_range: (-10000, 10000),
-            transaction_balance_x2_range: (-10000, 10000),
+            transaction_balance_headers: vec![],
+            transaction_balance_alignment: "x1".to_string(),
             transaction_balance_invert: false,
         }
     }
@@ -307,28 +310,29 @@ impl StatementConfig {
         overlay!(transaction_formats);
         overlay!(transaction_new_line_y1_tol);
         overlay!(transaction_start_date_required);
+        overlay!(transaction_x_tol);
 
         overlay!(transaction_date_formats);
-        overlay!(transaction_date_x1_range);
-        overlay!(transaction_date_x2_range);
+        overlay!(transaction_date_headers);
+        overlay!(transaction_date_alignment);
 
-        overlay!(transaction_description_x1_range);
-        overlay!(transaction_description_x2_range);
+        overlay!(transaction_description_headers);
+        overlay!(transaction_description_alignment);
 
         if let Some(ex_patterns) = partial.transaction_description_exclude {
             cfg.transaction_description_exclude = compile_regex_vec(ex_patterns)?;
         }
 
         overlay!(transaction_amount_formats);
-        overlay!(transaction_amount_x1_range);
-        overlay!(transaction_amount_x2_range);
-        overlay!(transaction_amount_invert_x1_range);
-        overlay!(transaction_amount_invert_x2_range);
+        overlay!(transaction_amount_headers);
+        overlay!(transaction_amount_alignment);
+        overlay!(transaction_amount_invert_headers);
+        overlay!(transaction_amount_invert_alignment);
         overlay!(transaction_amount_invert);
 
         overlay!(transaction_balance_formats);
-        overlay!(transaction_balance_x1_range);
-        overlay!(transaction_balance_x2_range);
+        overlay!(transaction_balance_headers);
+        overlay!(transaction_balance_alignment);
         overlay!(transaction_balance_invert);
 
         cfg.validate()?;
@@ -341,20 +345,19 @@ impl StatementConfig {
         if self.bank_name.trim().is_empty() { return Err("bank_name cannot be empty".into()); }
         if self.account_type.trim().is_empty() { return Err("account_type cannot be empty".into()); }
 
-        fn check_range(r: (i32,i32), name:&str) -> Result<(),String> {
-            if r.0 > r.1 { return Err(format!("range {} invalid: start {} > end {}", name, r.0, r.1)); }
+        // Header alignment sanity
+        fn valid_alignment(alignment: &str, name: &str) -> Result<(), String> {
+            let valid_alignments = ["x1", "x2"];
+            if !valid_alignments.contains(&alignment) {
+                return Err(format!("{} must be one of {:?}", name, valid_alignments));
+            }
             Ok(())
         }
-        check_range(self.transaction_date_x1_range, "transaction_date_x1_range")?;
-        check_range(self.transaction_date_x2_range, "transaction_date_x2_range")?;
-        check_range(self.transaction_description_x1_range, "transaction_description_x1_range")?;
-        check_range(self.transaction_description_x2_range, "transaction_description_x2_range")?;
-        check_range(self.transaction_amount_x1_range, "transaction_amount_x1_range")?;
-        check_range(self.transaction_amount_x2_range, "transaction_amount_x2_range")?;
-        check_range(self.transaction_amount_invert_x1_range, "transaction_amount_invert_x1_range")?;
-        check_range(self.transaction_amount_invert_x2_range, "transaction_amount_invert_x2_range")?;
-        check_range(self.transaction_balance_x1_range, "transaction_balance_x1_range")?;
-        check_range(self.transaction_balance_x2_range, "transaction_balance_x2_range")?;
+        valid_alignment(&self.transaction_date_alignment, "transaction_date_alignment")?;
+        valid_alignment(&self.transaction_description_alignment, "transaction_description_alignment")?;
+        valid_alignment(&self.transaction_amount_alignment, "transaction_amount_alignment")?;
+        valid_alignment(&self.transaction_amount_invert_alignment, "transaction_amount_invert_alignment")?;
+        valid_alignment(&self.transaction_balance_alignment, "transaction_balance_alignment")?;
 
         // Basic tolerance sanity
         fn non_negative(val: i32, name:&str) -> Result<(),String> {
@@ -441,14 +444,16 @@ mod tests {
         let json = r#"{
             "key": "k",
             "bank_name": "B",
-            "account_type": "T",
-            "transaction_date_x1_range": [10, 20]
+            "account_type": "T"
         }"#;
-        let path = write_temp("cfg_overlay", json);
+        let path = write_temp("cfg_defaults", json);
         let cfg = StatementConfig::from_json_file(&path).expect("load config");
-        assert_eq!(cfg.transaction_date_x1_range, (10,20));
-        // Unspecified field should remain default
-        assert_eq!(cfg.transaction_date_x2_range, (-10000, 10000));
+        assert_eq!(cfg.key, "k");
+        assert_eq!(cfg.bank_name, "B");
+        assert_eq!(cfg.account_type, "T");
+        // Defaults
+        assert_eq!(cfg.opening_balance_x1_tol, 1);
+        assert_eq!(cfg.transaction_start_date_required, false);
     }
 
     #[test]
