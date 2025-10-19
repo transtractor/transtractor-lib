@@ -9,7 +9,6 @@ pub struct PrimedDateParser {
     x1_tol: i32,
     same_y1: bool,
     y1_tol: i32,
-    invert: bool,
 }
 
 impl PrimedDateParser {
@@ -20,7 +19,6 @@ impl PrimedDateParser {
         x1_tol: i32,
         same_y1: bool,
         y1_tol: i32,
-        invert: bool,
     ) -> Self {
         Self {
             primer_parser: ParserPrimer::new(primer_terms),
@@ -29,7 +27,6 @@ impl PrimedDateParser {
             x1_tol,
             same_y1,
             y1_tol,
-            invert,
         }
     }
 
@@ -78,12 +75,7 @@ impl PrimedDateParser {
             return 0;
         }
 
-        // All conditions met, finalize
-        if self.invert {
-            if let Some(val) = self.date_parser.value {
-                self.date_parser.value = Some(-val);
-            }
-        }
+        // All conditions met
         consumed
     }
 
@@ -121,7 +113,7 @@ mod tests {
 
     #[test]
     fn test_primer_and_date_success() {
-        let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 5, true, 5, false);
+        let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 5, true, 5);
         let items = vec![
             make_text_item("DATE", 100, 200, 1),
             make_text_item("24 march 2020", 102, 202, 1),
@@ -139,22 +131,8 @@ mod tests {
     }
 
     #[test]
-    fn test_primer_and_date_invert() {
-        let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 5, true, 5, true);
-        let items = vec![
-            make_text_item("DATE", 100, 200, 1),
-            make_text_item("24 march 2020", 100, 200, 1),
-        ];
-        parser.parse_items(&items);
-        let consumed = parser.parse_items(&items[1..]);
-        assert_eq!(consumed, 1);
-        assert!(parser.date_parser.value.is_some());
-        assert!(parser.date_parser.value.unwrap() < 0);
-    }
-
-    #[test]
     fn test_primer_x1_fail() {
-        let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 1, false, 0, false);
+    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 1, false, 0);
         let items = vec![
             make_text_item("DATE", 100, 200, 1),
             make_text_item("24 march 2020", 105, 200, 1),
@@ -167,7 +145,7 @@ mod tests {
 
     #[test]
     fn test_primer_y1_fail() {
-        let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], false, 0, true, 1, false);
+    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], false, 0, true, 1);
         let items = vec![
             make_text_item("DATE", 100, 200, 1),
             make_text_item("24 march 2020", 100, 205, 1),
@@ -180,7 +158,7 @@ mod tests {
 
     #[test]
     fn test_primer_page_fail() {
-        let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], false, 0, false, 0, false);
+    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], false, 0, false, 0);
         let items = vec![
             make_text_item("DATE", 100, 200, 1),
             make_text_item("24 march 2020", 100, 200, 2),
@@ -193,7 +171,7 @@ mod tests {
 
     #[test]
     fn test_no_items() {
-        let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 5, true, 5, false);
+    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 5, true, 5);
         let items: Vec<TextItem> = vec![];
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 0);
@@ -203,7 +181,7 @@ mod tests {
 
     #[test]
     fn test_date_already_set() {
-        let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 5, true, 5, false);
+    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 5, true, 5);
         let items = vec![
             make_text_item("DATE", 100, 200, 1),
             make_text_item("24 march 2020", 100, 200, 1),
