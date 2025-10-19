@@ -17,7 +17,7 @@
   "closing_balance_y1_tol": 2,
   "closing_balance_invert": true,
 
-  "start_date_terms": ["Statement period"],
+  "start_date_terms": ["Statement Period"],
   "start_date_formats": ["format2"],
   "start_date_y1_tol": 2,
 
