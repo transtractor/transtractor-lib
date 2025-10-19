@@ -1,4 +1,5 @@
 use crate ::structs::ProtoTransaction;
+use chrono::{DateTime, Utc};
 
 #[derive(Clone)]
 pub struct StatementData {
@@ -41,8 +42,12 @@ impl StatementData {
 
     pub fn print(&self) {
         println!("Statement Data:");
-        if let Some(date) = self.start_date {
-            println!("  Start Date: {}", date);
+        if let Some(ms) = self.start_date {
+            if let Some(dt) = DateTime::<Utc>::from_timestamp_millis(ms) {
+                println!("  Start Date: {}", dt.format("%d %b %Y"));
+            } else {
+                println!("  Start Date: {}", ms);
+            }
         } else {
             println!("  Start Date: Not set");
         }
@@ -58,7 +63,29 @@ impl StatementData {
         }
         println!("  Proto Transactions:");
         for (i, tx) in self.proto_transactions.iter().enumerate() {
-            println!("    {}: {:?}", i + 1, tx);
+            let date_str = match tx.date {
+                Some(ms) => match DateTime::<Utc>::from_timestamp_millis(ms) {
+                    Some(dt) => dt.format("%d %b %Y").to_string(),
+                    None => ms.to_string(),
+                },
+                None => "Not set".to_string(),
+            };
+            let amount_str = match tx.amount {
+                Some(a) => format!("{:.2}", a),
+                None => "Not set".to_string(),
+            };
+            let balance_str = match tx.balance {
+                Some(b) => format!("{:.2}", b),
+                None => "Not set".to_string(),
+            };
+            println!(
+                "    {}: date={}, description=\"{}\", amount={}, balance={}",
+                i + 1,
+                date_str,
+                tx.description,
+                amount_str,
+                balance_str
+            );
         }
     }
 }
