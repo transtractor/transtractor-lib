@@ -3,3 +3,4 @@ pub mod primed;
 pub mod statement;
 pub mod statement_data_from_text_items;
 pub mod text_items_from_pdf;
+pub mod transaction;
