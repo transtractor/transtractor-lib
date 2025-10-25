@@ -2,7 +2,7 @@ use crate::parsers::base::{AmountParser, ParserPrimer};
 use crate::structs::{ProtoTransaction, StatementConfig, TextItem};
 
 pub struct TransactionBalanceParser {
-    primed: bool,
+    pub primed: bool,
     balance_parser: AmountParser,
     header_primer: ParserPrimer,
     alignment: String,
@@ -65,9 +65,22 @@ impl TransactionBalanceParser {
     }
 
     /// Reset the parser state
-    pub fn unprime(&mut self) {
+    pub fn reset(&mut self) {
         self.primed = false;
         self.balance_parser.reset();
+    }
+
+    /// Set parser as primed
+    pub fn prime(&mut self) {
+        self.primed = true;
+    }
+
+    /// Get the maximum lookahead for the parser
+    pub fn get_max_lookahead(&self) -> usize {
+        let mut max_lookahead = 0;
+        max_lookahead = max_lookahead.max(self.header_primer.max_lookahead);
+        max_lookahead = max_lookahead.max(self.balance_parser.max_lookahead);
+        max_lookahead
     }
 
     /// Try reading header and set x_ranges accordingly

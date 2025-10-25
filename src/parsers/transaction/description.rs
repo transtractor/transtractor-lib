@@ -2,7 +2,7 @@ use crate::parsers::base::ParserPrimer;
 use crate::structs::{ProtoTransaction, StatementConfig, TextItem};
 
 pub struct TransactionDescriptionParser {
-    primed: bool,
+    pub primed: bool,
     header_primer: ParserPrimer,
     alignment: String,
     x1_range: Vec<i32>,
@@ -57,8 +57,20 @@ impl TransactionDescriptionParser {
     }
 
     /// Reset the parser state
-    pub fn unprime(&mut self) {
+    pub fn reset(&mut self) {
         self.primed = false;
+    }
+
+    /// Set parser as primed
+    pub fn prime(&mut self) {
+        self.primed = true;
+    }
+
+    /// Get the maximum lookahead for the parser
+    pub fn get_max_lookahead(&self) -> usize {
+        let mut max_lookahead = 0;
+        max_lookahead = max_lookahead.max(self.header_primer.max_lookahead);
+        max_lookahead
     }
 
     /// Try reading header and define x1 of x2 bounds
