@@ -83,7 +83,7 @@ impl StatementData {
                 None => "Not set".to_string(),
             };
             println!(
-                "    {}: date={}, description=\"{}\", amount={}, balance={}",
+                "    {}: {}, \"{}\", {}, {}",
                 i + 1,
                 date_str,
                 tx.description,
