@@ -233,7 +233,7 @@ impl Default for StatementConfig {
             transaction_formats: vec![],
             transaction_new_line_y1_tol: 2,
             transaction_start_date_required: false,
-            transaction_x_tol: 5,
+            transaction_x_tol: 15,
 
             transaction_date_formats: vec![],
             transaction_date_headers: vec![],
