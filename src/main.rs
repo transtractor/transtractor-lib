@@ -52,6 +52,8 @@ fn main() {
                         let data = transtractor::parsers::statement_data_from_text_items::parse(&cfg, &items);
                         // Print StatementData to stdout (temporary behavior)
                         data.print();
+                        println!("Layout Text:");
+                        items.print_layout();
                         // Write a placeholder to the CSV file to acknowledge the request
                         let note = format!(
                             "CSV generation not implemented yet. Parsed with config '{}'. See stdout for StatementData debug output.",
