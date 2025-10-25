@@ -16,17 +16,12 @@ pub struct ProtoTransaction {
 
 impl ProtoTransaction {
     /// Create a new ProtoTransaction.
-    pub fn new(
-        date: Option<i64>,
-        description: String,
-        amount: Option<f64>,
-        balance: Option<f64>,
-    ) -> Self {
+    pub fn new() -> Self {
         Self {
-            date,
-            description,
-            amount,
-            balance,
+            date: None,
+            description: String::new(),
+            amount: None,
+            balance: None,
         }
     }
 
@@ -49,5 +44,35 @@ impl ProtoTransaction {
             self.amount.unwrap(),
             self.balance.unwrap(),
         ))
+    }
+
+    /// Checks if all specified required fields are set.
+    pub fn has_required_fields_set(&self, required_fields: &[String]) -> bool {
+        for field in required_fields {
+            match field.as_str() {
+                "date" => {
+                    if self.date.is_none() {
+                        return false;
+                    }
+                }
+                "description" => {
+                    if self.description.is_empty() {
+                        return false;
+                    }
+                }
+                "amount" => {
+                    if self.amount.is_none() {
+                        return false;
+                    }
+                }
+                "balance" => {
+                    if self.balance.is_none() {
+                        return false;
+                    }
+                }
+                _ => {}
+            }
+        }
+        true
     }
 }
