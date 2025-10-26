@@ -13,7 +13,6 @@ struct StatementConfigPartial {
     account_terms: Option<Vec<String>>,
     account_examples: Option<Vec<String>>,
     apply_y_patch: Option<bool>,
-    apply_y_patch_line_height: Option<i32>,
 
     opening_balance_terms: Option<Vec<String>>,
     opening_balance_formats: Option<Vec<String>>,
@@ -84,8 +83,6 @@ pub struct StatementConfig {
     pub account_examples: Vec<String>,
     /// Force re-ordering of items by Y coordinate to fix minor PDF extraction issues.
     pub apply_y_patch: bool,
-    /// Line height tolerance for Y patching (default 5)
-    pub apply_y_patch_line_height: i32,
 
     // OPENING BALANCE READ PARAMS
     /// Array of terms to identify the opening balance line (e.g., "Opening Balance", "Previous Balance")
@@ -203,7 +200,6 @@ impl Default for StatementConfig {
             account_terms: vec![],
             account_examples: vec![],
             apply_y_patch: false,
-            apply_y_patch_line_height: 5,
 
             opening_balance_terms: vec![],
             opening_balance_formats: vec![],
@@ -280,7 +276,6 @@ impl StatementConfig {
         overlay!(account_terms);
         overlay!(account_examples);
         overlay!(apply_y_patch);
-        overlay!(apply_y_patch_line_height);
 
         overlay!(opening_balance_terms);
         overlay!(opening_balance_formats);

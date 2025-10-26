@@ -5,7 +5,6 @@
     "account_terms": ["CommBank", "Available credit"],
     "account_examples": ["Low Rate Mastercard", "Low Fee Mastercard"],
     "apply_y_patch": true,
-    "apply_y_patch_line_height": 7,
 
     "opening_balance_terms": ["Opening balance"],
     "opening_balance_formats": ["format2"],
