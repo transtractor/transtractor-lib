@@ -49,6 +49,12 @@ fn main() {
                     Some(mut cfgs) if !cfgs.is_empty() => {
                         // Choose the first config for now
                         let cfg = cfgs.remove(0);
+                        // Apply y-disorder fix before parsing if apply_y_patch true
+                        let items = if cfg.apply_y_patch {
+                            items.fix_y_disorder()
+                        } else {
+                            items
+                        };
                         let data = transtractor::parsers::statement_data_from_text_items::parse(&cfg, &items);
                         // Print StatementData to stdout (temporary behavior)
                         data.print();

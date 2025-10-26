@@ -1,6 +1,8 @@
+use crate::structs::text_item::TextItem;
 use std::collections::HashMap;
 use std::fmt::{self, Display};
-use crate::structs::text_item::TextItem;
+use crate::structs::text_items::most_common_height::most_common_height;
+use crate::structs::text_items::fix_y_order::fix_y_order;
 
 // Helper extension so this module can format TextItem without altering canonical struct.
 trait TextItemExt {
@@ -8,9 +10,10 @@ trait TextItemExt {
 }
 
 impl TextItemExt for TextItem {
-    fn to_debug_block(&self) -> String { self.to_layout_block() }
+    fn to_debug_block(&self) -> String {
+        self.to_layout_block()
+    }
 }
-
 
 /// Wrapper for the serialized layout text
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -41,7 +44,6 @@ impl Display for ParseLayoutError {
 
 impl std::error::Error for ParseLayoutError {}
 
-
 #[derive(Debug, Default, Clone)]
 pub struct TextItems {
     pub items: Vec<TextItem>,
@@ -62,7 +64,14 @@ impl TextItems {
             if part.trim().is_empty() {
                 continue;
             }
-            self.items.push(TextItem::new(part.to_string(), text_item.x1, text_item.y1, text_item.x2, text_item.y2, text_item.page));
+            self.items.push(TextItem::new(
+                part.to_string(),
+                text_item.x1,
+                text_item.y1,
+                text_item.x2,
+                text_item.y2,
+                text_item.page,
+            ));
         }
     }
 
@@ -76,26 +85,6 @@ impl TextItems {
             .collect()
     }
 
-    /// Determine the most common integer height among text items (y2 - y1).
-    /// Returns 0 if no items or if all heights are non-positive.
-    fn most_common_height(&self) -> i32 {
-        let mut counts: HashMap<i32, usize> = HashMap::new();
-        for item in &self.items {
-            let h = item.y2 - item.y1;
-            if h <= 0 { continue; }
-            *counts.entry(h).or_insert(0) += 1;
-        }
-        let mut best_height: i32 = 0;
-        let mut best_count: usize = 0;
-        for (h, c) in counts {
-            if c > best_count {
-                best_count = c;
-                best_height = h;
-            }
-        }
-        best_height
-    }
-
     /// Convert the TextItems into a LayoutText representation.
     pub fn to_layout_text(&self) -> LayoutText {
         if self.items.is_empty() {
@@ -104,7 +93,7 @@ impl TextItems {
 
         // Merge items sharing identical (page,x1,x2,y1,y2) before layout serialization
         let mut merged: Vec<TextItem> = Vec::new();
-            let mut index_map: HashMap<(i32,i32,i32,i32,i32), usize> = HashMap::new();
+        let mut index_map: HashMap<(i32, i32, i32, i32, i32), usize> = HashMap::new();
         for it in &self.items {
             let key = (it.page, it.x1, it.x2, it.y1, it.y2);
             if let Some(&idx) = index_map.get(&key) {
@@ -127,10 +116,25 @@ impl TextItems {
         // Removed extra blank line after page header
         out.push_str(&format!("[Page {}]\n", curr_page));
         // Recompute common height based on merged items (could differ slightly)
-        let line_height = if items.len() == self.items.len() { self.most_common_height() } else {
+        let line_height = if items.len() == self.items.len() {
+            most_common_height(&self.items)
+        } else {
             let mut counts: HashMap<i32, usize> = HashMap::new();
-            for item in &items { let h = item.y2 - item.y1; if h > 0 { *counts.entry(h).or_insert(0) += 1; } }
-            let mut best_h = 0; let mut best_c = 0; for (h,c) in counts { if c > best_c { best_c = c; best_h = h; } } best_h
+            for item in &items {
+                let h = item.y2 - item.y1;
+                if h > 0 {
+                    *counts.entry(h).or_insert(0) += 1;
+                }
+            }
+            let mut best_h = 0;
+            let mut best_c = 0;
+            for (h, c) in counts {
+                if c > best_c {
+                    best_c = c;
+                    best_h = h;
+                }
+            }
+            best_h
         };
         let mut curr_y = items[0].y1; // integer baseline
         for item in &items {
@@ -155,7 +159,7 @@ impl TextItems {
 
     pub fn read_from_layout_text(&mut self, layout: &LayoutText) -> Result<(), ParseLayoutError> {
         self.items.clear();
-            let mut curr_page: i32 = 1;
+        let mut curr_page: i32 = 1;
         for line in layout.0.lines() {
             let trimmed = line.trim();
             if trimmed.is_empty() {
@@ -168,8 +172,8 @@ impl TextItems {
                 if parts.len() != 2 || parts[0] != "Page" {
                     return Err(ParseLayoutError::UnexpectedFormat(trimmed.to_string()));
                 }
-                    curr_page = parts[1]
-                        .parse::<i32>()
+                curr_page = parts[1]
+                    .parse::<i32>()
                     .map_err(|_| ParseLayoutError::InvalidNumber(parts[1].to_string()))?;
                 continue;
             }
@@ -244,8 +248,51 @@ impl TextItems {
             if token.is_empty() {
                 continue;
             }
-            self.items.push(TextItem::new(token.to_string(), x1, y1, x2, y2, page));
+            self.items
+                .push(TextItem::new(token.to_string(), x1, y1, x2, y2, page));
         }
         Ok(())
+    }
+
+    /// Fix Y disorder by reordering text items into proper lines and line order.
+    /// This method groups items into lines based on Y position tolerance and orders
+    /// lines from top to bottom (higher Y values first in PDF coordinates).
+    /// 
+    /// # Arguments
+    /// * `line_height` - The tolerance for grouping items into the same line.
+    ///                   Items within this Y-distance will be considered on the same line.
+    /// 
+    /// # Returns
+    /// A new TextItems with items reordered by Y position (line order)
+    pub fn fix_y_disorder(&self) -> TextItems {
+        let reordered_items = fix_y_order(&self.items);
+        TextItems { items: reordered_items }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn create_test_item(text: &str, y1: i32, page: i32) -> TextItem {
+        TextItem::new(text.to_string(), 0, y1, 100, y1 + 12, page)
+    }
+
+    #[test]
+    fn test_text_items_fix_y_disorder() {
+        let mut text_items = TextItems::new();
+        
+        // Add items in disorder (Y positions not sorted)
+        text_items.items.push(create_test_item("Item1", 100, 1)); // Top
+        text_items.items.push(create_test_item("Item3", 50, 1));  // Bottom  
+        text_items.items.push(create_test_item("Item2", 75, 1));  // Middle
+
+        let reordered = text_items.fix_y_disorder();
+        
+        // Should be ordered by Y position (descending)
+        assert_eq!(reordered.items.len(), 3);
+        assert_eq!(reordered.items[0].text, "Item1"); // Y=100
+        assert_eq!(reordered.items[1].text, "Item2"); // Y=75
+        assert_eq!(reordered.items[2].text, "Item3"); // Y=50
     }
 }
