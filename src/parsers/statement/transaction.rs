@@ -232,7 +232,7 @@ impl TransactionParser {
 
     /// Handle new line parsing for specified fields
     fn handle_new_line(&mut self, items: &[TextItem], data: &mut StatementData) -> usize {
-        if self.description_parser.primed {
+        if !self.description_parser.primed {
             self.prime_new_line_fields();
         }
 
