@@ -9,6 +9,9 @@ struct TextState {
     leading: f32,
     font_size: f32,
     hscale: f32, // horizontal scaling factor (PDF Tz), 1.0 = 100%
+    text_matrix: [f32; 6], // CTM for text positioning
+    word_spacing: f32,     // Tw operator
+    char_spacing: f32,     // Tc operator
 }
 
 impl Default for TextState {
@@ -19,11 +22,40 @@ impl Default for TextState {
             leading: 0.0,
             font_size: 12.0,
             hscale: 1.0,
+            text_matrix: [1.0, 0.0, 0.0, 1.0, 0.0, 0.0], // Identity matrix
+            word_spacing: 0.0,
+            char_spacing: 0.0,
         }
     }
 }
 
 fn translate_xy(x: f32, y: f32, tx: f32, ty: f32) -> (f32, f32) { (x + tx, y + ty) }
+
+// Calculate text width more accurately, accounting for kerning adjustments
+fn calculate_text_width(text: &str, font_size: f32, hscale: f32, char_spacing: f32, word_spacing: f32, kerning_adjustments: &[f32]) -> f32 {
+    let char_count = text.chars().count() as f32;
+    let space_count = text.chars().filter(|&c| c == ' ').count() as f32;
+    
+    // Base width estimation (improved from simple 0.5 multiplier)
+    // Using 0.6 as a better average for typical fonts
+    let base_width = 0.6 * font_size * hscale * char_count;
+    
+    // Add character spacing (applied between all characters)
+    let char_spacing_total = char_spacing * (char_count - 1.0).max(0.0);
+    
+    // Add word spacing (applied to space characters)
+    let word_spacing_total = word_spacing * space_count;
+    
+    // Subtract kerning adjustments (PDF kerning values are typically negative for tighter spacing)
+    let kerning_total: f32 = kerning_adjustments.iter().sum::<f32>() * font_size / 1000.0;
+    
+    base_width + char_spacing_total + word_spacing_total - kerning_total
+}
+
+// Calculate text advance from current position
+fn calculate_text_advance(text: &str, font_size: f32, hscale: f32, char_spacing: f32, word_spacing: f32, kerning_adjustments: &[f32]) -> f32 {
+    calculate_text_width(text, font_size, hscale, char_spacing, word_spacing, kerning_adjustments) * hscale
+}
 
 // Decode raw PDF string bytes into best-effort UTF-8 text with simple heuristics
 fn decode_pdf_bytes(raw: &[u8]) -> String {
@@ -96,9 +128,12 @@ pub fn parse(pdf_path: &str) -> TextItems {
                 "ET" => { /* end text object */ }
                 "Tm" => {
                     if op.operands.len() == 6 {
-                        let e = op.operands[4].as_f32().unwrap_or(0.0);
-                        let f = op.operands[5].as_f32().unwrap_or(0.0);
-                        state.x = e; state.y = f;
+                        // Set text matrix [a b c d e f]
+                        for i in 0..6 {
+                            state.text_matrix[i] = op.operands[i].as_f32().unwrap_or(0.0);
+                        }
+                        state.x = state.text_matrix[4]; // e value
+                        state.y = state.text_matrix[5]; // f value
                     }
                 }
                 "TD" => {
@@ -134,6 +169,18 @@ pub fn parse(pdf_path: &str) -> TextItems {
                         state.hscale = if pct.is_finite() { pct / 100.0 } else { 1.0 };
                     }
                 }
+                "Tw" => {
+                    // Word spacing
+                    if let Some(val) = op.operands.get(0) {
+                        state.word_spacing = val.as_f32().unwrap_or(0.0);
+                    }
+                }
+                "Tc" => {
+                    // Character spacing  
+                    if let Some(val) = op.operands.get(0) {
+                        state.char_spacing = val.as_f32().unwrap_or(0.0);
+                    }
+                }
                 "Tj" => {
                     if let Some(obj) = op.operands.get(0) {
                         if let Ok(bytes) = obj.as_str() {
@@ -141,11 +188,30 @@ pub fn parse(pdf_path: &str) -> TextItems {
                             if !text_decoded.is_empty() {
                                 let x1 = state.x.floor();
                                 let y1 = state.y.floor();
-                                let char_count = text_decoded.chars().count() as f32;
-                                let width_est = 0.5f32 * state.font_size * state.hscale * char_count;
+                                
+                                // Calculate more accurate width
+                                let width_est = calculate_text_width(
+                                    &text_decoded, 
+                                    state.font_size, 
+                                    state.hscale, 
+                                    state.char_spacing, 
+                                    state.word_spacing, 
+                                    &[]
+                                );
                                 let height_est = state.font_size;
                                 let x2 = (x1 + width_est).floor();
                                 let y2 = (y1 + height_est).floor();
+                                
+                                // Update state position for next text
+                                state.x += calculate_text_advance(
+                                    &text_decoded, 
+                                    state.font_size, 
+                                    state.hscale, 
+                                    state.char_spacing, 
+                                    state.word_spacing, 
+                                    &[]
+                                );
+                                
                                 text_items.add(&TextItem::new(text_decoded, x1 as i32, y1 as i32, x2 as i32, y2 as i32, page_num as i32));
                             }
                         }
@@ -155,21 +221,44 @@ pub fn parse(pdf_path: &str) -> TextItems {
                     if let Some(obj) = op.operands.get(0) {
                         if let Ok(arr) = obj.as_array() {
                             let mut collected = String::new();
+                            let mut kerning_adjustments = Vec::new();
+                            
                             for part in arr {
                                 if let Ok(s) = part.as_str() {
                                     collected.push_str(&decode_pdf_bytes(s.as_ref()));
-                                } else if let Ok(_num) = part.as_f32() {
-                                    // ignore kerning adjustments for this width approximation
+                                } else if let Ok(num) = part.as_f32() {
+                                    // Collect kerning adjustments for more precise width calculation
+                                    kerning_adjustments.push(num);
                                 }
                             }
+                            
                             if !collected.is_empty() {
                                 let x1 = state.x.floor();
                                 let y1 = state.y.floor();
-                                let char_count = collected.chars().count() as f32;
-                                let width_est = 0.5f32 * state.font_size * state.hscale * char_count;
+                                
+                                // Calculate width with kerning adjustments
+                                let width_est = calculate_text_width(
+                                    &collected, 
+                                    state.font_size, 
+                                    state.hscale, 
+                                    state.char_spacing, 
+                                    state.word_spacing, 
+                                    &kerning_adjustments
+                                );
                                 let height_est = state.font_size;
                                 let x2 = (x1 + width_est).floor();
                                 let y2 = (y1 + height_est).floor();
+                                
+                                // Update state position for next text
+                                state.x += calculate_text_advance(
+                                    &collected, 
+                                    state.font_size, 
+                                    state.hscale, 
+                                    state.char_spacing, 
+                                    state.word_spacing, 
+                                    &kerning_adjustments
+                                );
+                                
                                 text_items.add(&TextItem::new(collected, x1 as i32, y1 as i32, x2 as i32, y2 as i32, page_num as i32));
                             }
                         }
