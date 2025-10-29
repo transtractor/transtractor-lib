@@ -50,7 +50,7 @@ impl TransactionAmountParser {
             invert_x1_range: vec![0, 10000],
             invert_x2_range: vec![0, 10000],
             has_inverted_column: !invert_primer_terms.is_empty(),
-            invert: false,
+            invert: config.transaction_amount_invert,
         }
     }
 
@@ -151,7 +151,6 @@ impl TransactionAmountParser {
         let x1_ok = item.x1 >= self.x1_range[0] && item.x1 <= self.x1_range[1];
         let x2_ok = item.x2 >= self.x2_range[0] && item.x2 <= self.x2_range[1];
         if x1_ok && x2_ok {
-            self.invert = false;
             return consumed;
         }
         // Check invert ranges if configured
