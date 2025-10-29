@@ -75,4 +75,19 @@ impl ProtoTransaction {
         }
         true
     }
+
+    /// Set the amount for this transaction.
+    pub fn set_amount(&mut self, amount: f64) {
+        self.amount = Some(amount);
+    }
+
+    /// Set the balance for this transaction.
+    pub fn set_balance(&mut self, balance: f64) {
+        self.balance = Some(balance);
+    }
+
+    /// Set the date for this transaction.
+    pub fn set_date(&mut self, date: i64) {
+        self.date = Some(date);
+    }
 }
