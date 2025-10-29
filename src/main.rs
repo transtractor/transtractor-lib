@@ -1,6 +1,7 @@
 use std::{env, fs, path::Path, process};
 use transtractor::configs::StatementTyper;
 use transtractor::parsers;
+use transtractor::fixers::fix_statement_data;
 
 fn print_usage(program: &str) {
     eprintln!(
@@ -55,10 +56,15 @@ fn main() {
                         } else {
                             items
                         };
-                        let data = transtractor::parsers::statement_data_from_text_items::parse(&cfg, &items);
+                        let mut data = transtractor::parsers::statement_data_from_text_items::parse(&cfg, &items);
                         // Print StatementData to stdout (temporary behavior)
+                        println!("Parsed StatementData:");
                         data.print();
-                        println!("Layout Text:");
+                        // Apply fixers
+                        fix_statement_data(&mut data);
+                        println!("Fixed StatementData:");
+                        data.print();
+                        //println!("Layout Text:");
                         items.print_layout();
                         // Write a placeholder to the CSV file to acknowledge the request
                         let note = format!(
