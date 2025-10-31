@@ -104,6 +104,14 @@ impl TransactionAmountParser {
         max_lookahead
     }
 
+    /// Check if header is set
+    pub fn is_header_set(&self) -> bool {
+      if self.has_inverted_column {
+          return self.header_primer.primed && self.invert_header_primer.primed;
+      }
+      self.header_primer.primed
+    }
+
     /// Try reading header and set x_ranges accordingly
     fn try_parse_header(&mut self, items: &[TextItem]) -> usize {
         // Return if header already read

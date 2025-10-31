@@ -66,6 +66,11 @@ impl TransactionDescriptionParser {
         self.primed = true;
     }
 
+    /// Check if header is set
+    pub fn is_header_set(&self) -> bool {
+        self.header_primer.primed
+    }
+
     /// Get the maximum lookahead for the parser
     pub fn get_max_lookahead(&self) -> usize {
         let mut max_lookahead = 0;
