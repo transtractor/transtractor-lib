@@ -78,6 +78,23 @@ impl TransactionDescriptionParser {
         max_lookahead
     }
 
+    /// Adjust x1 or x2 bounds based on lowest/highest x positions
+    pub fn adjust_bounds(&mut self, x_lowest: i32, x_highest: i32) {
+        // Adjust upper bound if x_lowest is greater than first 
+        // bound and less than current upper bound
+        if self.alignment == "x1" {
+            if x_lowest > self.x1_range[0] && x_lowest < self.x1_range[1] {
+                self.x1_range[1] = x_lowest + self.x_tol;
+            }
+        // Adjust lower bound if x_highest is less than second
+        // bound and greater than current lower bound
+        } else if self.alignment == "x2" {
+            if x_highest < self.x2_range[1] && x_highest > self.x2_range[0] {
+                self.x2_range[0] = x_highest - self.x_tol;
+            }
+        }
+    }
+
     /// Try reading header and define x1 of x2 bounds
     fn try_parse_header(&mut self, items: &[TextItem]) -> usize {
         // Return if header already read

@@ -112,6 +112,29 @@ impl TransactionAmountParser {
       self.header_primer.primed
     }
 
+    /// Get effective x_bounds
+    pub fn get_x_bounds(&self) -> (i32, i32) {
+        let mut x_lower = 0;
+        let mut x_upper = 10000;
+        if self.alignment == "x1" {
+            x_lower = self.x1_range[0];
+            x_upper = self.x1_range[1];
+        } else if self.alignment == "x2" {
+            x_lower = self.x2_range[0];
+            x_upper = self.x2_range[1];
+        }
+        if self.has_inverted_column {
+            let (inv_lower, inv_upper) = if self.invert_alignment == "x1" {
+                (self.invert_x1_range[0], self.invert_x1_range[1])
+            } else {
+                (self.invert_x2_range[0], self.invert_x2_range[1])
+            };
+            x_lower = x_lower.min(inv_lower);
+            x_upper = x_upper.max(inv_upper);
+        }
+        (x_lower, x_upper)
+    }
+
     /// Try reading header and set x_ranges accordingly
     fn try_parse_header(&mut self, items: &[TextItem]) -> usize {
         // Return if header already read

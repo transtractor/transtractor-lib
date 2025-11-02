@@ -23,11 +23,13 @@ pub struct TransactionParser {
     stop_primer: ParserPrimer,
     current_transaction: ProtoTransaction,
     compulsory_fields: Vec<String>,
+    all_fields: Vec<String>,
     new_line_fields: Vec<String>,
     end_line_fields: Vec<String>,
     next_fields: HashMap<String, Vec<String>>,
     current_line_y1: i32,
     new_line_y1_tol: i32,
+    description_x_bounds_adjusted: bool,
 }
 
 impl TransactionParser {
@@ -36,7 +38,8 @@ impl TransactionParser {
         let new_line_fields = transaction::utils::get_new_line_fields(transaction_formats.clone());
         let end_line_fields = transaction::utils::get_end_line_fields(transaction_formats.clone());
         let next_fields = transaction::utils::get_next_fields(transaction_formats.clone());
-        let compulsory_fields = transaction::utils::get_compulsory_fields(transaction_formats);
+        let compulsory_fields = transaction::utils::get_compulsory_fields(transaction_formats.clone());
+        let all_fields = transaction::utils::get_all_fields(transaction_formats);
         let start_terms: Vec<&str> = config
             .transaction_terms
             .iter()
@@ -61,11 +64,13 @@ impl TransactionParser {
             stop_primer: ParserPrimer::new(&stop_terms),
             current_transaction: ProtoTransaction::new(),
             compulsory_fields,
+            all_fields,
             new_line_fields,
             end_line_fields,
             next_fields,
             current_line_y1: -100000,
             new_line_y1_tol: config.transaction_new_line_y1_tol,
+            description_x_bounds_adjusted: false,
         }
     }
 
@@ -84,6 +89,9 @@ impl TransactionParser {
         if !self.start_primer.primed || self.stop_primer.primed {
             return 0;
         }
+
+        // Adjust description parser x_bounds if needed
+        self.adjust_description_x_bounds();
 
         // Handle new line, if one
         let is_new_line = self.is_new_line(items);
@@ -148,6 +156,65 @@ impl TransactionParser {
         max_lookahead = max_lookahead.max(self.balance_parser.get_max_lookahead());
         max_lookahead = max_lookahead.max(self.description_parser.get_max_lookahead());
         max_lookahead
+    }
+
+    /// Check if all compulsory field headers are set
+    fn all_headers_set(&self) -> bool {
+        for field in &self.all_fields {
+            match field.as_str() {
+                "date" => {
+                    if !self.date_parser.is_header_set() {
+                        return false;
+                    }
+                }
+                "description" => {
+                    if !self.description_parser.is_header_set() {
+                        return false;
+                    }
+                }
+                "amount" => {
+                    if !self.amount_parser.is_header_set() {
+                        return false;
+                    }
+                }
+                "balance" => {
+                    if !self.balance_parser.is_header_set() {
+                        return false;
+                    }
+                }
+                _ => {}
+            }
+        }
+        true
+    }
+
+    /// Get effective x_bounds for a specified parser
+    fn get_parser_x_bounds(&self, field: &str) -> (i32, i32) {
+        match field {
+            "date" => self.date_parser.get_x_bounds(),
+            "amount" => self.amount_parser.get_x_bounds(),
+            "balance" => self.balance_parser.get_x_bounds(),
+            _ => (0, 10000),
+        }
+    }
+
+    /// Readjust description parser x_bounds if not already done and 
+    /// headers are all set
+    fn adjust_description_x_bounds(&mut self) {
+        if self.description_x_bounds_adjusted {
+            return;
+        }
+        if !self.all_headers_set() {
+            return;
+        }
+        // Get effective x_bounds from other parsers
+        for field in &self.all_fields {
+            if field == "description" {
+                continue;
+            }
+            let (x_lower, x_upper) = self.get_parser_x_bounds(field);
+            self.description_parser.adjust_bounds(x_lower, x_upper);
+        }
     }
 
     /// Check if the current items indicate a new line
