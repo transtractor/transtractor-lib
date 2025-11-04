@@ -42,7 +42,7 @@ fn main() {
                 println!("{}", layout.0);
                 return;
             }
-            // Mode 2: PDF -> CSV (for now, build StatementData and print it; file is a placeholder)
+            // Mode 2: PDF -> CSV
             ("pdf", "csv") => {
                 let items = parsers::text_items_from_pdf::parse(input);
                 let typer = StatementTyper::new();
@@ -57,24 +57,18 @@ fn main() {
                             items
                         };
                         let mut data = transtractor::parsers::statement_data_from_text_items::parse(&cfg, &items);
-                        // Print StatementData to stdout (temporary behavior)
-                        println!("Parsed StatementData:");
-                        data.print();
-                        // Apply fixers
+                        
+                        // Apply fixers to clean up the data
                         fix_statement_data(&mut data);
-                        println!("Fixed StatementData:");
-                        data.print();
-                        //println!("Layout Text:");
-                        items.print_layout();
-                        // Write a placeholder to the CSV file to acknowledge the request
-                        let note = format!(
-                            "CSV generation not implemented yet. Parsed with config '{}'. See stdout for StatementData debug output.",
-                            cfg.key
-                        );
-                        if let Err(e) = fs::write(output, note.as_bytes()) {
-                            eprintln!("Failed to write output file {output}: {e}");
+                        
+                        // Write the CSV file using the new function
+                        if let Err(e) = parsers::csv_from_statement_data::parse(&data, output) {
+                            eprintln!("Failed to write CSV file {output}: {e}");
                             process::exit(1);
                         }
+                        
+                        println!("Successfully parsed PDF and wrote {} transactions to CSV file: {}", 
+                                data.proto_transactions.len(), output);
                         return;
                     }
                     _ => {
