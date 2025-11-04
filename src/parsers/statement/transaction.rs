@@ -9,6 +9,7 @@ use crate::structs::StatementConfig;
 use crate::structs::StatementData;
 use crate::structs::TextItem;
 use std::collections::HashMap;
+use regex::Regex;
 
 pub struct TransactionParser {
     date_parser: TransactionDateParser,
@@ -30,6 +31,7 @@ pub struct TransactionParser {
     current_line_y1: i32,
     new_line_y1_tol: i32,
     description_x_bounds_adjusted: bool,
+    description_exclude_patterns: Vec<Regex>,
 }
 
 impl TransactionParser {
@@ -71,6 +73,7 @@ impl TransactionParser {
             current_line_y1: -100000,
             new_line_y1_tol: config.transaction_new_line_y1_tol,
             description_x_bounds_adjusted: false,
+            description_exclude_patterns: config.transaction_description_exclude.clone(),
         }
     }
 
@@ -269,6 +272,7 @@ impl TransactionParser {
         {
             return;
         }
+        self.current_transaction.clean_description(&self.description_exclude_patterns);
         data.proto_transactions
             .push(self.current_transaction.clone());
     }
