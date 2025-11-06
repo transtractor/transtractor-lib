@@ -18,7 +18,11 @@ fn main() {
 
     for path in json_files {
         // Since build.rs executes with CWD at crate root, we can use the path relative to crate root.
-        let rel = path.strip_prefix(".").unwrap_or(&path).to_string_lossy();
+        // Convert to forward slashes for cross-platform compatibility with include_str!
+        // The include_str! macro always expects forward slashes, even on Windows
+        let rel = path.strip_prefix(".").unwrap_or(&path)
+            .to_string_lossy()
+            .replace('\\', "/");  // Ensure forward slashes on all platforms
         // Skip any file we explicitly treat as generated or non-config
         if rel.ends_with("generated.rs") { continue; }
         writeln!(f, "    // Source: {rel}").unwrap();
