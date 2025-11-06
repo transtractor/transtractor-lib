@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use std::fs::File;
 
 /// Write all transactions in StatementData to CSV format (date, description, amount, balance)
-/// Date is in YYYY-MM-DD format, amounts and balances are in standard decimal format.
+/// Date is in YYYY-MM-DD format, amounts and balances are formatted to 2 decimal places.
 /// Descriptions are automatically quoted by the CSV writer.
 pub fn parse(sd: &StatementData, csv_path: &str) -> Result<(), Box<dyn std::error::Error>> {
     let file = File::create(csv_path)?;
@@ -32,8 +32,8 @@ pub fn parse(sd: &StatementData, csv_path: &str) -> Result<(), Box<dyn std::erro
             wtr.write_record(&[
                 &date_str,
                 &tx.description,
-                &amount.to_string(),
-                &balance.to_string(),
+                &format!("{:.2}", amount),
+                &format!("{:.2}", balance),
             ])?;
         }
     }
@@ -81,7 +81,7 @@ mod tests {
         assert!(result.is_ok());
 
         let content = fs::read_to_string(path).unwrap();
-        assert_eq!(content, "date,description,amount,balance\n2023-01-01,Test Payment,100.5,1000.75\n");
+        assert_eq!(content, "date,description,amount,balance\n2023-01-01,Test Payment,100.50,1000.75\n");
     }
 
     #[test]
@@ -111,7 +111,7 @@ mod tests {
         assert!(result.is_ok());
 
         let content = fs::read_to_string(path).unwrap();
-        let expected = "date,description,amount,balance\n2023-01-01,Payment One,50.25,950.25\n2023-01-02,Payment Two,-25,925.25\n";
+        let expected = "date,description,amount,balance\n2023-01-01,Payment One,50.25,950.25\n2023-01-02,Payment Two,-25.00,925.25\n";
         assert_eq!(content, expected);
     }
 
@@ -173,7 +173,7 @@ mod tests {
 
         let content = fs::read_to_string(path).unwrap();
         // Should only contain the complete transaction
-        assert_eq!(content, "date,description,amount,balance\n2023-01-01,Complete,100,1000\n");
+        assert_eq!(content, "date,description,amount,balance\n2023-01-01,Complete,100.00,1000.00\n");
     }
 
     #[test]
@@ -195,7 +195,7 @@ mod tests {
         assert!(result.is_ok());
 
         let content = fs::read_to_string(path).unwrap();
-        assert_eq!(content, "date,description,amount,balance\n2023-01-01,Overdraft Fee,-35,-10.5\n");
+        assert_eq!(content, "date,description,amount,balance\n2023-01-01,Overdraft Fee,-35.00,-10.50\n");
     }
 
     #[test]
@@ -220,7 +220,31 @@ mod tests {
         
         // The CSV writer should automatically quote the description field because it contains a comma
         // Expected format: date,description,amount,balance
-        // Should be: 2023-01-01,"Transfer to Smith, John",-250,750
-        assert_eq!(content, "date,description,amount,balance\n2023-01-01,\"Transfer to Smith, John\",-250,750\n");
+        // Should be: 2023-01-01,"Transfer to Smith, John",-250.00,750.00
+        assert_eq!(content, "date,description,amount,balance\n2023-01-01,\"Transfer to Smith, John\",-250.00,750.00\n");
+    }
+
+    #[test]
+    fn test_parse_rounds_to_two_decimal_places() {
+        let mut sd = StatementData::new();
+        
+        let mut tx = ProtoTransaction::new();
+        tx.set_date(1672531200000); // 2023-01-01
+        tx.description = "Rounding Test".to_string();
+        tx.set_amount(123.456789); // Should round to 123.46
+        tx.set_balance(987.654321); // Should round to 987.65
+        
+        sd.add_proto_transaction(tx);
+
+        let temp_file = NamedTempFile::new().unwrap();
+        let path = temp_file.path().to_str().unwrap();
+
+        let result = parse(&sd, path);
+        assert!(result.is_ok());
+
+        let content = fs::read_to_string(path).unwrap();
+        
+        // Verify amounts are rounded to exactly 2 decimal places
+        assert_eq!(content, "date,description,amount,balance\n2023-01-01,Rounding Test,123.46,987.65\n");
     }
 }
