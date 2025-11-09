@@ -61,6 +61,18 @@ fn main() {
                         // Apply fixers to clean up the data
                         fix_statement_data(&mut data);
                         
+                        // Check balance and handle errors gracefully
+                        transtractor::checkers::check_statement_data(&mut data);
+                        
+                        // Check if there were any errors added during processing
+                        if !data.errors.is_empty() {
+                            eprintln!("Quality checks failed with {} error(s):", data.errors.len());
+                            for error in &data.errors {
+                                eprintln!("  - {}", error);
+                            }
+                            process::exit(4);
+                        }
+                        
                         // Write the CSV file using the new function
                         if let Err(e) = parsers::csv_from_statement_data::parse(&data, output) {
                             eprintln!("Failed to write CSV file {output}: {e}");
