@@ -8,6 +8,7 @@ pub struct StatementData {
     pub opening_balance: Option<f64>,
     pub closing_balance: Option<f64>,
     pub proto_transactions: Vec<ProtoTransaction>,
+    pub errors: Vec<String>,
 }
 
 impl StatementData {
@@ -18,6 +19,7 @@ impl StatementData {
             opening_balance: None,
             closing_balance: None,
             proto_transactions: Vec::new(),
+            errors: Vec::new(),
         }
     }
 
@@ -42,6 +44,10 @@ impl StatementData {
 
     pub fn add_proto_transaction(&mut self, proto_tx: ProtoTransaction) {
         self.proto_transactions.push(proto_tx);
+    }
+
+    pub fn add_error(&mut self, error: String) {
+        self.errors.push(error);
     }
 
     pub fn print(&self) {
@@ -90,6 +96,14 @@ impl StatementData {
                 amount_str,
                 balance_str
             );
+        }
+        if !self.errors.is_empty() {
+            println!("  Errors:");
+            for error in &self.errors {
+                println!("    - {}", error);
+            }
+        } else {
+            println!("  Errors: None");
         }
     }
 }
