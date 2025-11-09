@@ -57,6 +57,18 @@ fn calculate_text_advance(text: &str, font_size: f32, hscale: f32, char_spacing:
     calculate_text_width(text, font_size, hscale, char_spacing, word_spacing, kerning_adjustments) * hscale
 }
 
+// Improved coordinate rounding that reduces variability for aligned items
+fn round_coordinate(coord: f32) -> i32 {
+    // Use more precise rounding instead of floor() to reduce variability
+    // This helps items that should align to actually align
+    (coord + 0.5).floor() as i32
+}
+
+// Snap coordinates to common alignment grid to reduce variability
+fn snap_to_grid(coord: f32, grid_size: f32) -> f32 {
+    (coord / grid_size).round() * grid_size
+}
+
 // Decode raw PDF string bytes into best-effort UTF-8 text with simple heuristics
 fn decode_pdf_bytes(raw: &[u8]) -> String {
     if raw.is_empty() { return String::new(); }
@@ -186,8 +198,12 @@ pub fn parse(pdf_path: &str) -> TextItems {
                         if let Ok(bytes) = obj.as_str() {
                             let text_decoded = decode_pdf_bytes(bytes.as_ref());
                             if !text_decoded.is_empty() {
-                                let x1 = state.x.floor();
-                                let y1 = state.y.floor();
+                                // Apply grid snapping to reduce variability for aligned items
+                                let snapped_x = snap_to_grid(state.x, 0.5);
+                                let snapped_y = snap_to_grid(state.y, 0.5);
+                                
+                                let x1 = round_coordinate(snapped_x);
+                                let y1 = round_coordinate(snapped_y);
                                 
                                 // Calculate more accurate width
                                 let width_est = calculate_text_width(
@@ -199,10 +215,10 @@ pub fn parse(pdf_path: &str) -> TextItems {
                                     &[]
                                 );
                                 let height_est = state.font_size;
-                                let x2 = (x1 + width_est).floor();
-                                let y2 = (y1 + height_est).floor();
+                                let x2 = round_coordinate(snapped_x + width_est);
+                                let y2 = round_coordinate(snapped_y + height_est);
                                 
-                                // Update state position for next text
+                                // Update state position for next text (use unsnapped values for precision)
                                 state.x += calculate_text_advance(
                                     &text_decoded, 
                                     state.font_size, 
@@ -212,7 +228,7 @@ pub fn parse(pdf_path: &str) -> TextItems {
                                     &[]
                                 );
                                 
-                                text_items.add(&TextItem::new(text_decoded, x1 as i32, y1 as i32, x2 as i32, y2 as i32, page_num as i32));
+                                text_items.add(&TextItem::new(text_decoded, x1, y1, x2, y2, page_num as i32));
                             }
                         }
                     }
@@ -233,8 +249,12 @@ pub fn parse(pdf_path: &str) -> TextItems {
                             }
                             
                             if !collected.is_empty() {
-                                let x1 = state.x.floor();
-                                let y1 = state.y.floor();
+                                // Apply grid snapping to reduce variability for aligned items
+                                let snapped_x = snap_to_grid(state.x, 0.5);
+                                let snapped_y = snap_to_grid(state.y, 0.5);
+                                
+                                let x1 = round_coordinate(snapped_x);
+                                let y1 = round_coordinate(snapped_y);
                                 
                                 // Calculate width with kerning adjustments
                                 let width_est = calculate_text_width(
@@ -246,10 +266,10 @@ pub fn parse(pdf_path: &str) -> TextItems {
                                     &kerning_adjustments
                                 );
                                 let height_est = state.font_size;
-                                let x2 = (x1 + width_est).floor();
-                                let y2 = (y1 + height_est).floor();
+                                let x2 = round_coordinate(snapped_x + width_est);
+                                let y2 = round_coordinate(snapped_y + height_est);
                                 
-                                // Update state position for next text
+                                // Update state position for next text (use unsnapped values for precision)
                                 state.x += calculate_text_advance(
                                     &collected, 
                                     state.font_size, 
@@ -259,7 +279,7 @@ pub fn parse(pdf_path: &str) -> TextItems {
                                     &kerning_adjustments
                                 );
                                 
-                                text_items.add(&TextItem::new(collected, x1 as i32, y1 as i32, x2 as i32, y2 as i32, page_num as i32));
+                                text_items.add(&TextItem::new(collected, x1, y1, x2, y2, page_num as i32));
                             }
                         }
                     }
