@@ -24,10 +24,17 @@ impl Parser {
         }
     }
 
-    /// Convert a PDF bank statement to CSV format
-    pub fn pdf_to_csv(&self, input_pdf: &str, output_csv: &str) -> PyResult<()> {
+    /// Convert a PDF or TXT bank statement to CSV format
+    pub fn to_csv(&self, input_file: &str, output_csv: &str) -> PyResult<()> {
         self.inner
-            .pdf_to_csv(input_pdf, output_csv)
+            .to_csv(input_file, output_csv)
+            .map_err(|e| PyRuntimeError::new_err(e))
+    }
+
+    /// Process all PDF and TXT files in a directory and its subdirectories
+    pub fn process_directory(&self, directory_path: &str) -> PyResult<()> {
+        self.inner
+            .process_directory(directory_path)
             .map_err(|e| PyRuntimeError::new_err(e))
     }
 }
