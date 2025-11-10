@@ -1,8 +1,9 @@
 use crate ::structs::ProtoTransaction;
 use chrono::{DateTime, Utc, TimeZone, Datelike};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct StatementData {
+    pub key: Option<String>,
     pub start_date: Option<i64>,
     pub start_date_year: Option<i32>,
     pub opening_balance: Option<f64>,
@@ -14,6 +15,7 @@ pub struct StatementData {
 impl StatementData {
     pub fn new() -> Self {
         Self {
+            key: None,
             start_date: None,
             start_date_year: None,
             opening_balance: None,
@@ -29,6 +31,10 @@ impl StatementData {
     pub fn start_date_year(&self) -> Option<i32> { self.start_date_year }
 
     // Setters for the fields
+    pub fn set_key(&mut self, key: String) {
+        self.key = Some(key);
+    }
+
     pub fn set_start_date(&mut self, date: i64) {
         self.start_date = Some(date);
         self.start_date_year = Utc.timestamp_millis_opt(date).single().map(|dt| dt.year());
