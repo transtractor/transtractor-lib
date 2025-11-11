@@ -31,10 +31,10 @@ impl Parser {
             .map_err(|e| PyRuntimeError::new_err(e))
     }
 
-    /// Process all PDF and TXT files in a directory and its subdirectories
-    pub fn process_directory(&self, directory_path: &str) -> PyResult<()> {
+    /// Test all PDF and TXT files in a directory and its subdirectories
+    pub fn test_directory(&self, directory_path: &str) -> PyResult<()> {
         self.inner
-            .process_directory(directory_path)
+            .test_directory(directory_path)
             .map_err(|e| PyRuntimeError::new_err(e))
     }
 }

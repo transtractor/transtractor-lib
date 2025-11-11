@@ -17,7 +17,7 @@ class Parser:
         >>> from transtractor import Parser
         >>> parser = Parser()
         >>> parser.to_csv("statement.pdf", "output.csv")  # Single file
-        >>> parser.process_directory("statements/")      # Batch processing
+        >>> parser.test_directory("statements/")         # Batch testing
     """
     
     def __init__(self) -> None:
@@ -67,16 +67,16 @@ class Parser:
         """
         ...
     
-    def process_directory(self, directory_path: str) -> None:
+    def test_directory(self, directory_path: str) -> None:
         """
-        Recursively process all PDF and TXT files in a directory and its subdirectories.
+        Recursively test all PDF and TXT files in a directory and its subdirectories.
         
         This method finds all supported files (PDF and TXT with case-insensitive extensions)
-        in the specified directory and all subdirectories, processes each file to extract
+        in the specified directory and all subdirectories, tests each file by attempting to extract
         StatementData, and prints detailed information about the parsing results to stdout.
         
-        For each file processed, the method prints:
-        - "Reading <file path>..." when starting to process a file
+        For each file tested, the method prints:
+        - "Reading <file path>..." when starting to test a file
         - "Statement type not supported" if the file is not recognized by any typer
         - Error messages for layout text parsing failures
         
@@ -88,7 +88,7 @@ class Parser:
         - Status: "PASS" (no errors) or "FAIL" (has errors)
         
         Args:
-            directory_path: Path to the directory to process recursively
+            directory_path: Path to the directory to test recursively
         
         Raises:
             RuntimeError: If the directory doesn't exist
@@ -97,7 +97,7 @@ class Parser:
         
         Example:
             >>> parser = Parser()
-            >>> parser.process_directory("bank_statements/")
+            >>> parser.test_directory("bank_statements/")
             Reading bank_statements/january/statement1.pdf...
               Key: CBA_Credit_Card, Transactions: 15, Time: 45ms, Errors: 0, Status: PASS
             Reading bank_statements/february/statement2.TXT...
@@ -106,7 +106,7 @@ class Parser:
               Key: ING_Debit, Transactions: 23, Time: 62ms, Errors: 2, Status: FAIL
         
         Note:
-            This method is designed for batch processing and quality assessment.
+            This method is designed for batch testing and quality assessment.
             It does not generate CSV files - use to_csv() for individual file conversion.
             The method processes files in directory traversal order (not guaranteed to be sorted).
         """
