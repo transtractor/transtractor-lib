@@ -132,6 +132,35 @@ impl Parser {
         Ok(())
     }
 
+    /// Converts a PDF file to layout text format and writes it to a file.
+    pub fn to_layout_text(&self, input_file: &str, output_file: &str, fix_y_disorder: bool) -> Result<(), String> {
+        // Check if file exists first
+        if !std::path::Path::new(input_file).exists() {
+            return Err(format!("Input file does not exist: {}", input_file));
+        }
+
+        let input_file_lower = input_file.to_lowercase();
+        if !input_file_lower.ends_with(".pdf") {
+            return Err("Only PDF files are supported for layout text conversion.".to_string());
+        }
+
+        // Parse PDF file
+        let mut items = parsers::text_items_from_pdf::parse(input_file);
+
+        // Apply Y-coordinate disorder fix if requested
+        if fix_y_disorder {
+            items = items.fix_y_disorder();
+        }
+
+        let layout_text = items.to_layout_text();
+        
+        // Write layout text to the output file
+        fs::write(output_file, layout_text.0)
+            .map_err(|e| format!("Failed to write layout text file: {}", e))?;
+
+        Ok(())
+    }
+
     /// Recursively finds all PDF and TXT files in a directory and its subdirectories.
     /// Tests each file to see if it can be parsed and prints detailed information about the results.
     ///
@@ -439,5 +468,48 @@ mod tests {
         // Clean up
         let _ = std::fs::remove_file(temp_file);
         let _ = std::fs::remove_file(output_file);
+    }
+
+    #[test]
+    fn test_to_layout_text_nonexistent_file() {
+        let parser = Parser::new();
+        let result = parser.to_layout_text("nonexistent.pdf", "output.txt", false);
+
+        // Should return an error for a nonexistent file
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("does not exist"));
+    }
+
+    #[test]
+    fn test_to_layout_text_unsupported_file_format() {
+        let parser = Parser::new();
+
+        // Create a temporary TXT file
+        let temp_file = "test.txt";
+        std::fs::write(temp_file, "test content").unwrap();
+
+        let result = parser.to_layout_text(temp_file, "output.txt", false);
+
+        // Clean up
+        let _ = std::fs::remove_file(temp_file);
+
+        // Should return an error for non-PDF file format
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("Only PDF files are supported"));
+    }
+
+    #[test]
+    fn test_to_layout_text_case_insensitive_pdf_extension() {
+        let parser = Parser::new();
+
+        // Test uppercase PDF extension
+        let result = parser.to_layout_text("nonexistent.PDF", "output.txt", false);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("does not exist")); // Should recognize as PDF, fail on file existence
+
+        // Test mixed case PDF extension
+        let result = parser.to_layout_text("nonexistent.Pdf", "output.txt", true);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("does not exist")); // Should recognize as PDF, fail on file existence
     }
 }

@@ -16,8 +16,9 @@ class Parser:
     Example:
         >>> from transtractor import Parser
         >>> parser = Parser()
-        >>> parser.to_csv("statement.pdf", "output.csv")  # Single file
-        >>> parser.test_directory("statements/")         # Batch testing
+        >>> parser.to_csv("statement.pdf", "output.csv")        # Convert to CSV
+        >>> parser.to_layout_text("statement.pdf", "layout.txt", False)  # Convert to layout text
+        >>> parser.test_directory("statements/")                # Batch testing
     """
     
     def __init__(self) -> None:
@@ -145,5 +146,48 @@ class Parser:
             This method is designed for batch testing and quality assessment.
             It does not generate CSV files - use to_csv() for individual file conversion.
             The method processes files in directory traversal order (not guaranteed to be sorted).
+        """
+        ...
+    
+    def to_layout_text(self, input_file: str, output_file: str, fix_y_disorder: bool) -> None:
+        """
+        Convert a PDF file to layout text format and write it to a file.
+        
+        This method reads a PDF file, extracts text items using PDF parsing,
+        optionally applies Y-coordinate disorder fix to correct text positioning issues,
+        converts the text items to layout text format, and writes the result to a file.
+        
+        Only PDF files are supported as input. The output file will contain the layout text
+        representation which includes text positioning information that can be used for
+        debugging PDF parsing issues or for further processing.
+        
+        Args:
+            input_file: Path to the input PDF file
+            output_file: Path where the layout text will be written
+            fix_y_disorder: Whether to apply Y-coordinate disorder fix to the text items.
+                          This is useful when the PDF has text positioning issues that
+                          result in incorrect reading order.
+        
+        Raises:
+            RuntimeError: If the input file doesn't exist
+            RuntimeError: If the file format is not PDF (only .pdf files are supported)
+            RuntimeError: If there's an error parsing the PDF file
+            RuntimeError: If there's an error writing the output file
+        
+        Example:
+            >>> parser = Parser()
+            >>> # Convert PDF to layout text without Y-disorder fix
+            >>> parser.to_layout_text("statement.pdf", "layout.txt", False)
+            Layout text written to: layout.txt
+            >>> 
+            >>> # Convert with Y-disorder fix enabled (useful for problematic PDFs)
+            >>> parser.to_layout_text("problematic.pdf", "fixed_layout.txt", True)
+            Layout text written to: fixed_layout.txt
+        
+        Note:
+            The layout text format contains detailed positioning information for each
+            text element extracted from the PDF. This is primarily useful for debugging
+            PDF parsing issues and understanding how text is positioned in the document.
+            The fix_y_disorder option helps correct common PDF text positioning problems.
         """
         ...

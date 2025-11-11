@@ -44,6 +44,13 @@ impl Parser {
             .test_directory(directory_path)
             .map_err(|e| PyRuntimeError::new_err(e))
     }
+
+    /// Convert a PDF file to layout text format and write it to a file
+    pub fn to_layout_text(&self, input_file: &str, output_file: &str, fix_y_disorder: bool) -> PyResult<()> {
+        self.inner
+            .to_layout_text(input_file, output_file, fix_y_disorder)
+            .map_err(|e| PyRuntimeError::new_err(e))
+    }
 }
 
 /// Python module definition
