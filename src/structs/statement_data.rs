@@ -56,28 +56,29 @@ impl StatementData {
         self.errors.push(error);
     }
 
-    pub fn print(&self) {
-        println!("Statement Data:");
+    pub fn to_string(&self) -> String {
+        let mut result = String::new();
+        result.push_str("Statement Data:\n");
         if let Some(ms) = self.start_date {
             if let Some(dt) = DateTime::<Utc>::from_timestamp_millis(ms) {
-                println!("  Start Date: {}", dt.format("%d %b %Y"));
+                result.push_str(&format!("  Start Date: {}\n", dt.format("%d %b %Y")));
             } else {
-                println!("  Start Date: {}", ms);
+                result.push_str(&format!("  Start Date: {}\n", ms));
             }
         } else {
-            println!("  Start Date: Not set");
+            result.push_str("  Start Date: Not set\n");
         }
         if let Some(balance) = self.opening_balance {
-            println!("  Opening Balance: {:.2}", balance);
+            result.push_str(&format!("  Opening Balance: {:.2}\n", balance));
         } else {
-            println!("  Opening Balance: Not set");
+            result.push_str("  Opening Balance: Not set\n");
         }
         if let Some(balance) = self.closing_balance {
-            println!("  Closing Balance: {:.2}", balance);
+            result.push_str(&format!("  Closing Balance: {:.2}\n", balance));
         } else {
-            println!("  Closing Balance: Not set");
+            result.push_str("  Closing Balance: Not set\n");
         }
-        println!("  Proto Transactions:");
+        result.push_str("  Proto Transactions:\n");
         for (i, tx) in self.proto_transactions.iter().enumerate() {
             let date_str = match tx.date {
                 Some(ms) => match DateTime::<Utc>::from_timestamp_millis(ms) {
@@ -94,23 +95,28 @@ impl StatementData {
                 Some(b) => format!("{:.2}", b),
                 None => "Not set".to_string(),
             };
-            println!(
-                "    {}: {}, \"{}\", {}, {}",
+            result.push_str(&format!(
+                "    {}: {}, \"{}\", {}, {}\n",
                 i + 1,
                 date_str,
                 tx.description,
                 amount_str,
                 balance_str
-            );
+            ));
         }
         if !self.errors.is_empty() {
-            println!("  Errors:");
+            result.push_str("  Errors:\n");
             for error in &self.errors {
-                println!("    - {}", error);
+                result.push_str(&format!("    - {}\n", error));
             }
         } else {
-            println!("  Errors: None");
+            result.push_str("  Errors: None\n");
         }
+        result
+    }
+
+    pub fn print(&self) {
+        println!("{}", self.to_string());
     }
 }
 
