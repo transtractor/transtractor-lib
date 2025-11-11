@@ -31,6 +31,13 @@ impl Parser {
             .map_err(|e| PyRuntimeError::new_err(e))
     }
 
+    /// Debug a PDF or TXT bank statement and write detailed parsing information to a file
+    pub fn debug(&self, input_file: &str, output_file: &str) -> PyResult<()> {
+        self.inner
+            .debug(input_file, output_file)
+            .map_err(|e| PyRuntimeError::new_err(e))
+    }
+
     /// Test all PDF and TXT files in a directory and its subdirectories
     pub fn test_directory(&self, directory_path: &str) -> PyResult<()> {
         self.inner

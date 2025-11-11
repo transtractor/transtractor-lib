@@ -67,6 +67,42 @@ class Parser:
         """
         ...
     
+    def debug(self, input_file: str, output_file: str) -> None:
+        """
+        Debug a PDF or TXT bank statement and write detailed parsing information to a file.
+        
+        This method reads a bank statement file (PDF or TXT layout text format), 
+        identifies its type using built-in configurations, extracts all possible
+        StatementData results, and writes detailed information to an output file for debugging.
+        
+        The debug output includes all parsing attempts with their results, showing:
+        - Complete StatementData structures for each parsing attempt
+        - All extracted transactions with dates, amounts, and balances
+        - All errors encountered during parsing
+        - Detailed information about opening/closing balances and dates
+        
+        Args:
+            input_file: Path to the input bank statement file (PDF or TXT)
+            output_file: Path where the debug information will be written
+        
+        Raises:
+            RuntimeError: If the input file doesn't exist
+            RuntimeError: If the file format is unsupported (only .pdf and .txt are supported)
+            RuntimeError: If the file cannot be identified as a supported bank statement type
+            RuntimeError: If there's an error writing the debug output file
+        
+        Example:
+            >>> parser = Parser()
+            >>> parser.debug("problematic_statement.pdf", "debug_output.txt")
+            Debug output written to: debug_output.txt
+        
+        Note:
+            This method is designed for debugging parsing issues and understanding
+            how the parser processes different statement formats. The output file
+            contains human-readable information about all parsing attempts.
+        """
+        ...
+    
     def test_directory(self, directory_path: str) -> None:
         """
         Recursively test all PDF and TXT files in a directory and its subdirectories.
