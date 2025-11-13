@@ -2,8 +2,10 @@ use crate::checkers::check_statement_data;
 use crate::configs::StatementTyper;
 use crate::fixers::fix_statement_data;
 use crate::parsers;
+use crate::parsers::dict_from_statement_data::{dict_from_statement_data, ColumnData};
 use crate::structs::text_items::LayoutText;
 use crate::structs::{StatementData, TextItems};
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 use std::time::Instant;
@@ -61,6 +63,51 @@ impl Parser {
                 parsers::csv_from_statement_data::parse(&data, output_csv)
                     .map_err(|e| format!("Failed to write CSV: {}", e))?;
                 return Ok(());
+            }
+        }
+        Err("Extracted data failed quality check indicating an issue with statement parsing configuration.".to_string())
+    }
+
+    /// Converts a PDF or TXT bank statement to a dictionary of lists.
+    ///
+    /// For PDF files, extracts text items using PDF parsing.
+    /// For TXT files, reads layout text format and parses into text items.
+    ///
+    /// Returns a dictionary with column names as keys and vectors of typed data as values.
+    /// Returns an error if no StatementData is error-free.
+    pub fn to_dict(&self, input_file: &str) -> Result<HashMap<String, ColumnData>, String> {
+        // Check if file exists first
+        if !std::path::Path::new(input_file).exists() {
+            return Err(format!("Input file does not exist: {}", input_file));
+        }
+
+        let input_file_lower = input_file.to_lowercase();
+        let mut items = if input_file_lower.ends_with(".pdf") {
+            // Parse PDF file
+            parsers::text_items_from_pdf::parse(input_file)
+        } else if input_file_lower.ends_with(".txt") {
+            // Read TXT file and parse as layout text
+            let layout_content = std::fs::read_to_string(input_file)
+                .map_err(|e| format!("Failed to read TXT file: {}", e))?;
+            let layout = LayoutText(layout_content);
+            let mut items = TextItems::new();
+            items
+                .read_from_layout_text(&layout)
+                .map_err(|e| format!("Failed to parse layout text: {:?}", e))?;
+            items
+        } else {
+            return Err(
+                "Unsupported file format. Only .pdf and .txt files are supported.".to_string(),
+            );
+        };
+
+        let statement_data_results = self.parse_text_items(&mut items)?;
+
+        // Find the first error-free StatementData
+        for data in statement_data_results {
+            if data.errors.is_empty() {
+                // Convert the first error-free result to dictionary
+                return Ok(dict_from_statement_data(&data));
             }
         }
         Err("Extracted data failed quality check indicating an issue with statement parsing configuration.".to_string())

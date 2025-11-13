@@ -31,6 +31,43 @@ impl Parser {
             .map_err(|e| PyRuntimeError::new_err(e))
     }
 
+    /// Convert a PDF or TXT bank statement to a dictionary of lists
+    pub fn to_dict(&self, input_file: &str) -> PyResult<std::collections::HashMap<String, PyObject>> {
+        use pyo3::types::PyList;
+        use parsers::dict_from_statement_data::ColumnData;
+        
+        let dict = self.inner
+            .to_dict(input_file)
+            .map_err(|e| PyRuntimeError::new_err(e))?;
+        
+        Python::with_gil(|py| {
+            let mut py_dict = std::collections::HashMap::new();
+            
+            for (key, column_data) in dict {
+                let py_list: PyObject = match column_data {
+                    ColumnData::DateColumn(data) => {
+                        PyList::new(py, &data)?.into()
+                    },
+                    ColumnData::IndexColumn(data) => {
+                        PyList::new(py, &data)?.into()
+                    },
+                    ColumnData::StringColumn(data) => {
+                        PyList::new(py, &data)?.into()
+                    },
+                    ColumnData::AmountColumn(data) => {
+                        PyList::new(py, &data)?.into()
+                    },
+                    ColumnData::BalanceColumn(data) => {
+                        PyList::new(py, &data)?.into()
+                    },
+                };
+                py_dict.insert(key, py_list);
+            }
+            
+            Ok(py_dict)
+        })
+    }
+
     /// Debug a PDF or TXT bank statement and write detailed parsing information to a file
     pub fn debug(&self, input_file: &str, output_file: &str) -> PyResult<()> {
         self.inner

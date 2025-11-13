@@ -1,5 +1,6 @@
 pub mod base;
 pub mod csv_from_statement_data;
+pub mod dict_from_statement_data;
 pub mod parser;
 pub mod primed;
 pub mod statement;

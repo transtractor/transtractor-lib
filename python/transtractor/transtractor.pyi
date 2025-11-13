@@ -17,6 +17,7 @@ class Parser:
         >>> from transtractor import Parser
         >>> parser = Parser()
         >>> parser.to_csv("statement.pdf", "output.csv")        # Convert to CSV
+        >>> data = parser.to_dict("statement.pdf")              # Convert to dictionary
         >>> parser.to_layout_text("statement.pdf", "layout.txt", False)  # Convert to layout text
         >>> parser.test_directory("statements/")                # Batch testing
     """
@@ -65,6 +66,56 @@ class Parser:
             The output CSV will have columns: date, description, amount, balance
             Dates are formatted as YYYY-MM-DD, amounts are decimal numbers.
             Only the first error-free parsing result is written to CSV.
+        """
+        ...
+    
+    def to_dict(self, input_file: str) -> dict[str, list[Any]]:
+        """
+        Convert a PDF or TXT bank statement to a dictionary of lists.
+        
+        This method reads a bank statement file (PDF or TXT layout text format), 
+        identifies its type using built-in configurations, extracts transaction data, 
+        applies data fixing algorithms, and returns the first error-free result as a 
+        dictionary with column names as keys and lists of typed data as values.
+        
+        The returned dictionary is suitable for creating pandas DataFrames and contains:
+        - 'date': List of timestamps (int64) representing transaction dates
+        - 'transaction_index': List of integers (int) for within-day transaction ordering
+        - 'description': List of strings describing each transaction
+        - 'amount': List of floats representing transaction amounts
+        - 'balance': List of floats representing running balances
+        
+        Args:
+            input_file: Path to the input bank statement file (PDF or TXT)
+        
+        Returns:
+            Dictionary with column names as keys and lists of properly typed data as values.
+            All required fields (date, amount, balance) are guaranteed to be present.
+        
+        Raises:
+            RuntimeError: If the input file doesn't exist
+            RuntimeError: If the file format is unsupported (only .pdf and .txt are supported)
+            RuntimeError: If the file cannot be identified as a supported bank statement type
+            RuntimeError: If no error-free StatementData is found
+            RuntimeError: If any transaction is missing required data (date, amount, or balance)
+        
+        Example:
+            >>> parser = Parser()
+            >>> data = parser.to_dict("bank_statement.pdf")
+            >>> import pandas as pd
+            >>> df = pd.DataFrame(data)
+            >>> print(df.dtypes)
+            date                  int64
+            transaction_index     int64
+            description          object
+            amount              float64
+            balance             float64
+        
+        Note:
+            Unlike to_csv(), this method preserves the original data types for better
+            performance and precision when working with numerical analysis libraries.
+            The 'transaction_index' field is renamed from 'index' to avoid conflicts 
+            with pandas DataFrame index.
         """
         ...
     
