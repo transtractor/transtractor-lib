@@ -6,6 +6,8 @@ use regex::Regex;
 pub struct ProtoTransaction {
     /// Date of the transaction as a timestamp (milliseconds since epoch)
     pub date: Option<i64>,
+    /// Index for the transaction for date (allows balance-safe ordering)
+    pub index: usize,
     /// Description of the transaction
     pub description: String,
     /// Amount of the transaction
@@ -19,6 +21,7 @@ impl ProtoTransaction {
     pub fn new() -> Self {
         Self {
             date: None,
+            index: 0,
             description: String::new(),
             amount: None,
             balance: None,
@@ -89,6 +92,11 @@ impl ProtoTransaction {
     /// Set the date for this transaction.
     pub fn set_date(&mut self, date: i64) {
         self.date = Some(date);
+    }
+
+    /// Set index for this transaction.
+    pub fn set_index(&mut self, index: usize) {
+        self.index = index;
     }
 
     /// Cleans the description by trimming whitespace and removing unwanted patterns.
