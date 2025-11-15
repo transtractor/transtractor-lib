@@ -54,7 +54,20 @@ impl DateParts {
 
         let year = parse_year(year_source)? as i32;
 
-        let date = chrono::NaiveDate::from_ymd_opt(year, month, day)?;
+        // Try to create the date
+        let date = chrono::NaiveDate::from_ymd_opt(year, month, day);
+        
+        // If parsing failed and we have February 29, try adding 1 year (leap year fix)
+        let date = match date {
+            Some(d) => d,
+            None if day == 29 && month == 2 => {
+                // Feb 29 failed, likely because current year is not a leap year
+                // Try adding 1 year to handle year crossover issue with leap years
+                chrono::NaiveDate::from_ymd_opt(year + 1, month, day)?
+            },
+            None => return None,
+        };
+        
         let datetime = date.and_hms_opt(0, 0, 0)?;
         Some(datetime.and_utc().timestamp_millis())
     }
@@ -195,6 +208,51 @@ mod tests {
         assert!(multi_fmt.parse("24/3/20", "").is_some());
         // Should not parse invalid
         assert_eq!(multi_fmt.parse("foo", "2023"), None);
+    }
+
+    #[test]
+    fn test_february_29_leap_year_fix() {
+        // Test that Feb 29 in a non-leap year gets corrected to the next leap year
+        let dp = DateParts {
+            day_str: "29".to_string(),
+            month_str: "Feb".to_string(),
+            year_str: "2023".to_string(), // 2023 is not a leap year
+        };
+        
+        // Should automatically try 2024 (which is a leap year) when 2023 fails
+        let result = dp.to_utc_timestamp("");
+        assert!(result.is_some());
+        
+        // Verify it's actually 2024-02-29
+        let expected_2024_feb_29 = chrono::NaiveDate::from_ymd_opt(2024, 2, 29)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap()
+            .and_utc()
+            .timestamp_millis();
+        assert_eq!(result.unwrap(), expected_2024_feb_29);
+    }
+
+    #[test]
+    fn test_february_29_already_leap_year() {
+        // Test that Feb 29 in an actual leap year works normally
+        let dp = DateParts {
+            day_str: "29".to_string(),
+            month_str: "Feb".to_string(),
+            year_str: "2024".to_string(), // 2024 is a leap year
+        };
+        
+        let result = dp.to_utc_timestamp("");
+        assert!(result.is_some());
+        
+        // Should be exactly 2024-02-29
+        let expected_2024_feb_29 = chrono::NaiveDate::from_ymd_opt(2024, 2, 29)
+            .unwrap()
+            .and_hms_opt(0, 0, 0)
+            .unwrap()
+            .and_utc()
+            .timestamp_millis();
+        assert_eq!(result.unwrap(), expected_2024_feb_29);
     }
 
     #[test]
