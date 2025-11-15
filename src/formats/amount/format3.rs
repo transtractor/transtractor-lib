@@ -47,5 +47,6 @@ mod tests {
         assert_eq!(fmt.parse("$1,234.5 DR"), None);
         assert_eq!(fmt.parse("$1,234.567 DR"), None);
         assert_eq!(fmt.parse("$1,000,234.56 CR"), Some(100_0234.56));
+        assert_eq!(fmt.parse("$4.00 DR"), Some(-4.00));
     }
 }
