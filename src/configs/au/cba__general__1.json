@@ -28,6 +28,7 @@
     "transaction_formats": [
         ["date", "description", "amount", "balance"]
     ],
+    "transaction_x_tol": 40,
     
     "transaction_date_formats": ["format1"],
     "transaction_date_headers": ["Date"],
