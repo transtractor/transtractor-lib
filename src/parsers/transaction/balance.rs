@@ -19,17 +19,17 @@ impl TransactionBalanceParser {
             .iter()
             .map(|s| s.as_str())
             .collect();
-        let amount_formats: Vec<&str> = config
-            .transaction_amount_formats
+        let balance_formats: Vec<&str> = config
+            .transaction_balance_formats
             .iter()
             .map(|s| s.as_str())
             .collect();
-        let alignment = config.transaction_amount_alignment.clone();
+        let alignment = config.transaction_balance_alignment.clone();
         let x_tol = config.transaction_x_tol;
-        let invert = config.transaction_amount_invert;
+        let invert = config.transaction_balance_invert;
         Self {
             primed: false,
-            balance_parser: AmountParser::new(amount_formats.as_slice()),
+            balance_parser: AmountParser::new(balance_formats.as_slice()),
             header_primer: ParserPrimer::new(primer_terms.as_slice()),
             alignment,
             x_tol,
