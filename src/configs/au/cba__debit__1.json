@@ -37,7 +37,7 @@
     "transaction_description_alignment": "x1",
     "transaction_description_exclude": [" -$", " \\$$"],
 
-    "transaction_amount_formats": ["format1", "format2"],
+    "transaction_amount_formats": ["format1"],
     "transaction_amount_headers": ["Credit"],
     "transaction_amount_alignment": "x2",
     "transaction_amount_invert_headers": ["Debit"],
