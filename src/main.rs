@@ -53,6 +53,14 @@ fn main() {
                 }
                 return;
             }
+            // Mode 4: PDF -> Debug file
+            ("pdf", "debug") => {
+                if let Err(e) = parser.debug(input, output) {
+                    eprintln!("Failed to write debug file {output}: {e}");
+                    process::exit(1);
+                }
+                return;
+            }
             _ => {
                 // Fall through to usage
             }
