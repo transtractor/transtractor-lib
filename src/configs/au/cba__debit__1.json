@@ -1,10 +1,9 @@
 {
-    "key": "au__cba__general__1",
+    "key": "au__cba__debit__1",
     "bank_name": "Commonwealth Bank of Australia",
-    "account_type": "General Savings or Loan",
+    "account_type": "General Savings or Debit Account",
     "account_terms": ["CommBank", "Account Number"],
     "account_examples": [
-        "Complete Home Loan",
         "Streamline",
         "Smart Access",
         "GoalSaver",
