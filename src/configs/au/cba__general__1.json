@@ -1,5 +1,5 @@
 {
-    "key": "cba__general__1",
+    "key": "au__cba__general__1",
     "bank_name": "Commonwealth Bank of Australia",
     "account_type": "General Savings or Loan",
     "account_terms": ["CommBank", "Account Number"],
@@ -11,7 +11,7 @@
         "Everyday Offset"
     ],
 
-    "opening_balance_terms": ["Opening Balance"],
+    "opening_balance_terms": ["OPENING BALANCE"],
     "opening_balance_formats": ["format3", "format5"],
     "opening_balance_y1_tol": 2,
 
