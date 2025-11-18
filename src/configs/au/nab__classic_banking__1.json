@@ -1,0 +1,52 @@
+{
+    "key": "au__nab__classic_banking__1",
+    "bank_name": "National Australia Bank",
+    "account_type": "Classic Banking",
+    "account_terms": ["NAB", "Classic Banking"],
+    "account_examples": ["Classic Banking"],
+
+    "opening_balance_terms": ["Opening balance"],
+    "opening_balance_formats": ["format3"],
+    "opening_balance_y1_tol": 2,
+
+    "closing_balance_terms": ["Closing balance"],
+    "closing_balance_formats": ["format3"],
+    "closing_balance_y1_tol": 2,
+
+    "start_date_terms": ["Statement starts"],
+    "start_date_formats": ["format2"],
+    "start_date_y1_tol": 2,
+
+    "transaction_terms": ["Transactions Details"],
+    "transaction_terms_stop": [],
+    "transaction_formats": [
+        ["date", "description", "amount", "balance"],
+        ["date", "description", "amount"],
+        ["description", "amount", "balance"],
+        ["description", "amount"]
+    ],
+
+    "transaction_date_formats": ["format2"],
+    "transaction_date_headers": ["Date"],
+    "transaction_date_alignment": "x1",
+
+    "transaction_description_headers": ["Particulars"],
+    "transaction_description_alignment": "x1",
+    "transaction_description_exclude": [
+        "\\.\\.",
+        "Carried forward", 
+        "Brought forward", 
+        "Particulars",
+        "\\.$"
+        ],
+
+    "transaction_amount_formats": ["format1"],
+    "transaction_amount_headers": ["Credits"],
+    "transaction_amount_alignment": "x2",
+    "transaction_amount_invert_headers": ["Debits"],
+    "transaction_amount_invert_alignment": "x2",
+
+    "transaction_balance_formats": ["format4"],
+    "transaction_balance_headers": ["Balance"],
+    "transaction_balance_alignment": "x2"
+}
