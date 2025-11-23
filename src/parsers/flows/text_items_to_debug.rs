@@ -5,7 +5,7 @@ use crate::structs::TextItems;
 /// Read TextItems and record all parsed StatementData results into string for debugging.
 /// This provides detailed debug information about all parsing attempts and their results.
 /// The string can then be written to a file or logged as needed.
-pub fn debug(items: &mut TextItems, typer: &StatementTyper) -> Result<String, String> {
+pub fn text_items_to_debug(items: &mut TextItems, typer: &StatementTyper) -> Result<String, String> {
     // Write debug information to the output file
     let mut output = String::new();
     output.push_str("Debug output\n");
