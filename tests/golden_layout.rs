@@ -27,7 +27,8 @@ fn pdf_layout_matches_golden() {
     assert!(expected_txt.exists(), "Missing expected text: {:?}", expected_txt);
 
     // Extract layout text using library API
-    let items = transtractor::parsers::text_items_from_pdf::parse(pdf.to_str().unwrap());
+    let items = transtractor::parsers::flows::pdf_to_text_items::pdf_to_text_items(pdf.to_str().unwrap())
+        .expect("extract text items from PDF");
     let layout = items.to_layout_text();
 
     // Write to a temporary output under target/test-output to avoid polluting the repo
