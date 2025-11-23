@@ -1,6 +1,6 @@
 use crate::configs::StatementTyper;
 use crate::parsers::flows::statement_data_to_dict::ColumnData;
-use crate::parsers::flows::statement_data_to_dict::dict_from_statement_data;
+use crate::parsers::flows::statement_data_to_dict::statement_data_to_dict;
 use crate::parsers::flows::text_items_to_statement_datas::text_items_to_statement_datas;
 use crate::structs::TextItems;
 use std::collections::HashMap;
@@ -22,7 +22,7 @@ pub fn text_items_to_dict(
     for data in statement_data_results {
         if data.errors.is_empty() {
             // Convert the first error-free result to dictionary
-            return Ok(dict_from_statement_data(&data));
+            return Ok(statement_data_to_dict(&data));
         }
     }
     Err("Extracted data failed quality check indicating an issue with statement parsing configuration.".to_string())
