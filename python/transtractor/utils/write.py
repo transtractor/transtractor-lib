@@ -1,5 +1,5 @@
 import csv
-
+from datetime import datetime, timezone, timedelta
 
 def dict_to_csv(statement_data_dict: dict, output_file: str) -> None:
     """Write a dictionary representation of bank statement data to a CSV file.
@@ -10,11 +10,11 @@ def dict_to_csv(statement_data_dict: dict, output_file: str) -> None:
         writer = csv.writer(file)
         header = [
             "date",
-            "transaction_index",
             "description",
             "amount",
             "balance",
         ]
+        writer.writerow(header)
 
         # Get num rows, assert all columns have same length
         num_rows = None
@@ -27,5 +27,14 @@ def dict_to_csv(statement_data_dict: dict, output_file: str) -> None:
                     raise ValueError(f"Column '{column}' has inconsistent length.")
 
         for i in range(num_rows):
-            row = [statement_data_dict.get(col, [""] * num_rows)[i] for col in header]
+            # Convert date from milliseconds since epoch to YYYY-MM-DD format
+            date = statement_data_dict["date"][i]
+            dt = datetime.fromtimestamp(date / 1000, tz=timezone(timedelta(hours=0)))
+            date = dt.strftime("%Y-%m-%d")
+            # Leave description
+            description = statement_data_dict["description"][i]
+            # Round amount and balance to 2 decimal places
+            amount = round(float(statement_data_dict["amount"][i]), 2)
+            balance = round(float(statement_data_dict["balance"][i]), 2)
+            row = [date, description, amount, balance]
             writer.writerow(row)
