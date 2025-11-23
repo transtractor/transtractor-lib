@@ -78,7 +78,7 @@ pub fn fix_y_order(text_items: &[TextItem]) -> Vec<TextItem> {
         }
 
         // Create new line
-        if item.y1 < curr_y_pos {
+        if dist >= line_height {
             let mut new_line = Line::new(item.y1);
             new_line.append(item.clone());
             lines.push(new_line);
