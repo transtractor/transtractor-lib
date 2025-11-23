@@ -59,6 +59,10 @@ impl StatementData {
     pub fn to_string(&self) -> String {
         let mut result = String::new();
         result.push_str("Statement Data:\n");
+        match &self.key {
+            Some(k) => result.push_str(&format!("  Key: {}\n", k)),
+            None => result.push_str("  Key: Not set\n"),
+        }
         if let Some(ms) = self.start_date {
             if let Some(dt) = DateTime::<Utc>::from_timestamp_millis(ms) {
                 result.push_str(&format!("  Start Date: {}\n", dt.format("%d %b %Y")));
