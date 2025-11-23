@@ -41,7 +41,7 @@ impl ColumnData {
 /// 
 /// # Returns
 /// A HashMap where keys are column names and values are ColumnData enums containing the typed data
-pub fn dict_from_statement_data(sd: &StatementData) -> HashMap<String, ColumnData> {
+pub fn statement_data_to_dict(sd: &StatementData) -> HashMap<String, ColumnData> {
     let mut result: HashMap<String, ColumnData> = HashMap::new();
     
     // Initialize vectors for each column with proper types
@@ -132,9 +132,9 @@ mod tests {
     }
 
     #[test]
-    fn test_dict_from_statement_data_basic() {
+    fn test_statement_data_to_dict_basic() {
         let sd = create_test_statement_data();
-        let dict = dict_from_statement_data(&sd);
+        let dict = statement_data_to_dict(&sd);
         
         // Check that all expected columns are present
         assert!(dict.contains_key("date"));
@@ -153,9 +153,9 @@ mod tests {
     }
 
     #[test]
-    fn test_dict_from_statement_data_values() {
+    fn test_statement_data_to_dict_values() {
         let sd = create_test_statement_data();
-        let dict = dict_from_statement_data(&sd);
+        let dict = statement_data_to_dict(&sd);
         
         // Test dates
         if let ColumnData::DateColumn(dates) = &dict["date"] {
@@ -209,7 +209,7 @@ mod tests {
     }
 
     #[test]
-    fn test_dict_from_statement_data_empty() {
+    fn test_statement_data_to_dict_empty() {
         let sd = StatementData {
             proto_transactions: vec![],
             opening_balance: None,
@@ -220,7 +220,7 @@ mod tests {
             errors: Vec::new(),
         };
         
-        let dict = dict_from_statement_data(&sd);
+        let dict = statement_data_to_dict(&sd);
         
         // Check that all columns are present but empty
         assert!(dict.contains_key("date"));
@@ -237,7 +237,7 @@ mod tests {
     }
 
     #[test]
-    fn test_dict_from_statement_data_single_transaction() {
+    fn test_statement_data_to_dict_single_transaction() {
         let sd = StatementData {
             proto_transactions: vec![
                 ProtoTransaction {
@@ -256,7 +256,7 @@ mod tests {
             errors: Vec::new(),
         };
         
-        let dict = dict_from_statement_data(&sd);
+        let dict = statement_data_to_dict(&sd);
         
         // Check single values with proper type matching
         if let ColumnData::DateColumn(dates) = &dict["date"] {
@@ -292,7 +292,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected = "Transaction at index 0 is missing date")]
-    fn test_dict_from_statement_data_panics_on_missing_date() {
+    fn test_statement_data_to_dict_panics_on_missing_date() {
         let sd = StatementData {
             proto_transactions: vec![
                 ProtoTransaction {
@@ -311,12 +311,12 @@ mod tests {
             errors: Vec::new(),
         };
         
-        dict_from_statement_data(&sd);
+        statement_data_to_dict(&sd);
     }
 
     #[test]
     #[should_panic(expected = "Transaction at index 1 is missing amount")]
-    fn test_dict_from_statement_data_panics_on_missing_amount() {
+    fn test_statement_data_to_dict_panics_on_missing_amount() {
         let sd = StatementData {
             proto_transactions: vec![
                 ProtoTransaction {
@@ -342,12 +342,12 @@ mod tests {
             errors: Vec::new(),
         };
         
-        dict_from_statement_data(&sd);
+        statement_data_to_dict(&sd);
     }
 
     #[test]
     #[should_panic(expected = "Transaction at index 2 is missing balance")]
-    fn test_dict_from_statement_data_panics_on_missing_balance() {
+    fn test_statement_data_to_dict_panics_on_missing_balance() {
         let sd = StatementData {
             proto_transactions: vec![
                 ProtoTransaction {
@@ -380,6 +380,6 @@ mod tests {
             errors: Vec::new(),
         };
         
-        dict_from_statement_data(&sd);
+        statement_data_to_dict(&sd);
     }
 }
