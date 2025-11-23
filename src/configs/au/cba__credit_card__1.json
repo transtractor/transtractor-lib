@@ -18,7 +18,7 @@
 
     "start_date_terms": ["Statement Period"],
     "start_date_formats": ["format2"],
-    "start_date_y1_tol": 2,
+    "start_date_y1_tol": 5,
 
     "transaction_terms": ["Transactions Date Transaction Details"],
     "transaction_terms_stop": ["Please check your"],
