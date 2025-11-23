@@ -3,6 +3,7 @@ use crate::configs::StatementTyper;
 use crate::fixers::fix_statement_data;
 use crate::parsers;
 use crate::parsers::dict_from_statement_data::{dict_from_statement_data, ColumnData};
+use crate::parsers::flows::pdf_to_text_items::pdf_to_text_items;
 use crate::structs::text_items::LayoutText;
 use crate::structs::{StatementData, TextItems};
 use std::collections::HashMap;
@@ -37,7 +38,7 @@ impl Parser {
         let input_file_lower = input_file.to_lowercase();
         let mut items = if input_file_lower.ends_with(".pdf") {
             // Parse PDF file
-            parsers::text_items_from_pdf::parse(input_file)
+                pdf_to_text_items(input_file).map_err(|e| format!("PDF parse failed: {e}"))?
         } else if input_file_lower.ends_with(".txt") {
             // Read TXT file and parse as layout text
             let layout_content = std::fs::read_to_string(input_file)
@@ -84,7 +85,7 @@ impl Parser {
         let input_file_lower = input_file.to_lowercase();
         let mut items = if input_file_lower.ends_with(".pdf") {
             // Parse PDF file
-            parsers::text_items_from_pdf::parse(input_file)
+                pdf_to_text_items(input_file).map_err(|e| format!("PDF parse failed: {e}"))?
         } else if input_file_lower.ends_with(".txt") {
             // Read TXT file and parse as layout text
             let layout_content = std::fs::read_to_string(input_file)
@@ -124,7 +125,7 @@ impl Parser {
         let input_file_lower = input_file.to_lowercase();
         let mut items = if input_file_lower.ends_with(".pdf") {
             // Parse PDF file
-            parsers::text_items_from_pdf::parse(input_file)
+                pdf_to_text_items(input_file).map_err(|e| format!("PDF parse failed: {e}"))?
         } else if input_file_lower.ends_with(".txt") {
             // Read TXT file and parse as layout text
             let layout_content = std::fs::read_to_string(input_file)
@@ -192,7 +193,7 @@ impl Parser {
         }
 
         // Parse PDF file
-        let mut items = parsers::text_items_from_pdf::parse(input_file);
+            let mut items = pdf_to_text_items(input_file).map_err(|e| format!("PDF parse failed: {e}"))?;
 
         // Apply Y-coordinate disorder fix if requested
         if fix_y_disorder {
@@ -267,7 +268,8 @@ impl Parser {
         let input_file_lower = file_path.to_lowercase();
         let mut items = if input_file_lower.ends_with(".pdf") {
             // Parse PDF file
-            parsers::text_items_from_pdf::parse(file_path)
+            parsers::flows::pdf_to_text_items::pdf_to_text_items(file_path)
+                .map_err(|e| format!("PDF parse failed: {e}"))?
         } else if input_file_lower.ends_with(".txt") {
             // Read TXT file and parse as layout text
             match fs::read_to_string(file_path) {
