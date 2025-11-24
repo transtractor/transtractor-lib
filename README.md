@@ -1,8 +1,8 @@
-# The Transtractor
+# The Transtractor (pre-release)
 
 ## Universal PDF bank statement parsing
 
-The Trnasaction Extractor, or 'Transtractor', aspires to be a universal 
+The Transaction Extractor, or 'Transtractor', aspires to be a universal 
 library for extracting transaction data from PDF bank statements. Key features:
 
 * Written in Rust (fast)
@@ -31,9 +31,6 @@ Transtractor is currently under active development and has not yet been released
    maturin develop --release
    ```
 
-The Transtractor package will be installed in your current Python environment and ready to use.
-
-
 ### Basic usage (Python)
 
 1. **Import and initialise the parser**
@@ -56,69 +53,30 @@ The Transtractor package will be installed in your current Python environment an
    df = pd.DataFrame(data)
    ```
 
-An exception will be raised if your statement format is not supported or
-the running balances of the extracted transactions disagree with the opening 
-and closing balances in the statement.
+## Supported statements
 
-## Unsupported statements
+Only a limited number of PDF statements are supported. This will hopefully expand with community support.
 
-You may develop your own configuration settings if the Transtractor cannot 
-parse your statement:
+Currently supported statements, with their config files (src/configs folder), include:
 
-### Loading a custom configuration file
+### Australia
 
-  ```python
-  parser = Parser()
-  parser.import_conf('my_config.json')
-  parser.to_csv('statement.pdf', 'statement.csv')
-  ```
+* **Commonwealth Bank**
+    * Credit Card (*au__cba__credit_card__1*)
+    * Debit/Savings (*au__cba__debit__1*)
+    * Loan (*au__cba__loan__1*)
 
-### Preparing a configuration file
+* **National Australia Bank**
+    * Classic Banking (*au__nab__classic_banking__1*)
 
+## Expanding support
 
-  ```json
-{
-    "key": "au__cba__credit_card__1",
-    "bank_name": "Commonwealth Bank of Australia",
-    "account_type": "Credit Card",
-    "account_terms": ["CommBank", "Available credit"],
-    "account_examples": ["Low Rate Mastercard", "Low Fee Mastercard"],
-    "apply_y_patch": true,
+Stay tuned for proper guidance. But if you are really keen:
 
-    "opening_balance_terms": ["Opening balance"],
-    "opening_balance_formats": ["format2"],
-    "opening_balance_y1_tol": 2,
-    "opening_balance_invert": true,
+1. Develop a config file for you bank statement and copy it into the src/configs folder. 
+2. Add new date or amount formats as required to the src/formats/date or src/formats/amount modules.
+3. Rebuild the package.
 
-    "closing_balance_terms": ["Closing balance"],
-    "closing_balance_formats": ["format2"],
-    "closing_balance_y1_tol": 2,
-    "closing_balance_invert": true,
+## Contributing to the project
 
-    "start_date_terms": ["Statement Period"],
-    "start_date_formats": ["format2"],
-    "start_date_y1_tol": 2,
-
-    "transaction_terms": ["Transactions Date Transaction Details"],
-    "transaction_terms_stop": ["Please check your"],
-    "transaction_formats": [
-        ["date", "description", "amount"],
-        ["description", "amount"]
-    ],
-
-    "transaction_date_formats": ["format1"],
-    "transaction_date_headers": ["Date"],
-    "transaction_date_alignment": "x1",
-
-    "transaction_description_headers": ["Transaction Details"],
-    "transaction_description_alignment": "x1",
-    "transaction_description_exclude": [
-        "NetBank Visit.*Transaction Details"
-    ],
-
-    "transaction_amount_formats": ["format1"],
-    "transaction_amount_headers": ["Amount (A$)"],
-    "transaction_amount_alignment": "x2",
-    "transaction_amount_invert": true
-}
-  ```
+Stay tuned.
