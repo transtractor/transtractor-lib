@@ -55,9 +55,9 @@ Transtractor is currently under active development and has not yet been released
 
 ## Supported statements
 
-Only a limited number of PDF statements are supported. This will hopefully expand with community support.
+Only a limited number of PDF statements are supported. This should expand with community contributions.
 
-Currently supported statements, with their config files (src/configs folder), include:
+Currently supported statements, and their config files (src/configs), include:
 
 ### Australia
 
@@ -73,7 +73,7 @@ Currently supported statements, with their config files (src/configs folder), in
 
 Stay tuned for proper guidance. But if you are really keen:
 
-1. Develop a config file for you bank statement and copy it into the src/configs folder. 
+1. Develop a config file for your bank statement and copy it into the src/configs folder. 
 2. Add new date or amount formats as required to the src/formats/date or src/formats/amount modules.
 3. Rebuild the package.
 
