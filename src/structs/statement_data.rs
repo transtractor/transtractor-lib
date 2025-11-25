@@ -4,6 +4,7 @@ use chrono::{DateTime, Utc, TimeZone, Datelike};
 #[derive(Clone, Debug)]
 pub struct StatementData {
     pub key: Option<String>,
+    pub account_number: Option<String>,
     pub start_date: Option<i64>,
     pub start_date_year: Option<i32>,
     pub opening_balance: Option<f64>,
@@ -16,6 +17,7 @@ impl StatementData {
     pub fn new() -> Self {
         Self {
             key: None,
+            account_number: None,
             start_date: None,
             start_date_year: None,
             opening_balance: None,
@@ -25,6 +27,9 @@ impl StatementData {
         }
     }
 
+    pub fn account_number(&self) -> Option<&String> {
+        self.account_number.as_ref()
+    }
     pub fn opening_balance(&self) -> Option<f64> { self.opening_balance }
     pub fn closing_balance(&self) -> Option<f64> { self.closing_balance }
     pub fn start_date(&self) -> Option<i64> { self.start_date }
@@ -33,6 +38,10 @@ impl StatementData {
     // Setters for the fields
     pub fn set_key(&mut self, key: String) {
         self.key = Some(key);
+    }
+
+    pub fn set_account_number(&mut self, account_number: String) {
+        self.account_number = Some(account_number);
     }
 
     pub fn set_start_date(&mut self, date: i64) {
@@ -62,6 +71,10 @@ impl StatementData {
         match &self.key {
             Some(k) => result.push_str(&format!("  Key: {}\n", k)),
             None => result.push_str("  Key: Not set\n"),
+        }
+        match &self.account_number {
+            Some(an) => result.push_str(&format!("  Account Number: {}\n", an)),
+            None => result.push_str("  Account Number: Not set\n"),
         }
         if let Some(ms) = self.start_date {
             if let Some(dt) = DateTime::<Utc>::from_timestamp_millis(ms) {

@@ -15,6 +15,11 @@ use crate::structs::StatementData;
 pub fn check_fields(sd: &mut StatementData) {
     let mut missing_fields = Vec::new();
     
+    // Check for account number
+    if sd.account_number.is_none() {
+        missing_fields.push("account number");
+    }
+
     // Check for opening balance
     if sd.opening_balance.is_none() {
         missing_fields.push("opening balance");
@@ -42,7 +47,7 @@ mod tests {
         
         check_fields(&mut sd);
         assert_eq!(sd.errors.len(), 1);
-        assert!(sd.errors[0].contains("Missing required fields: opening balance, closing balance"));
+        assert!(sd.errors[0].contains("Missing required fields: account number, opening balance, closing balance"));
     }
 
     #[test]
@@ -52,7 +57,7 @@ mod tests {
         
         check_fields(&mut sd);
         assert_eq!(sd.errors.len(), 1);
-        assert!(sd.errors[0].contains("Missing required fields: opening balance"));
+        assert!(sd.errors[0].contains("Missing required fields: account number, opening balance"));
     }
 
     #[test]
@@ -62,12 +67,13 @@ mod tests {
         
         check_fields(&mut sd);
         assert_eq!(sd.errors.len(), 1);
-        assert!(sd.errors[0].contains("Missing required fields: closing balance"));
+        assert!(sd.errors[0].contains("Missing required fields: account number, closing balance"));
     }
 
     #[test]
     fn test_check_fields_all_present() {
         let mut sd = StatementData::new();
+        sd.set_account_number("1234 5678 9012".to_string());
         sd.set_opening_balance(1000.0);
         sd.set_closing_balance(900.0);
         
@@ -78,6 +84,7 @@ mod tests {
     #[test]
     fn test_check_fields_with_zero_balances() {
         let mut sd = StatementData::new();
+        sd.set_account_number("1234 5678 9012".to_string());
         sd.set_opening_balance(0.0);
         sd.set_closing_balance(0.0);
         
@@ -88,6 +95,7 @@ mod tests {
     #[test]
     fn test_check_fields_with_negative_balances() {
         let mut sd = StatementData::new();
+        sd.set_account_number("1234 5678 9012".to_string());
         sd.set_opening_balance(-500.0);
         sd.set_closing_balance(-200.0);
         
@@ -105,7 +113,7 @@ mod tests {
         
         // Should have 2 error entries (one from each call)
         assert_eq!(sd.errors.len(), 2);
-        assert!(sd.errors[0].contains("Missing required fields: opening balance, closing balance"));
-        assert!(sd.errors[1].contains("Missing required fields: opening balance, closing balance"));
+        assert!(sd.errors[0].contains("Missing required fields: account number, opening balance, closing balance"));
+        assert!(sd.errors[1].contains("Missing required fields: account number, opening balance, closing balance"));
     }
 }

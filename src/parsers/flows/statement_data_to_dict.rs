@@ -122,6 +122,7 @@ mod tests {
                     balance: Some(874.75), // Changed from None to calculated balance
                 },
             ],
+            account_number: Some("123456789".to_string()),
             opening_balance: Some(1000.0),
             closing_balance: Some(874.75), // Updated to match final balance
             start_date: Some(1609459200000),
@@ -212,6 +213,7 @@ mod tests {
     fn test_statement_data_to_dict_empty() {
         let sd = StatementData {
             proto_transactions: vec![],
+            account_number: None,
             opening_balance: None,
             closing_balance: None,
             start_date: None,
@@ -248,6 +250,7 @@ mod tests {
                     balance: Some(123.45),
                 },
             ],
+            account_number: None,
             opening_balance: None,
             closing_balance: None,
             start_date: None,
@@ -303,6 +306,7 @@ mod tests {
                     balance: Some(100.0),
                 },
             ],
+            account_number: None,
             opening_balance: None,
             closing_balance: None,
             start_date: None,
@@ -334,6 +338,7 @@ mod tests {
                     balance: Some(50.0),
                 },
             ],
+            account_number: None,
             opening_balance: None,
             closing_balance: None,
             start_date: None,
@@ -372,6 +377,7 @@ mod tests {
                     balance: None, // Missing balance should cause panic
                 },
             ],
+            account_number: None,
             opening_balance: None,
             closing_balance: None,
             start_date: None,

@@ -1,14 +1,19 @@
 use crate::parsers::statement::{
-    ClosingBalanceParser, OpeningBalanceParser, StartDateParser, TransactionParser,
+    AccountNumberParser, ClosingBalanceParser, OpeningBalanceParser, 
+    StartDateParser, TransactionParser,
 };
 use crate::structs::StatementConfig;
 use crate::structs::StatementData;
 use crate::structs::TextItems;
 
-pub fn text_items_to_statement_data(config: &StatementConfig, text_items: &TextItems) -> StatementData {
+pub fn text_items_to_statement_data(
+    config: &StatementConfig,
+    text_items: &TextItems,
+) -> StatementData {
     let mut statement_data = StatementData::new();
 
     // Initialize parsers
+    let mut account_number_parser = AccountNumberParser::new(config);
     let mut opening_balance_parser = OpeningBalanceParser::new(config);
     let mut closing_balance_parser = ClosingBalanceParser::new(config);
     let mut start_date_parser = StartDateParser::new(config);
@@ -17,6 +22,7 @@ pub fn text_items_to_statement_data(config: &StatementConfig, text_items: &TextI
     // Other settings based on parsers
     // Compute max lookahead across all parsers generically to keep this scalable
     let lookaheads = [
+        account_number_parser.get_max_lookahead(),
         opening_balance_parser.get_max_lookahead(),
         closing_balance_parser.get_max_lookahead(),
         start_date_parser.get_max_lookahead(),
@@ -34,7 +40,10 @@ pub fn text_items_to_statement_data(config: &StatementConfig, text_items: &TextI
         let buffer_size = max_lookahead.min(len - i);
         let buffer = text_items.get_text_item_buffer(i, buffer_size);
         let mut consumed = 0usize;
-        // Try parsers in a stable order: start date -> opening balance -> closing balance
+        // Try parsers in a stable order: account number -> start date -> opening balance -> closing balance
+        if consumed == 0 {
+            consumed = account_number_parser.parse_items(&buffer, &mut statement_data);
+        }
         if consumed == 0 {
             consumed = start_date_parser.parse_items(&buffer, &mut statement_data);
         }

@@ -7,6 +7,13 @@
         "Complete Home Loan"
     ],
 
+    "account_number_terms": ["Account number"],
+    "account_number_patterns": ["\\b\\d+\\b"],
+    "account_number_same_x1": false,
+    "account_number_x1_tol": 1,
+    "account_number_same_y1": true,
+    "account_number_y1_tol": 1,
+
     "opening_balance_terms": ["Opening balance"],
     "opening_balance_formats": ["format3", "format5"],
     "opening_balance_y1_tol": 2,

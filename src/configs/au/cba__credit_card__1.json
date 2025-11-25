@@ -6,6 +6,13 @@
     "account_examples": ["Low Rate Mastercard", "Low Fee Mastercard"],
     "apply_y_patch": true,
 
+    "account_number_terms": ["Account"],
+    "account_number_patterns": ["\\b\\d{4}\\s\\d{4}\\s\\d{4}\\s\\d{4}\\b"],
+    "account_number_same_x1": false,
+    "account_number_x1_tol": 1,
+    "account_number_same_y1": true,
+    "account_number_y1_tol": 1,
+
     "opening_balance_terms": ["Opening balance"],
     "opening_balance_formats": ["format2"],
     "opening_balance_y1_tol": 2,

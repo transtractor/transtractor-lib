@@ -14,6 +14,13 @@ struct StatementConfigPartial {
     account_examples: Option<Vec<String>>,
     apply_y_patch: Option<bool>,
 
+    account_number_terms: Option<Vec<String>>,
+    account_number_patterns: Option<Vec<String>>,
+    account_number_same_x1: Option<bool>,
+    account_number_x1_tol: Option<i32>,
+    account_number_same_y1: Option<bool>,
+    account_number_y1_tol: Option<i32>,
+
     opening_balance_terms: Option<Vec<String>>,
     opening_balance_formats: Option<Vec<String>>,
     opening_balance_same_x1: Option<bool>,
@@ -83,6 +90,20 @@ pub struct StatementConfig {
     pub account_examples: Vec<String>,
     /// Force re-ordering of items by Y coordinate to fix minor PDF extraction issues.
     pub apply_y_patch: bool,
+
+    // ACCOUNT NUMBER READ PARAMS
+    /// Array of terms to identify the account number line (e.g., "Account Number", "Acct No")
+    pub account_number_terms: Vec<String>,
+    /// Array of regex patterns to extract the account number
+    pub account_number_patterns: Vec<Regex>,
+    /// Require account number to be on the same X1 coordinate as the term
+    pub account_number_same_x1: bool,
+    /// Tolerance for X1 coordinate matching of account number
+    pub account_number_x1_tol: i32,
+    /// Require account number to be on the same Y1 coordinate as the term
+    pub account_number_same_y1: bool,
+    /// Tolerance for Y1 coordinate matching of account number
+    pub account_number_y1_tol: i32,
 
     // OPENING BALANCE READ PARAMS
     /// Array of terms to identify the opening balance line (e.g., "Opening Balance", "Previous Balance")
@@ -201,6 +222,13 @@ impl Default for StatementConfig {
             account_examples: vec![],
             apply_y_patch: false,
 
+            account_number_terms: vec![],
+            account_number_patterns: vec![],
+            account_number_same_x1: false,
+            account_number_x1_tol: 1,
+            account_number_same_y1: true,
+            account_number_y1_tol: 1,
+
             opening_balance_terms: vec![],
             opening_balance_formats: vec![],
             opening_balance_same_x1: false,
@@ -276,6 +304,15 @@ impl StatementConfig {
         overlay!(account_terms);
         overlay!(account_examples);
         overlay!(apply_y_patch);
+
+        overlay!(account_number_terms);
+        if let Some(patterns) = partial.account_number_patterns {
+            cfg.account_number_patterns = compile_regex_vec(patterns)?;
+        }
+        overlay!(account_number_same_x1);
+        overlay!(account_number_x1_tol);
+        overlay!(account_number_same_y1);
+        overlay!(account_number_y1_tol);
 
         overlay!(opening_balance_terms);
         overlay!(opening_balance_formats);
@@ -359,6 +396,8 @@ impl StatementConfig {
             if val < 0 { return Err(format!("{} must be >= 0", name)); }
             Ok(())
         }
+        non_negative(self.account_number_x1_tol, "account_number_x1_tol")?;
+        non_negative(self.account_number_y1_tol, "account_number_y1_tol")?;
         non_negative(self.opening_balance_x1_tol, "opening_balance_x1_tol")?;
         non_negative(self.opening_balance_y1_tol, "opening_balance_y1_tol")?;
         non_negative(self.closing_balance_x1_tol, "closing_balance_x1_tol")?;
@@ -374,6 +413,11 @@ impl StatementConfig {
         for f in &self.transaction_date_formats { if f.trim().is_empty() { return Err("Empty transaction_date_formats entry".into()); } }
         for f in &self.transaction_amount_formats { if f.trim().is_empty() { return Err("Empty transaction_amount_formats entry".into()); } }
         for f in &self.transaction_balance_formats { if f.trim().is_empty() { return Err("Empty transaction_balance_formats entry".into()); } }
+
+        // Regex patterns sanity (non-empty) for account number
+        if self.account_number_patterns.is_empty() {
+            return Err("account_number_patterns cannot be empty".into());
+        }
 
         // Transaction formats: each non-empty vector with allowed tokens (light validation)
         let allowed_tokens = ["date", "description", "amount", "balance"]; // extend as needed
@@ -422,6 +466,7 @@ mod tests {
             "key": "au__test__acct",
             "bank_name": "Test Bank",
             "account_type": "Test Account",
+            "account_number_patterns": ["\\b\\d+\\b"],
             "opening_balance_terms": ["Opening balance"],
             "opening_balance_formats": ["format2"],
             "transaction_amount_formats": ["format1"]
@@ -439,7 +484,8 @@ mod tests {
         let json = r#"{
             "key": "k",
             "bank_name": "B",
-            "account_type": "T"
+            "account_type": "T",
+            "account_number_patterns": ["\\b\\d+\\b"]
         }"#;
         let path = write_temp("cfg_defaults", json);
         let cfg = StatementConfig::from_json_file(&path).expect("load config");
