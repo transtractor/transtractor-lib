@@ -18,7 +18,7 @@ impl TransactionDescriptionParser {
             .map(|s| s.as_str())
             .collect();
         let alignment = config.transaction_description_alignment.clone();
-        let x_tol = config.transaction_x_tol;
+        let x_tol = config.transaction_alignment_tol;
         Self {
             primed: false,
             header_primer: ParserPrimer::new(primer_terms.as_slice()),

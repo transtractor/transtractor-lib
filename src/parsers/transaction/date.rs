@@ -25,7 +25,7 @@ impl TransactionDateParser {
             .map(|s| s.as_str())
             .collect();
         let alignment = config.transaction_date_alignment.clone();
-        let x_tol = config.transaction_x_tol;
+        let x_tol = config.transaction_alignment_tol;
         Self {
             primed: false,
             date_parser: DateParser::new(date_formats.as_slice()),

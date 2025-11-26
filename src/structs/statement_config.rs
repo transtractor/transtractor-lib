@@ -39,9 +39,9 @@ struct StatementConfigPartial {
     transaction_terms: Option<Vec<String>>,
     transaction_terms_stop: Option<Vec<String>>,
     transaction_formats: Option<Vec<Vec<String>>>,
-    transaction_new_line_y1_tol: Option<i32>,
+    transaction_new_line_tol: Option<i32>,
     transaction_start_date_required: Option<bool>,
-    transaction_x_tol: Option<i32>,
+    transaction_alignment_tol: Option<i32>,
 
     transaction_date_formats: Option<Vec<String>>,
     transaction_date_headers: Option<Vec<String>>,
@@ -139,12 +139,12 @@ pub struct StatementConfig {
     /// on the first transaction of each day.
     pub transaction_formats: Vec<Vec<String>>,
     /// Y-coordinate tolerance to identify a new line in the transaction list
-    pub transaction_new_line_y1_tol: i32,
+    pub transaction_new_line_tol: i32,
     /// Parsing transaction requires the start date value to have been read
     /// so that the year can be inferred for each transaction date.
     pub transaction_start_date_required: bool,
     /// Tolerance for X alignment mismatch between value and header
-    pub transaction_x_tol: i32,
+    pub transaction_alignment_tol: i32,
 
     // TRANSACTION DATE READ PARAMS
     /// Array of accepted formats to parse the transaction date
@@ -223,9 +223,9 @@ impl Default for StatementConfig {
             transaction_terms: vec![],
             transaction_terms_stop: vec![],
             transaction_formats: vec![],
-            transaction_new_line_y1_tol: 2,
+            transaction_new_line_tol: 2,
             transaction_start_date_required: false,
-            transaction_x_tol: 20,
+            transaction_alignment_tol: 20,
 
             transaction_date_formats: vec![],
             transaction_date_headers: vec![],
@@ -300,9 +300,9 @@ impl StatementConfig {
         overlay!(transaction_terms);
         overlay!(transaction_terms_stop);
         overlay!(transaction_formats);
-        overlay!(transaction_new_line_y1_tol);
+        overlay!(transaction_new_line_tol);
         overlay!(transaction_start_date_required);
-        overlay!(transaction_x_tol);
+        overlay!(transaction_alignment_tol);
 
         overlay!(transaction_date_formats);
         overlay!(transaction_date_headers);
@@ -373,8 +373,8 @@ impl StatementConfig {
         non_negative(self.opening_balance_alignment_tol, "opening_balance_alignment_tol")?;
         non_negative(self.closing_balance_alignment_tol, "closing_balance_alignment_tol")?;
         non_negative(self.start_date_alignment_tol, "start_date_alignment_tol")?;
-        non_negative(self.transaction_x_tol, "`transaction_x_tol`")?;
-        non_negative(self.transaction_new_line_y1_tol, "transaction_new_line_y1_tol")?;
+        non_negative(self.transaction_alignment_tol, "`transaction_alignment_tol`")?;
+        non_negative(self.transaction_new_line_tol, "transaction_new_line_tol")?;
 
         // Formats sanity (simple: strings non-empty)
         for f in &self.opening_balance_formats { if f.trim().is_empty() { return Err("Empty opening_balance_formats entry".into()); } }

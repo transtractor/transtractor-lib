@@ -25,7 +25,7 @@ impl TransactionBalanceParser {
             .map(|s| s.as_str())
             .collect();
         let alignment = config.transaction_balance_alignment.clone();
-        let x_tol = config.transaction_x_tol;
+        let x_tol = config.transaction_alignment_tol;
         let invert = config.transaction_balance_invert;
         Self {
             primed: false,

@@ -36,7 +36,7 @@ impl TransactionAmountParser {
             .collect();
         let alignment = config.transaction_amount_alignment.clone();
         let invert_alignment = config.transaction_amount_invert_alignment.clone();
-        let x_tol = config.transaction_x_tol;
+        let x_tol = config.transaction_alignment_tol;
         Self {
             primed: false,
             amount_parser: AmountParser::new(amount_formats.as_slice()),
