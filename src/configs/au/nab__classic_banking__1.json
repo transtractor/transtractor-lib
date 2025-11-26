@@ -7,22 +7,23 @@
 
     "account_number_terms": ["Account number"],
     "account_number_patterns": ["\\b\\d+-\\d+-\\d+\\b"],
-    "account_number_same_x1": false,
-    "account_number_x1_tol": 1,
-    "account_number_same_y1": true,
-    "account_number_y1_tol": 1,
+    "account_number_alignment": "y1",
+    "account_number_alignment_tol": 5,
 
     "opening_balance_terms": ["Opening balance"],
     "opening_balance_formats": ["format3"],
-    "opening_balance_y1_tol": 2,
+    "opening_balance_alignment": "y1",
+    "opening_balance_alignment_tol": 5,
 
     "closing_balance_terms": ["Closing balance"],
     "closing_balance_formats": ["format3"],
-    "closing_balance_y1_tol": 2,
+    "closing_balance_alignment": "y1",
+    "closing_balance_alignment_tol": 5,
 
     "start_date_terms": ["Statement starts"],
     "start_date_formats": ["format2"],
-    "start_date_y1_tol": 2,
+    "start_date_alignment": "y1",
+    "start_date_alignment_tol": 5,
 
     "transaction_terms": ["Transaction Details"],
     "transaction_terms_stop": [],

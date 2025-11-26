@@ -16,33 +16,25 @@ struct StatementConfigPartial {
 
     account_number_terms: Option<Vec<String>>,
     account_number_patterns: Option<Vec<String>>,
-    account_number_same_x1: Option<bool>,
-    account_number_x1_tol: Option<i32>,
-    account_number_same_y1: Option<bool>,
-    account_number_y1_tol: Option<i32>,
+    account_number_alignment: Option<String>,
+    account_number_alignment_tol: Option<i32>,
 
     opening_balance_terms: Option<Vec<String>>,
     opening_balance_formats: Option<Vec<String>>,
-    opening_balance_same_x1: Option<bool>,
-    opening_balance_x1_tol: Option<i32>,
-    opening_balance_same_y1: Option<bool>,
-    opening_balance_y1_tol: Option<i32>,
+    opening_balance_alignment: Option<String>,
+    opening_balance_alignment_tol: Option<i32>,
     opening_balance_invert: Option<bool>,
 
     closing_balance_terms: Option<Vec<String>>,
     closing_balance_formats: Option<Vec<String>>,
-    closing_balance_same_x1: Option<bool>,
-    closing_balance_x1_tol: Option<i32>,
-    closing_balance_same_y1: Option<bool>,
-    closing_balance_y1_tol: Option<i32>,
+    closing_balance_alignment: Option<String>,
+    closing_balance_alignment_tol: Option<i32>,
     closing_balance_invert: Option<bool>,
 
     start_date_terms: Option<Vec<String>>,
     start_date_formats: Option<Vec<String>>,
-    start_date_same_x1: Option<bool>,
-    start_date_x1_tol: Option<i32>,
-    start_date_same_y1: Option<bool>,
-    start_date_y1_tol: Option<i32>,
+    start_date_alignment: Option<String>,
+    start_date_alignment_tol: Option<i32>,
 
     transaction_terms: Option<Vec<String>>,
     transaction_terms_stop: Option<Vec<String>>,
@@ -96,28 +88,20 @@ pub struct StatementConfig {
     pub account_number_terms: Vec<String>,
     /// Array of regex patterns to extract the account number
     pub account_number_patterns: Vec<Regex>,
-    /// Require account number to be on the same X1 coordinate as the term
-    pub account_number_same_x1: bool,
-    /// Tolerance for X1 coordinate matching of account number
-    pub account_number_x1_tol: i32,
-    /// Require account number to be on the same Y1 coordinate as the term
-    pub account_number_same_y1: bool,
-    /// Tolerance for Y1 coordinate matching of account number
-    pub account_number_y1_tol: i32,
+    /// Alignment of the account number relative to the term ("x1", "x2", "y1", "y2", "")
+    pub account_number_alignment: String,
+    /// Tolerance for alignment matching of account number
+    pub account_number_alignment_tol: i32,
 
     // OPENING BALANCE READ PARAMS
     /// Array of terms to identify the opening balance line (e.g., "Opening Balance", "Previous Balance")
     pub opening_balance_terms: Vec<String>,
     /// Array of accepted formats to parse the opening balance amount
     pub opening_balance_formats: Vec<String>,
-    /// Require opening balance to be on the same X1 coordinate as the term
-    pub opening_balance_same_x1: bool,
-    /// Tolerance for X1 coordinate matching of opening balance
-    pub opening_balance_x1_tol: i32,
-    /// Require opening balance to be on the same Y1 coordinate as the term
-    pub opening_balance_same_y1: bool,
-    /// Tolerance for Y1 coordinate matching of opening balance
-    pub opening_balance_y1_tol: i32,
+    /// Alignment of the opening balance relative to the term ("x1", "x2", "y1", "y2", "")
+    pub opening_balance_alignment: String,
+    /// Tolerance for alignment matching of opening balance
+    pub opening_balance_alignment_tol: i32,
     /// Invert the sign of the opening balance amount
     pub opening_balance_invert: bool,
 
@@ -126,14 +110,10 @@ pub struct StatementConfig {
     pub closing_balance_terms: Vec<String>,
     /// Array of accepted formats to parse the closing balance amount
     pub closing_balance_formats: Vec<String>,
-    /// Require closing balance to be on the same X1 coordinate as the term
-    pub closing_balance_same_x1: bool,
-    /// Tolerance for X1 coordinate matching of closing balance
-    pub closing_balance_x1_tol: i32,
-    /// Require closing balance to be on the same Y1 coordinate as the term
-    pub closing_balance_same_y1: bool,
-    /// Tolerance for Y1 coordinate matching of closing balance
-    pub closing_balance_y1_tol: i32,
+    /// Alignment of the closing balance relative to the term ("x1", "x2", "y1", "y2", "")
+    pub closing_balance_alignment: String,
+    /// Tolerance for alignment matching of closing balance
+    pub closing_balance_alignment_tol: i32,
     /// Invert the sign of the closing balance amount
     pub closing_balance_invert: bool,
 
@@ -142,14 +122,10 @@ pub struct StatementConfig {
     pub start_date_terms: Vec<String>,
     /// Array of accepted formats to parse the statement start date
     pub start_date_formats: Vec<String>,
-    /// Require start date to be on the same X1 coordinate as the term
-    pub start_date_same_x1: bool,
-    /// Tolerance for X1 coordinate matching of start date
-    pub start_date_x1_tol: i32,
-    /// Require start date to be on the same Y1 coordinate as the term
-    pub start_date_same_y1: bool,
-    /// Tolerance for Y1 coordinate matching of start date
-    pub start_date_y1_tol: i32,
+    /// Alignment of the start date relative to the term ("x1", "x2", "y1", "y2", "")
+    pub start_date_alignment: String,
+    /// Tolerance for alignment matching of start date
+    pub start_date_alignment_tol: i32,
 
     // GENERAL TRANSACTION READ PARAMS
     /// Array of terms that can indicate start, or nearing the start of transaction table
@@ -224,33 +200,25 @@ impl Default for StatementConfig {
 
             account_number_terms: vec![],
             account_number_patterns: vec![],
-            account_number_same_x1: false,
-            account_number_x1_tol: 1,
-            account_number_same_y1: true,
-            account_number_y1_tol: 1,
+            account_number_alignment: "y1".to_string(),
+            account_number_alignment_tol: 5,
 
             opening_balance_terms: vec![],
             opening_balance_formats: vec![],
-            opening_balance_same_x1: false,
-            opening_balance_x1_tol: 1,
-            opening_balance_same_y1: true,
-            opening_balance_y1_tol: 1,
+            opening_balance_alignment: "y1".to_string(),
+            opening_balance_alignment_tol: 1,
             opening_balance_invert: false,
 
             closing_balance_terms: vec![],
             closing_balance_formats: vec![],
-            closing_balance_same_x1: false,
-            closing_balance_x1_tol: 1,
-            closing_balance_same_y1: true,
-            closing_balance_y1_tol: 1,
+            closing_balance_alignment: "y1".to_string(),
+            closing_balance_alignment_tol: 1,
             closing_balance_invert: false,
 
             start_date_terms: vec![],
             start_date_formats: vec![],
-            start_date_same_x1: false,
-            start_date_x1_tol: 1,
-            start_date_same_y1: true,
-            start_date_y1_tol: 1,
+            start_date_alignment: "y1".to_string(),
+            start_date_alignment_tol: 1,
 
             transaction_terms: vec![],
             transaction_terms_stop: vec![],
@@ -309,33 +277,25 @@ impl StatementConfig {
         if let Some(patterns) = partial.account_number_patterns {
             cfg.account_number_patterns = compile_regex_vec(patterns)?;
         }
-        overlay!(account_number_same_x1);
-        overlay!(account_number_x1_tol);
-        overlay!(account_number_same_y1);
-        overlay!(account_number_y1_tol);
+        overlay!(account_number_alignment);
+        overlay!(account_number_alignment_tol);
 
         overlay!(opening_balance_terms);
         overlay!(opening_balance_formats);
-        overlay!(opening_balance_same_x1);
-        overlay!(opening_balance_x1_tol);
-        overlay!(opening_balance_same_y1);
-        overlay!(opening_balance_y1_tol);
+        overlay!(opening_balance_alignment);
+        overlay!(opening_balance_alignment_tol);
         overlay!(opening_balance_invert);
 
         overlay!(closing_balance_terms);
         overlay!(closing_balance_formats);
-        overlay!(closing_balance_same_x1);
-        overlay!(closing_balance_x1_tol);
-        overlay!(closing_balance_same_y1);
-        overlay!(closing_balance_y1_tol);
+        overlay!(closing_balance_alignment);
+        overlay!(closing_balance_alignment_tol);
         overlay!(closing_balance_invert);
 
         overlay!(start_date_terms);
         overlay!(start_date_formats);
-        overlay!(start_date_same_x1);
-        overlay!(start_date_x1_tol);
-        overlay!(start_date_same_y1);
-        overlay!(start_date_y1_tol);
+        overlay!(start_date_alignment);
+        overlay!(start_date_alignment_tol);
 
         overlay!(transaction_terms);
         overlay!(transaction_terms_stop);
@@ -391,19 +351,29 @@ impl StatementConfig {
         valid_alignment(&self.transaction_amount_invert_alignment, "transaction_amount_invert_alignment")?;
         valid_alignment(&self.transaction_balance_alignment, "transaction_balance_alignment")?;
 
+        // Other alignment sanity
+        fn valid_full_alignment(alignment: &str, name: &str) -> Result<(), String> {
+            let valid_alignments = ["x1", "x2", "y1", "y2", ""];
+            if !valid_alignments.contains(&alignment) {
+                return Err(format!("{} must be one of {:?}", name, valid_alignments));
+            }
+            Ok(())
+        }
+        valid_full_alignment(&self.account_number_alignment, "account_number_alignment")?;
+        valid_full_alignment(&self.opening_balance_alignment, "opening_balance_alignment")?;
+        valid_full_alignment(&self.closing_balance_alignment, "closing_balance_alignment")?;
+        valid_full_alignment(&self.start_date_alignment, "start_date_alignment")?;
+
         // Basic tolerance sanity
         fn non_negative(val: i32, name:&str) -> Result<(),String> {
             if val < 0 { return Err(format!("{} must be >= 0", name)); }
             Ok(())
         }
-        non_negative(self.account_number_x1_tol, "account_number_x1_tol")?;
-        non_negative(self.account_number_y1_tol, "account_number_y1_tol")?;
-        non_negative(self.opening_balance_x1_tol, "opening_balance_x1_tol")?;
-        non_negative(self.opening_balance_y1_tol, "opening_balance_y1_tol")?;
-        non_negative(self.closing_balance_x1_tol, "closing_balance_x1_tol")?;
-        non_negative(self.closing_balance_y1_tol, "closing_balance_y1_tol")?;
-        non_negative(self.start_date_x1_tol, "start_date_x1_tol")?;
-        non_negative(self.start_date_y1_tol, "start_date_y1_tol")?;
+        non_negative(self.account_number_alignment_tol, "account_number_alignment_tol")?;
+        non_negative(self.opening_balance_alignment_tol, "opening_balance_alignment_tol")?;
+        non_negative(self.closing_balance_alignment_tol, "closing_balance_alignment_tol")?;
+        non_negative(self.start_date_alignment_tol, "start_date_alignment_tol")?;
+        non_negative(self.transaction_x_tol, "`transaction_x_tol`")?;
         non_negative(self.transaction_new_line_y1_tol, "transaction_new_line_y1_tol")?;
 
         // Formats sanity (simple: strings non-empty)
@@ -493,7 +463,7 @@ mod tests {
         assert_eq!(cfg.bank_name, "B");
         assert_eq!(cfg.account_type, "T");
         // Defaults
-        assert_eq!(cfg.opening_balance_x1_tol, 1);
+        assert_eq!(cfg.opening_balance_invert, false);
         assert_eq!(cfg.transaction_start_date_required, false);
     }
 

@@ -12,22 +12,23 @@
 
     "account_number_terms": ["Account Number"],
     "account_number_patterns": ["\\b\\d+\\s\\d+\\s\\d+\\b"],
-    "account_number_same_x1": false,
-    "account_number_x1_tol": 1,
-    "account_number_same_y1": true,
-    "account_number_y1_tol": 1,
+    "account_number_alignment": "y1",
+    "account_number_alignment_tol": 5,
 
     "opening_balance_terms": ["OPENING BALANCE"],
     "opening_balance_formats": ["format3", "format5"],
-    "opening_balance_y1_tol": 2,
-
+    "opening_balance_alignment": "y1",
+    "opening_balance_alignment_tol": 5,
+    
     "closing_balance_terms": ["Closing Balance"],
     "closing_balance_formats": ["format3", "format5"],
-    "closing_balance_y1_tol": 2,
+    "closing_balance_alignment": "y1",
+    "closing_balance_alignment_tol": 5,
 
     "start_date_terms": ["Statement Period"],
     "start_date_formats": ["format2"],
-    "start_date_y1_tol": 20,
+    "start_date_alignment": "y1",
+    "start_date_alignment_tol": 20,
 
     "transaction_terms": ["Date Transaction Debit"],
     "transaction_terms_stop": ["Opening balance", "Important Information:"],

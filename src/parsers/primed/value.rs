@@ -6,28 +6,22 @@ use regex::Regex;
 pub struct PrimedValueParser {
     primer_parser: ParserPrimer,
     value_parser: ValueParser,
-    same_x1: bool,
-    x1_tol: i32,
-    same_y1: bool,
-    y1_tol: i32,
+    alignment: String,
+    alignment_tol: i32,
 }
 
 impl PrimedValueParser {
     pub fn new(
         primer_terms: &[&str],
         value_patterns: &[Regex],
-        same_x1: bool,
-        x1_tol: i32,
-        same_y1: bool,
-        y1_tol: i32,
+        alignment: &str,
+        alignment_tol: i32,
     ) -> Self {
         Self {
             primer_parser: ParserPrimer::new(primer_terms),
             value_parser: ValueParser::new(value_patterns),
-            same_x1,
-            x1_tol,
-            same_y1,
-            y1_tol,
+            alignment: alignment.to_string(),
+            alignment_tol,
         }
     }
 
@@ -62,19 +56,17 @@ impl PrimedValueParser {
         // Check coordinate constraints
         let value_item = self.value_parser.text_item();
         let primer_item = self.primer_parser.text_item();
-        let valid_x1 = if self.same_x1 {
-            (value_item.x1 - primer_item.x1).abs() <= self.x1_tol
-        } else {
-            true
-        };
-        let valid_y1 = if self.same_y1 {
-            (value_item.y1 - primer_item.y1).abs() <= self.y1_tol
-        } else {
-            true
+        let valid_alignment = match self.alignment.as_str() {
+            "x1" => (value_item.x1 - primer_item.x1).abs() <= self.alignment_tol,
+            "x2" => (value_item.x2 - primer_item.x2).abs() <= self.alignment_tol,
+            "y1" => (value_item.y1 - primer_item.y1).abs() <= self.alignment_tol,
+            "y2" => (value_item.y2 - primer_item.y2).abs() <= self.alignment_tol,
+            "" => true, // No alignment constraint
+            _ => true, // No alignment constraint
         };
         let page_ok = value_item.page == primer_item.page;
         // Return 0 if any condition fails
-        if !valid_x1 || !valid_y1 || !page_ok {
+        if !valid_alignment || !page_ok {
             // Reset value parser state
             self.value_parser.reset();
             return 0;
@@ -119,9 +111,7 @@ mod tests {
         let parser = PrimedValueParser::new(
             &["Account"],
             &patterns,
-            false,
-            0,
-            false,
+            "",
             0,
         );
         assert!(parser.value().is_none());
@@ -134,9 +124,7 @@ mod tests {
         let mut parser = PrimedValueParser::new(
             &["Account"],
             &patterns,
-            false,
-            0,
-            false,
+            "",
             0,
         );
         
@@ -154,9 +142,7 @@ mod tests {
         let mut parser = PrimedValueParser::new(
             &["Account"],
             &patterns,
-            false,
-            0,
-            false,
+            "",
             0,
         );
         
@@ -173,9 +159,7 @@ mod tests {
         let mut parser = PrimedValueParser::new(
             &["Account"],
             &patterns,
-            false,
-            0,
-            false,
+            "",
             0,
         );
         
@@ -197,9 +181,7 @@ mod tests {
         let mut parser = PrimedValueParser::new(
             &["Account"],
             &patterns,
-            false,
-            0,
-            false,
+            "",
             0,
         );
         
@@ -225,10 +207,8 @@ mod tests {
         let mut parser = PrimedValueParser::new(
             &["Account"],
             &patterns,
-            true,  // same_x1
+            "x1",  // same x1
             5,     // x1_tol
-            false,
-            0,
         );
         
         // Prime at x1=100
@@ -249,10 +229,8 @@ mod tests {
         let mut parser = PrimedValueParser::new(
             &["Account"],
             &patterns,
-            true,  // same_x1
+            "x1",  // same x1
             5,     // x1_tol
-            false,
-            0,
         );
         
         // Prime at x1=100
@@ -273,9 +251,7 @@ mod tests {
         let mut parser = PrimedValueParser::new(
             &["Account"],
             &patterns,
-            false,
-            0,
-            true,  // same_y1
+            "y1",  // same y1
             3,     // y1_tol
         );
         
@@ -297,11 +273,9 @@ mod tests {
         let mut parser = PrimedValueParser::new(
             &["Account"],
             &patterns,
-            false,
-            0,
-            true,  // same_y1
+            "y1",  // same y1
             3,     // y1_tol
-            );
+        );
         
         // Prime at y1=100
         let items1 = vec![create_text_item("Account", 100, 100)];
@@ -321,9 +295,7 @@ mod tests {
         let mut parser = PrimedValueParser::new(
             &["Account"],
             &patterns,
-            false,
-            0,
-            false,
+            "",
             0,
         );
         
@@ -347,9 +319,7 @@ mod tests {
         let mut parser = PrimedValueParser::new(
             &["Account"],
             &patterns,
-            false,
-            0,
-            false,
+            "",
             0,
         );
         
@@ -376,9 +346,7 @@ mod tests {
         let mut parser = PrimedValueParser::new(
             &["Account"],
             &patterns,
-            false,
-            0,
-            false,
+            "",
             0,
         );
         

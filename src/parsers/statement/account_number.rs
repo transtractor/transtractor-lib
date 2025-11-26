@@ -21,10 +21,8 @@ impl AccountNumberParser {
             parser: PrimedValueParser::new(
                 primer_terms.as_slice(),
                 value_patterns.as_slice(),
-                config.account_number_same_x1,
-                config.account_number_x1_tol,
-                config.account_number_same_y1,
-                config.account_number_y1_tol,
+                config.account_number_alignment.as_str(),
+                config.account_number_alignment_tol,
             ),
         }
     }
@@ -66,10 +64,8 @@ mod tests {
         StatementConfig {
             account_number_terms: vec!["Account Number".to_string()],
             account_number_patterns: vec![regex::Regex::new(r"\b\d+\s+\d+\s+\d+\b").unwrap()],
-            account_number_same_x1: true,
-            account_number_x1_tol: 5,
-            account_number_same_y1: true,
-            account_number_y1_tol: 5,
+            account_number_alignment: "x1".to_string(),
+            account_number_alignment_tol: 5,
             ..Default::default()
         }
     }
@@ -155,7 +151,8 @@ mod tests {
 
     #[test]
     fn test_account_number_y1_constraint_fail() {
-        let config = default_config();
+        let mut config = default_config();
+        config.account_number_alignment = "y1".to_string();
         let mut data = StatementData::new();
         let mut parser = AccountNumberParser::new(&config);
 
@@ -298,7 +295,7 @@ mod tests {
     #[test]
     fn test_account_number_no_x1_constraint() {
         let mut config = default_config();
-        config.account_number_same_x1 = false;
+        config.account_number_alignment = "".to_string();
         
         let mut data = StatementData::new();
         let mut parser = AccountNumberParser::new(&config);
@@ -320,7 +317,7 @@ mod tests {
     #[test]
     fn test_account_number_no_y1_constraint() {
         let mut config = default_config();
-        config.account_number_same_y1 = false;
+        config.account_number_alignment = "".to_string();
         
         let mut data = StatementData::new();
         let mut parser = AccountNumberParser::new(&config);

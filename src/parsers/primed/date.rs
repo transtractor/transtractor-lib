@@ -5,28 +5,22 @@ use crate::parsers::base::ParserPrimer;
 pub struct PrimedDateParser {
     primer_parser: ParserPrimer,
     date_parser: DateParser,
-    same_x1: bool,
-    x1_tol: i32,
-    same_y1: bool,
-    y1_tol: i32,
+    alignment: String,
+    alignment_tol: i32,
 }
 
 impl PrimedDateParser {
     pub fn new(
         primer_terms: &[&str],
         date_formats: &[&str],
-        same_x1: bool,
-        x1_tol: i32,
-        same_y1: bool,
-        y1_tol: i32,
+        alignment: &str,
+        alignment_tol: i32,
     ) -> Self {
         Self {
             primer_parser: ParserPrimer::new(primer_terms),
             date_parser: DateParser::new(date_formats),
-            same_x1,
-            x1_tol,
-            same_y1,
-            y1_tol,
+            alignment: alignment.to_string(),
+            alignment_tol,
         }
     }
 
@@ -55,21 +49,18 @@ impl PrimedDateParser {
         let date_item = self.date_parser.text_item.as_ref().unwrap();
         let primer_item = self.primer_parser.text_item.as_ref().unwrap();
 
-        // Check x1, y1 and page conditions
-        let x1_ok = if self.same_x1 {
-            (date_item.x1 - primer_item.x1).abs() <= self.x1_tol
-        } else {
-            true
-        };
-        let y1_ok = if self.same_y1 {
-            (date_item.y1 - primer_item.y1).abs() <= self.y1_tol
-        } else {
-            true
+        let valid_alignment = match self.alignment.as_str() {
+            "x1" => (date_item.x1 - primer_item.x1).abs() <= self.alignment_tol,
+            "x2" => (date_item.x2 - primer_item.x2).abs() <= self.alignment_tol,
+            "y1" => (date_item.y1 - primer_item.y1).abs() <= self.alignment_tol,
+            "y2" => (date_item.y2 - primer_item.y2).abs() <= self.alignment_tol,
+            "" => true, // No alignment check
+            _ => true, // No alignment check
         };
         let page_ok = date_item.page == primer_item.page;
 
         // Return 0 if any condition fails
-        if !x1_ok || !y1_ok || !page_ok {
+        if !valid_alignment || !page_ok {
             // Reset date parser state
             self.date_parser.reset();
             return 0;
@@ -113,7 +104,7 @@ mod tests {
 
     #[test]
     fn test_primer_and_date_success() {
-        let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 5, true, 5);
+        let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], "x1", 5);
         let items = vec![
             make_text_item("DATE", 100, 200, 1),
             make_text_item("24 march 2020", 102, 202, 1),
@@ -132,7 +123,7 @@ mod tests {
 
     #[test]
     fn test_primer_x1_fail() {
-    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 1, false, 0);
+    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], "x1", 1);
         let items = vec![
             make_text_item("DATE", 100, 200, 1),
             make_text_item("24 march 2020", 105, 200, 1),
@@ -145,7 +136,7 @@ mod tests {
 
     #[test]
     fn test_primer_y1_fail() {
-    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], false, 0, true, 1);
+    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], "y1", 1);
         let items = vec![
             make_text_item("DATE", 100, 200, 1),
             make_text_item("24 march 2020", 100, 205, 1),
@@ -158,7 +149,7 @@ mod tests {
 
     #[test]
     fn test_primer_page_fail() {
-    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], false, 0, false, 0);
+    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], "", 0);
         let items = vec![
             make_text_item("DATE", 100, 200, 1),
             make_text_item("24 march 2020", 100, 200, 2),
@@ -171,7 +162,7 @@ mod tests {
 
     #[test]
     fn test_no_items() {
-    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 5, true, 5);
+    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], "x1", 5);
         let items: Vec<TextItem> = vec![];
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 0);
@@ -181,7 +172,7 @@ mod tests {
 
     #[test]
     fn test_date_already_set() {
-    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], true, 5, true, 5);
+    let mut parser = PrimedDateParser::new(&["DATE"], &["format2"], "x1", 5);
         let items = vec![
             make_text_item("DATE", 100, 200, 1),
             make_text_item("24 march 2020", 100, 200, 1),

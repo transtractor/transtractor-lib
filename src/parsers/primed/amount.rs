@@ -5,10 +5,8 @@ use crate::parsers::base::ParserPrimer;
 pub struct PrimedAmountParser {
     primer_parser: ParserPrimer,
     amount_parser: AmountParser,
-    same_x1: bool,
-    x1_tol: i32,
-    same_y1: bool,
-    y1_tol: i32,
+    alignment: String,
+    alignment_tol: i32,
     invert: bool,
 }
 
@@ -16,19 +14,15 @@ impl PrimedAmountParser {
     pub fn new(
         primer_terms: &[&str],
         amount_formats: &[&str],
-        same_x1: bool,
-        x1_tol: i32,
-        same_y1: bool,
-        y1_tol: i32,
+        alignment: &str,
+        alignment_tol: i32,
         invert: bool,
     ) -> Self {
         Self {
             primer_parser: ParserPrimer::new(primer_terms),
             amount_parser: AmountParser::new(amount_formats),
-            same_x1,
-            x1_tol,
-            same_y1,
-            y1_tol,
+            alignment: alignment.to_string(),
+            alignment_tol,
             invert,
         }
     }
@@ -65,21 +59,18 @@ impl PrimedAmountParser {
         let amount_item = self.amount_parser.text_item();
         let primer_item = self.primer_parser.text_item();
 
-        // Check x1, y1 and page conditions
-        let x1_ok = if self.same_x1 {
-            (amount_item.x1 - primer_item.x1).abs() <= self.x1_tol
-        } else {
-            true
-        };
-        let y1_ok = if self.same_y1 {
-            (amount_item.y1 - primer_item.y1).abs() <= self.y1_tol
-        } else {
-            true
+        let valid_alignment = match self.alignment.as_str() {
+            "x1" => (amount_item.x1 - primer_item.x1).abs() <= self.alignment_tol,
+            "x2" => (amount_item.x2 - primer_item.x2).abs() <= self.alignment_tol,
+            "y1" => (amount_item.y1 - primer_item.y1).abs() <= self.alignment_tol,
+            "y2" => (amount_item.y2 - primer_item.y2).abs() <= self.alignment_tol,
+            "" => true, // No alignment check
+            _ => true, // No alignment check
         };
         let page_ok = amount_item.page == primer_item.page;
 
         // Return 0 if any condition fails
-        if !x1_ok || !y1_ok || !page_ok {
+        if !valid_alignment || !page_ok {
             // Reset amount parser state
             self.amount_parser.reset();
             return 0;
@@ -126,7 +117,7 @@ mod tests {
 
     #[test]
     fn test_primer_and_amount_success() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], true, 5, true, 5, false);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 5, false);
         let items = vec![
             make_text_item("PRIME", 100, 200, 1),
             make_text_item("1,234.56", 102, 202, 1),
@@ -145,7 +136,7 @@ mod tests {
 
     #[test]
     fn test_primer_and_amount_invert() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], true, 5, true, 5, true);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 5, true);
         let items = vec![
             make_text_item("PRIME", 100, 200, 1),
             make_text_item("1,234.56", 100, 200, 1),
@@ -158,7 +149,7 @@ mod tests {
 
     #[test]
     fn test_primer_x1_fail() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], true, 1, false, 0, false);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 1, false);
         let items = vec![
             make_text_item("PRIME", 100, 200, 1),
             make_text_item("1,234.56", 105, 200, 1),
@@ -171,7 +162,7 @@ mod tests {
 
     #[test]
     fn test_primer_y1_fail() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], false, 0, true, 1, false);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "y1", 1, false);
         let items = vec![
             make_text_item("PRIME", 100, 200, 1),
             make_text_item("1,234.56", 100, 205, 1),
@@ -184,7 +175,7 @@ mod tests {
 
     #[test]
     fn test_primer_page_fail() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], false, 0, false, 0, false);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "", 0, false);
         let items = vec![
             make_text_item("PRIME", 100, 200, 1),
             make_text_item("1,234.56", 100, 200, 2),
@@ -197,7 +188,7 @@ mod tests {
 
     #[test]
     fn test_no_items() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], true, 5, true, 5, false);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 5, false);
         let items: Vec<TextItem> = vec![];
         let consumed = parser.parse_items(&items);
         assert_eq!(consumed, 0);
@@ -207,7 +198,7 @@ mod tests {
 
     #[test]
     fn test_amount_already_set() {
-        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], true, 5, true, 5, false);
+        let mut parser = PrimedAmountParser::new(&["PRIME"], &["format1"], "x1", 5, false);
         let items = vec![
             make_text_item("PRIME", 100, 200, 1),
             make_text_item("1,234.56", 100, 200, 1),

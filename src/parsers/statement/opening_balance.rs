@@ -22,10 +22,8 @@ impl OpeningBalanceParser {
             parser: PrimedAmountParser::new(
                 primer_terms.as_slice(),
                 amount_formats.as_slice(),
-                config.opening_balance_same_x1,
-                config.opening_balance_x1_tol,
-                config.opening_balance_same_y1,
-                config.opening_balance_y1_tol,
+                &config.opening_balance_alignment,
+                config.opening_balance_alignment_tol,
                 config.opening_balance_invert,
             ),
         }
@@ -69,10 +67,8 @@ mod tests {
         StatementConfig {
             opening_balance_terms: vec!["OPENING BALANCE".to_string()],
             opening_balance_formats: vec!["format1".to_string()],
-            opening_balance_same_x1: true,
-            opening_balance_x1_tol: 5,
-            opening_balance_same_y1: true,
-            opening_balance_y1_tol: 5,
+            opening_balance_alignment: "x1".to_string(),
+            opening_balance_alignment_tol: 5,
             opening_balance_invert: false,
             // Add other fields as needed, or use StatementConfig::default() if available
             ..Default::default()

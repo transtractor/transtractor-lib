@@ -8,24 +8,25 @@
 
     "account_number_terms": ["Account"],
     "account_number_patterns": ["\\b\\d{4}\\s\\d{4}\\s\\d{4}\\s\\d{4}\\b"],
-    "account_number_same_x1": false,
-    "account_number_x1_tol": 1,
-    "account_number_same_y1": true,
-    "account_number_y1_tol": 1,
+    "account_number_alignment": "y1",
+    "account_number_alignment_tol": 5,
 
     "opening_balance_terms": ["Opening balance"],
     "opening_balance_formats": ["format2"],
-    "opening_balance_y1_tol": 2,
+    "opening_balance_alignment": "y1",
+    "opening_balance_alignment_tol": 5,
     "opening_balance_invert": true,
 
     "closing_balance_terms": ["Closing balance"],
     "closing_balance_formats": ["format2"],
-    "closing_balance_y1_tol": 2,
+    "closing_balance_alignment": "y1",
+    "closing_balance_alignment_tol": 5,
     "closing_balance_invert": true,
 
     "start_date_terms": ["Statement Period"],
     "start_date_formats": ["format2"],
-    "start_date_y1_tol": 5,
+    "start_date_alignment": "y1",
+    "start_date_alignment_tol": 5,
 
     "transaction_terms": ["Transactions Date Transaction Details"],
     "transaction_terms_stop": ["Please check your"],

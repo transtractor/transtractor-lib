@@ -21,10 +21,8 @@ impl ClosingBalanceParser {
             parser: PrimedAmountParser::new(
                 primer_terms.as_slice(),
                 amount_formats.as_slice(),
-                config.closing_balance_same_x1,
-                config.closing_balance_x1_tol,
-                config.closing_balance_same_y1,
-                config.closing_balance_y1_tol,
+                &config.closing_balance_alignment,
+                config.closing_balance_alignment_tol,
                 config.closing_balance_invert,
             ),
         }
@@ -67,10 +65,8 @@ mod tests {
         StatementConfig {
             closing_balance_terms: vec!["CLOSING BALANCE".to_string()],
             closing_balance_formats: vec!["format1".to_string()],
-            closing_balance_same_x1: true,
-            closing_balance_x1_tol: 5,
-            closing_balance_same_y1: true,
-            closing_balance_y1_tol: 5,
+            closing_balance_alignment: "x1".to_string(),
+            closing_balance_alignment_tol: 5,
             closing_balance_invert: false,
             ..Default::default()
         }

@@ -21,10 +21,8 @@ impl StartDateParser {
             parser: PrimedDateParser::new(
                 primer_terms.as_slice(),
                 date_formats.as_slice(),
-                config.start_date_same_x1,
-                config.start_date_x1_tol,
-                config.start_date_same_y1,
-                config.start_date_y1_tol,
+                &config.start_date_alignment,
+                config.start_date_alignment_tol,
             ),
         }
     }
@@ -66,10 +64,8 @@ mod tests {
         StatementConfig {
             start_date_terms: vec!["STATEMENT PERIOD".to_string(), "FROM".to_string()],
             start_date_formats: vec!["format2".to_string()],
-            start_date_same_x1: true,
-            start_date_x1_tol: 5,
-            start_date_same_y1: true,
-            start_date_y1_tol: 5,
+            start_date_alignment: "x1".to_string(),
+            start_date_alignment_tol: 5,
             ..Default::default()
         }
     }
