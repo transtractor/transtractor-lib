@@ -1,4 +1,5 @@
 from .transtractor import LibParser
+from .structs.statement_data import StatementData
 from .utils.write import dict_to_csv
 from .utils.extract import pdf_to_text_items
 
@@ -38,16 +39,28 @@ class Parser:
             }
 
         RuntimeError overview (raised indirectly from the Rust core):
-        - File access failure: PDF cannot be opened or read.
         - Unsupported or unidentifiable statement: no matching configuration (typer failure).
         - Quality check failure: no error-free parsed StatementData produced (e.g., unbalanced transactions).
         - Missing required transaction fields: a required date/amount/balance absent.
-        - Parsing configuration error: internal parsing logic signals inconsistent data state.
-        - Invalid text items: structural issues converting extracted items before parsing.
-        The error message string will describe the specific failure cause.
         """        
         py_text_items = pdf_to_text_items(pdf_file_path)
         return self._inner.py_text_items_to_py_dict(py_text_items)
+
+    def parse(self, pdf_file_path: str) -> StatementData:
+        """Parse the bank statement PDF and return a StatementData object.
+
+        :param pdf_file_path: Path to the PDF file to be processed
+        :return: StatementData object representing the parsed bank statement
+
+        RuntimeError overview (raised indirectly from the Rust core):
+        - Unsupported or unidentifiable statement: no matching configuration (typer failure).
+        - Quality check failure: no error-free parsed StatementData produced (e.g., unbalanced transactions).
+        - Missing required transaction fields: a required date/amount/balance absent.
+        """
+        py_text_items = pdf_to_text_items(pdf_file_path)
+        sd: StatementData = self._inner.py_text_items_to_py_statement_data(py_text_items)
+        sd.set_filename(pdf_file_path)
+        return sd
 
     def to_debug(self, pdf_file_path: str, output_file: str) -> str:
         """Write a summary of the statement data and quality checks for 
@@ -70,13 +83,9 @@ class Parser:
         :param output_file: Path to the output CSV file
 
         RuntimeError overview (raised indirectly from the Rust core):
-        - File access failure: PDF cannot be opened or read.
         - Unsupported or unidentifiable statement: no matching configuration (typer failure).
         - Quality check failure: no error-free parsed StatementData produced (e.g., unbalanced transactions).
         - Missing required transaction fields: a required date/amount/balance absent.
-        - Parsing configuration error: internal parsing logic signals inconsistent data state.
-        - Invalid text items: structural issues converting extracted items before parsing.
-        The error message string will describe the specific failure cause.
         """
         statement_data_dict = self.to_dict(pdf_file_path)
         dict_to_csv(statement_data_dict, output_file)
