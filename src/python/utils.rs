@@ -1,10 +1,8 @@
-use crate::parsers::flows::statement_data_to_dict::ColumnData;
 use crate::structs::TextItem;
 use crate::structs::TextItems;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyList};
-use std::collections::HashMap;
 
 /// Converts a Python list of text item dictionaries to a Rust TextItems struct
 pub fn py_text_items_to_rust_text_items(py_text_items: &Bound<'_, PyAny>) -> PyResult<TextItems> {
@@ -101,26 +99,5 @@ pub fn rust_statement_data_to_py_statement_data(
         ))?;
         
         Ok(py_statement_data.into())
-    })
-}
-
-
-/// Converts a Rust dictionary of ColumnData to a Python dictionary
-pub fn rust_dict_to_py_dict(
-    rust_dict: &HashMap<String, ColumnData>,
-) -> PyResult<HashMap<String, PyObject>> {
-    Python::with_gil(|py| {
-        let mut py_dict = HashMap::new();
-        for (key, column_data) in rust_dict {
-            let py_list: PyObject = match column_data {
-                ColumnData::DateColumn(data) => PyList::new(py, data)?.into(),
-                ColumnData::IndexColumn(data) => PyList::new(py, data)?.into(),
-                ColumnData::StringColumn(data) => PyList::new(py, data)?.into(),
-                ColumnData::AmountColumn(data) => PyList::new(py, data)?.into(),
-                ColumnData::BalanceColumn(data) => PyList::new(py, data)?.into(),
-            };
-            py_dict.insert(key.clone(), py_list);
-        }
-        Ok(py_dict)
     })
 }

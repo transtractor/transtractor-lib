@@ -23,29 +23,6 @@ class Parser:
     def __init__(self):
         self._inner = LibParser()
 
-    def to_dict(self, pdf_file_path: str) -> dict[str, list]:
-        """Extract bank statement into a dictionary suitable for reading into 
-        a DataFrame.
-
-        :param pdf_file_path: Path to the PDF file to be processed
-        :return: Dictionary of lists representation of the bank statement data. 
-            Format is:
-            {
-                "date": [int],  # milliseconds since epoch
-                "transaction_index": [int], # Transaction index for the day
-                "description": [str], # Description of the transaction
-                "amount": [float], # Amount of the transaction
-                "balance": [float], # Balance after the transaction
-            }
-
-        RuntimeError overview (raised indirectly from the Rust core):
-        - Unsupported or unidentifiable statement: no matching configuration (typer failure).
-        - Quality check failure: no error-free parsed StatementData produced (e.g., unbalanced transactions).
-        - Missing required transaction fields: a required date/amount/balance absent.
-        """        
-        py_text_items = pdf_to_text_items(pdf_file_path)
-        return self._inner.py_text_items_to_py_dict(py_text_items)
-
     def parse(self, pdf_file_path: str) -> StatementData:
         """Parse the bank statement PDF and return a StatementData object.
 
@@ -62,7 +39,7 @@ class Parser:
         sd.set_filename(pdf_file_path)
         return sd
 
-    def to_debug(self, pdf_file_path: str, output_file: str) -> str:
+    def debug(self, pdf_file_path: str, output_file: str) -> str:
         """Write a summary of the statement data and quality checks for 
         each statement extraction configuration applied.
 
@@ -75,17 +52,3 @@ class Parser:
         with open(output_file, 'w', encoding='utf-8') as fh:
             fh.write(result)
         return result
-
-    def to_csv(self, pdf_file_path: str, output_file: str) -> None:
-        """Convert a bank statement PDF to CSV format and save to output file.
-
-        :param pdf_file_path: Path to the PDF file to be processed
-        :param output_file: Path to the output CSV file
-
-        RuntimeError overview (raised indirectly from the Rust core):
-        - Unsupported or unidentifiable statement: no matching configuration (typer failure).
-        - Quality check failure: no error-free parsed StatementData produced (e.g., unbalanced transactions).
-        - Missing required transaction fields: a required date/amount/balance absent.
-        """
-        statement_data_dict = self.to_dict(pdf_file_path)
-        dict_to_csv(statement_data_dict, output_file)
