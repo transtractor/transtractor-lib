@@ -1,6 +1,7 @@
 use crate::configs::STATEMENT_CONFIG_REGISTRY;
 use crate::structs::StatementConfig;
-use crate::structs::TextItems;
+use crate::structs::TextItem;
+use crate::structs::text_items::get_text_item_buffer;
 use std::collections::{HashMap, HashSet};
 
 /// Struct to identify statement types from text items.
@@ -58,8 +59,11 @@ impl StatementTyper {
         }
     }
 
-    /// Identify statement types from TextItems. Returns None if no type identified.
-    pub fn identify_from_text_items(&self, text_items: &TextItems) -> Option<Vec<StatementConfig>> {
+    /// Identify statement types from tokenised TextItems. Returns None if no type identified.
+    pub fn identify_from_text_items(
+        &self,
+        text_items: &Vec<TextItem>,
+    ) -> Option<Vec<StatementConfig>> {
         // Incremented for each found term found for a key
         let mut matches_by_key: HashMap<String, usize> = HashMap::new();
         // Lookup set of account_terms already encountered, to prevent double counting
@@ -73,7 +77,7 @@ impl StatementTyper {
         let mut i: usize = 0;
         while i < len {
             let buffer_size = self.max_lookahead.min(len - i);
-            let buffer = text_items.get_text_item_buffer(i, buffer_size);
+            let buffer = get_text_item_buffer(&text_items, i, buffer_size);
             if buffer.is_empty() {
                 break;
             }
@@ -141,6 +145,7 @@ impl StatementTyper {
 mod tests {
     use super::*;
     use crate::structs::text_item::TextItem;
+    use crate::structs::text_items::tokenise::tokenise_items;
 
     fn ti(text: &str) -> TextItem {
         TextItem::new(text.to_string(), 0, 0, 0, 0, 1)
@@ -150,10 +155,11 @@ mod tests {
     fn identify_returns_cba_when_all_terms_present() {
         // Given a typer built from embedded registry and items containing both terms
         let typer = StatementTyper::new();
-        let mut items = TextItems::new();
-        items.add(&ti("Hello CommBank world"));
-        items.add(&ti("noise"));
-        items.add(&ti("Available credit here"));
+        let mut items = Vec::new();
+        items.push(ti("Hello CommBank world"));
+        items.push(ti("noise"));
+        items.push(ti("Available credit here"));
+        let items = tokenise_items(items);
 
         let result = typer.identify_from_text_items(&items);
         assert!(result.is_some(), "Expected at least one match");
@@ -170,9 +176,11 @@ mod tests {
     #[test]
     fn identify_none_when_only_one_term_or_duplicates() {
         let typer = StatementTyper::new();
-        let mut items = TextItems::new();
+        let mut items = Vec::new();
         // Only one of the required terms present (and duplicated), should not complete
-        items.add(&ti("CommBank CommBank more text"));
+        items.push(ti("CommBank CommBank more text"));
+
+        let items = tokenise_items(items);
 
         let result = typer.identify_from_text_items(&items);
         assert!(
@@ -184,17 +192,18 @@ mod tests {
     #[test]
     fn identify_none_on_empty_input() {
         let typer = StatementTyper::new();
-        let items = TextItems::new();
+        let items = Vec::new();
         assert!(typer.identify_from_text_items(&items).is_none());
     }
 
     #[test]
     fn identify_is_case_sensitive() {
         let typer = StatementTyper::new();
-        let mut items = TextItems::new();
+        let mut items = Vec::new();
         // Lowercased term should not match the case-sensitive 'CommBank'
-        items.add(&ti("commbank"));
-        items.add(&ti("Available credit"));
+        items.push(ti("commbank"));
+        items.push(ti("Available credit"));
+        let items = tokenise_items(items);
         assert!(typer.identify_from_text_items(&items).is_none());
     }
 }

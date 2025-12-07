@@ -47,10 +47,21 @@ impl TextItem {
         self.text = format!("{} {}", self.text, other.text);
         // take the smallest x1 and y1 from self and other 
         self.x1 = self.x1.min(other.x1);
-        self.y1 = self.y1.min(other.y1);
-        // take the largest x2 and y2 from self and other 
         self.x2 = self.x2.max(other.x2);
-        self.y2 = self.y2.max(other.y2);
+
+        // If y-axis is inverted (0 at top), take largest y1 and smallest y2
+        if (self.y1 > self.y2) && (other.y1 > other.y2) {
+            self.y1 = self.y1.max(other.y1);
+            self.y2 = self.y2.min(other.y2);
+            return;
+        }
+        if (self.y1 < self.y2) && (other.y1 < other.y2) {
+            self.y1 = self.y1.min(other.y1);
+            self.y2 = self.y2.max(other.y2);
+            return;
+        }
+        // Mixed y-axis orientation, raise panic
+        panic!("Inconsistent y-axis orientation when merging TextItems");
     }
 
     /// Create merged TextItem from a slice of TextItems

@@ -4,7 +4,7 @@
     "account_type": "Credit Card",
     "account_terms": ["CommBank", "Available credit"],
     "account_examples": ["Low Rate Mastercard", "Low Fee Mastercard"],
-    "apply_y_patch": true,
+    "fix_text_order": [5.0, 0.0],
 
     "account_number_terms": ["Account"],
     "account_number_patterns": ["\\b\\d{4}\\s\\d{4}\\s\\d{4}\\s\\d{4}\\b"],

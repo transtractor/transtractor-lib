@@ -1,6 +1,5 @@
 from .transtractor import LibParser
 from .structs.statement_data import StatementData
-from .utils.write import dict_to_csv
 from .utils.extract import pdf_to_text_items
 
 
@@ -52,3 +51,17 @@ class Parser:
         with open(output_file, 'w', encoding='utf-8') as fh:
             fh.write(result)
         return result
+
+    def layout(self, pdf_file_page, output_file: str, y_bin=0.0, x_gap=0.0) -> str:
+        """Extract and return a text layout representation of the PDF page.
+
+        :param pdf_file_page: A single page from a PDF file (PyMuPDF Page object)
+        :param y_bin: Y coordinate bin size for sorting/merging text items
+        :param x_gap: X coordinate gap size for merging text items
+        :return: A string representing the text layout of the page
+        """
+        py_text_items = pdf_to_text_items(pdf_file_page)
+        layout_str: str = self._inner.py_text_items_to_layout_py_str(py_text_items, y_bin, x_gap)
+        with open(output_file, 'w', encoding='utf-8') as fh:
+            fh.write(layout_str)
+        return layout_str

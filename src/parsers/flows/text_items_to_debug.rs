@@ -1,16 +1,16 @@
 use crate::configs::StatementTyper;
 use crate::parsers::flows::text_items_to_statement_datas::text_items_to_statement_datas;
-use crate::structs::TextItems;
+use crate::structs::TextItem;
 
 /// Read TextItems and record all parsed StatementData results into string for debugging.
 /// This provides detailed debug information about all parsing attempts and their results.
 /// The string can then be written to a file or logged as needed.
-pub fn text_items_to_debug(items: &mut TextItems, typer: &StatementTyper) -> Result<String, String> {
+pub fn text_items_to_debug(items: &Vec<TextItem>, typer: &StatementTyper) -> Result<String, String> {
     // Write debug information to the output file
     let mut output = String::new();
     output.push_str("Debug output\n");
 
-    match text_items_to_statement_datas(items, typer) {
+    match text_items_to_statement_datas(&items, typer) {
         Ok(statement_data_results) => {
             output.push_str(&format!(
                 "Found {} StatementData result(s)\n\n",

@@ -6,7 +6,6 @@ pub mod statement_data;
 pub mod transaction;
 
 pub use text_item::TextItem;
-pub use text_items::TextItems;
 pub use proto_transaction::ProtoTransaction;
 pub use statement_config::StatementConfig;
 pub use statement_data::StatementData;

@@ -1,12 +1,13 @@
 use crate::structs::TextItem;
-use crate::structs::TextItems;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyList};
 
 /// Converts a Python list of text item dictionaries to a Rust TextItems struct
-pub fn py_text_items_to_rust_text_items(py_text_items: &Bound<'_, PyAny>) -> PyResult<TextItems> {
-    let mut text_items = TextItems::new();
+pub fn py_text_items_to_rust_text_items(
+    py_text_items: &Bound<'_, PyAny>,
+) -> PyResult<Vec<TextItem>> {
+    let mut text_items = Vec::new();
     let py_list = py_text_items.downcast::<PyList>()?;
     for obj in py_list.iter() {
         let dict = obj.downcast::<pyo3::types::PyDict>()?;
@@ -35,7 +36,7 @@ pub fn py_text_items_to_rust_text_items(py_text_items: &Bound<'_, PyAny>) -> PyR
             .ok_or_else(|| PyRuntimeError::new_err("Missing 'page' field"))?
             .extract()?;
         let text_item = TextItem::new(text, x1, y1, x2, y2, page);
-        text_items.add(&text_item);
+        text_items.push(text_item);
     }
     Ok(text_items)
 }
@@ -48,34 +49,35 @@ pub fn rust_statement_data_to_py_statement_data(
         // Import the Python StatementData and Transaction classes
         let statement_data_module = py.import("transtractor.structs.statement_data")?;
         let statement_data_class = statement_data_module.getattr("StatementData")?;
-        
+
         let transaction_module = py.import("transtractor.structs.transaction")?;
         let transaction_class = transaction_module.getattr("Transaction")?;
-        
+
         // Get key (required field)
-        let key = rust_statement_data.key.as_ref()
-            .ok_or_else(|| PyRuntimeError::new_err("StatementData is missing required field: key"))?;
-        
+        let key = rust_statement_data.key.as_ref().ok_or_else(|| {
+            PyRuntimeError::new_err("StatementData is missing required field: key")
+        })?;
+
         // Get account_number (required field)
-        let account_number = rust_statement_data.account_number.as_ref()
-            .ok_or_else(|| PyRuntimeError::new_err("StatementData is missing required field: account_number"))?;
-        
+        let account_number = rust_statement_data.account_number.as_ref().ok_or_else(|| {
+            PyRuntimeError::new_err("StatementData is missing required field: account_number")
+        })?;
+
         // Convert proto_transactions to Transaction objects
         let py_transactions = PyList::empty(py);
         for proto_tx in &rust_statement_data.proto_transactions {
             // Check if the proto transaction is complete
             if !proto_tx.is_ready() {
-                return Err(PyRuntimeError::new_err(
-                    format!("Incomplete transaction found: date={:?}, date_index='{}', description='{}', amount={:?}, balance={:?}",
-                        proto_tx.date,
-                        proto_tx.index,
-                        proto_tx.description,
-                        proto_tx.amount,
-                        proto_tx.balance
-                    )
-                ));
+                return Err(PyRuntimeError::new_err(format!(
+                    "Incomplete transaction found: date={:?}, date_index='{}', description='{}', amount={:?}, balance={:?}",
+                    proto_tx.date,
+                    proto_tx.index,
+                    proto_tx.description,
+                    proto_tx.amount,
+                    proto_tx.balance
+                )));
             }
-            
+
             // Create Python Transaction object
             // Transaction.__init__(date: int, description: str, amount: float, balance: float)
             let py_transaction = transaction_class.call1((
@@ -85,19 +87,16 @@ pub fn rust_statement_data_to_py_statement_data(
                 proto_tx.amount.unwrap(),
                 proto_tx.balance.unwrap(),
             ))?;
-            
+
             py_transactions.append(py_transaction)?;
         }
-        
+
         // Create Python StatementData object
         // StatementData(key: str, filename: str, account_number: str, transactions: list[Transaction])
         // filename is set to empty string - to be set by Python calling function
-        let py_statement_data = statement_data_class.call1((
-            key,
-            account_number,
-            py_transactions,
-        ))?;
-        
+        let py_statement_data =
+            statement_data_class.call1((key, account_number, py_transactions))?;
+
         Ok(py_statement_data.into())
     })
 }

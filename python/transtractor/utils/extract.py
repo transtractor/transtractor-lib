@@ -17,9 +17,9 @@ def pdf_to_text_items(pdf_path: str) -> List[dict]:
                 items.append({
                     "text": word.get("text", ""),
                     "x1": int(float(word["x0"])),
-                    "y1": int(float(word["top"])),
+                    "y1": int(float(word["bottom"])),
                     "x2": int(float(word["x1"])),
-                    "y2": int(float(word["bottom"])),
+                    "y2": int(float(word["top"])),
                     "page": page_index,
                 })
     return items

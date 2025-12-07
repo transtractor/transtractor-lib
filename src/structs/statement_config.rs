@@ -12,7 +12,7 @@ struct StatementConfigPartial {
     account_type: Option<String>,
     account_terms: Option<Vec<String>>,
     account_examples: Option<Vec<String>>,
-    apply_y_patch: Option<bool>,
+    fix_text_order: Option<Vec<f32>>,
 
     account_number_terms: Option<Vec<String>>,
     account_number_patterns: Option<Vec<String>>,
@@ -80,9 +80,11 @@ pub struct StatementConfig {
     pub account_terms: Vec<String>,
     /// Account types that should work with this layout (e.g., "Streamline", "Everyday Offset")
     pub account_examples: Vec<String>,
-    /// Force re-ordering of items by Y coordinate to fix minor PDF extraction issues.
-    pub apply_y_patch: bool,
-
+    /// Enforce that text extracted is sorted by Y, then X and optionally merged by specifying 
+    /// [y_bin, x_gap] values. Word/items will be binned by Y coordinate into bins of size y_bin,
+    /// then sorted by X within each bin, and merged if within x_gap * avg_char_width. Set 
+    /// y_bin to 0.0 to disable Y binning (and X sorting by extension). Set x_gap to 0.0 to disable merging.
+    pub fix_text_order: Vec<f32>,
     // ACCOUNT NUMBER READ PARAMS
     /// Array of terms to identify the account number line (e.g., "Account Number", "Acct No")
     pub account_number_terms: Vec<String>,
@@ -196,7 +198,7 @@ impl Default for StatementConfig {
             account_type: "Generic Account".to_string(),
             account_terms: vec![],
             account_examples: vec![],
-            apply_y_patch: false,
+            fix_text_order: vec![0.0, 0.0],
 
             account_number_terms: vec![],
             account_number_patterns: vec![],
@@ -271,7 +273,7 @@ impl StatementConfig {
         overlay!(account_type);
         overlay!(account_terms);
         overlay!(account_examples);
-        overlay!(apply_y_patch);
+        overlay!(fix_text_order);
 
         overlay!(account_number_terms);
         if let Some(patterns) = partial.account_number_patterns {
@@ -336,6 +338,17 @@ impl StatementConfig {
         if self.key.trim().is_empty() { return Err("key cannot be empty".into()); }
         if self.bank_name.trim().is_empty() { return Err("bank_name cannot be empty".into()); }
         if self.account_type.trim().is_empty() { return Err("account_type cannot be empty".into()); }
+
+        // fix_text_order sanity
+        if self.fix_text_order.len() != 2 {
+            return Err("fix_text_order must have exactly two elements".into());
+        }
+        if self.fix_text_order[0] < 0.0 {
+            return Err("fix_text_order[0] (y_bin) must be >= 0.0".into());
+        }
+        if self.fix_text_order[1] < 0.0 {
+            return Err("fix_text_order[1] (x_gap) must be >= 0.0".into());
+        }
 
         // Header alignment sanity
         fn valid_alignment(alignment: &str, name: &str) -> Result<(), String> {
