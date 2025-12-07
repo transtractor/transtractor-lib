@@ -1,4 +1,5 @@
 pub mod statement_typer;
+pub mod utils;
 
 use crate::structs::StatementConfig;
 use once_cell::sync::Lazy;
