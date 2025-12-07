@@ -42,14 +42,14 @@ Transtractor is currently under active development and has not yet been released
 
 2. **Convert PDF to CSV**: All CSV files are written in a standard format
    ```python
-   parser.to_csv('statement.pdf', 'statement.csv')
+   parser.parse('statement.pdf').to_csv('statement.csv')
    ```
 
 3. **Convert PDF the dictionary**: Load into a DataFrame for analysis
    ```python
    import pandas as pd
 
-   data = parser.to_dict('statement.pdf')
+   data = parser.parse('statement.pdf').to_pandas_dict()
    df = pd.DataFrame(data)
    ```
 
