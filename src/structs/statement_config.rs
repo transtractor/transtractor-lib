@@ -1,3 +1,4 @@
+use crate::configs::validate;
 use regex::Regex;
 use serde::Deserialize;
 use std::fs;
@@ -80,9 +81,9 @@ pub struct StatementConfig {
     pub account_terms: Vec<String>,
     /// Account types that should work with this layout (e.g., "Streamline", "Everyday Offset")
     pub account_examples: Vec<String>,
-    /// Enforce that text extracted is sorted by Y, then X and optionally merged by specifying 
+    /// Enforce that text extracted is sorted by Y, then X and optionally merged by specifying
     /// [y_bin, x_gap] values. Word/items will be binned by Y coordinate into bins of size y_bin,
-    /// then sorted by X within each bin, and merged if within x_gap * avg_char_width. Set 
+    /// then sorted by X within each bin, and merged if within x_gap * avg_char_width. Set
     /// y_bin to 0.0 to disable Y binning (and X sorting by extension). Set x_gap to 0.0 to disable merging.
     pub fix_text_order: Vec<f32>,
     // ACCOUNT NUMBER READ PARAMS
@@ -255,18 +256,26 @@ impl Default for StatementConfig {
 impl StatementConfig {
     /// Load a StatementConfig from a JSON file, overlaying onto defaults and validating fields.
     pub fn from_json_file<P: AsRef<Path>>(path: P) -> Result<Self, String> {
+        let path_ref = path.as_ref();
         let data = fs::read_to_string(&path)
-            .map_err(|e| format!("Failed reading config {:?}: {}", path.as_ref(), e))?;
-        Self::from_json_str(&data)
+            .map_err(|e| format!("Failed reading config {:?}: {}", path_ref, e))?;
+        let cfg = Self::from_json_str(&data)?;
+        Ok(cfg)
     }
 
     /// Load from a JSON &str.
     pub fn from_json_str(src: &str) -> Result<Self, String> {
-        let partial: StatementConfigPartial = serde_json::from_str(src)
-            .map_err(|e| format!("JSON parse error: {}", e))?;
+        let partial: StatementConfigPartial =
+            serde_json::from_str(src).map_err(|e| format!("JSON parse error: {}", e))?;
         let mut cfg = StatementConfig::default();
 
-        macro_rules! overlay { ($field:ident) => { if let Some(v) = partial.$field { cfg.$field = v; } }; }
+        macro_rules! overlay {
+            ($field:ident) => {
+                if let Some(v) = partial.$field {
+                    cfg.$field = v;
+                }
+            };
+        }
 
         overlay!(key);
         overlay!(bank_name);
@@ -335,9 +344,18 @@ impl StatementConfig {
 
     /// Validate invariants and value ranges.
     pub fn validate(&self) -> Result<(), String> {
-        if self.key.trim().is_empty() { return Err("key cannot be empty".into()); }
-        if self.bank_name.trim().is_empty() { return Err("bank_name cannot be empty".into()); }
-        if self.account_type.trim().is_empty() { return Err("account_type cannot be empty".into()); }
+        if self.key.trim().is_empty() {
+            return Err("key cannot be empty".into());
+        }
+        if self.bank_name.trim().is_empty() {
+            return Err("bank_name cannot be empty".into());
+        }
+        if self.account_type.trim().is_empty() {
+            return Err("account_type cannot be empty".into());
+        }
+
+        // Validate key format
+        validate::key(&self.key)?;
 
         // fix_text_order sanity
         if self.fix_text_order.len() != 2 {
@@ -358,11 +376,26 @@ impl StatementConfig {
             }
             Ok(())
         }
-        valid_alignment(&self.transaction_date_alignment, "transaction_date_alignment")?;
-        valid_alignment(&self.transaction_description_alignment, "transaction_description_alignment")?;
-        valid_alignment(&self.transaction_amount_alignment, "transaction_amount_alignment")?;
-        valid_alignment(&self.transaction_amount_invert_alignment, "transaction_amount_invert_alignment")?;
-        valid_alignment(&self.transaction_balance_alignment, "transaction_balance_alignment")?;
+        valid_alignment(
+            &self.transaction_date_alignment,
+            "transaction_date_alignment",
+        )?;
+        valid_alignment(
+            &self.transaction_description_alignment,
+            "transaction_description_alignment",
+        )?;
+        valid_alignment(
+            &self.transaction_amount_alignment,
+            "transaction_amount_alignment",
+        )?;
+        valid_alignment(
+            &self.transaction_amount_invert_alignment,
+            "transaction_amount_invert_alignment",
+        )?;
+        valid_alignment(
+            &self.transaction_balance_alignment,
+            "transaction_balance_alignment",
+        )?;
 
         // Other alignment sanity
         fn valid_full_alignment(alignment: &str, name: &str) -> Result<(), String> {
@@ -378,24 +411,62 @@ impl StatementConfig {
         valid_full_alignment(&self.start_date_alignment, "start_date_alignment")?;
 
         // Basic tolerance sanity
-        fn non_negative(val: i32, name:&str) -> Result<(),String> {
-            if val < 0 { return Err(format!("{} must be >= 0", name)); }
+        fn non_negative(val: i32, name: &str) -> Result<(), String> {
+            if val < 0 {
+                return Err(format!("{} must be >= 0", name));
+            }
             Ok(())
         }
-        non_negative(self.account_number_alignment_tol, "account_number_alignment_tol")?;
-        non_negative(self.opening_balance_alignment_tol, "opening_balance_alignment_tol")?;
-        non_negative(self.closing_balance_alignment_tol, "closing_balance_alignment_tol")?;
+        non_negative(
+            self.account_number_alignment_tol,
+            "account_number_alignment_tol",
+        )?;
+        non_negative(
+            self.opening_balance_alignment_tol,
+            "opening_balance_alignment_tol",
+        )?;
+        non_negative(
+            self.closing_balance_alignment_tol,
+            "closing_balance_alignment_tol",
+        )?;
         non_negative(self.start_date_alignment_tol, "start_date_alignment_tol")?;
-        non_negative(self.transaction_alignment_tol, "`transaction_alignment_tol`")?;
+        non_negative(
+            self.transaction_alignment_tol,
+            "`transaction_alignment_tol`",
+        )?;
         non_negative(self.transaction_new_line_tol, "transaction_new_line_tol")?;
 
         // Formats sanity (simple: strings non-empty)
-        for f in &self.opening_balance_formats { if f.trim().is_empty() { return Err("Empty opening_balance_formats entry".into()); } }
-        for f in &self.closing_balance_formats { if f.trim().is_empty() { return Err("Empty closing_balance_formats entry".into()); } }
-        for f in &self.start_date_formats { if f.trim().is_empty() { return Err("Empty start_date_formats entry".into()); } }
-        for f in &self.transaction_date_formats { if f.trim().is_empty() { return Err("Empty transaction_date_formats entry".into()); } }
-        for f in &self.transaction_amount_formats { if f.trim().is_empty() { return Err("Empty transaction_amount_formats entry".into()); } }
-        for f in &self.transaction_balance_formats { if f.trim().is_empty() { return Err("Empty transaction_balance_formats entry".into()); } }
+        for f in &self.opening_balance_formats {
+            if f.trim().is_empty() {
+                return Err("Empty opening_balance_formats entry".into());
+            }
+        }
+        for f in &self.closing_balance_formats {
+            if f.trim().is_empty() {
+                return Err("Empty closing_balance_formats entry".into());
+            }
+        }
+        for f in &self.start_date_formats {
+            if f.trim().is_empty() {
+                return Err("Empty start_date_formats entry".into());
+            }
+        }
+        for f in &self.transaction_date_formats {
+            if f.trim().is_empty() {
+                return Err("Empty transaction_date_formats entry".into());
+            }
+        }
+        for f in &self.transaction_amount_formats {
+            if f.trim().is_empty() {
+                return Err("Empty transaction_amount_formats entry".into());
+            }
+        }
+        for f in &self.transaction_balance_formats {
+            if f.trim().is_empty() {
+                return Err("Empty transaction_balance_formats entry".into());
+            }
+        }
 
         // Regex patterns sanity (non-empty) for account number
         if self.account_number_patterns.is_empty() {
@@ -405,7 +476,9 @@ impl StatementConfig {
         // Transaction formats: each non-empty vector with allowed tokens (light validation)
         let allowed_tokens = ["date", "description", "amount", "balance"]; // extend as needed
         for fmt in &self.transaction_formats {
-            if fmt.is_empty() { return Err("transaction_formats entry cannot be empty".into()); }
+            if fmt.is_empty() {
+                return Err("transaction_formats entry cannot be empty".into());
+            }
             for token in fmt {
                 if !allowed_tokens.iter().any(|a| a == token) {
                     return Err(format!("Unknown token '{}' in transaction_formats", token));
@@ -431,9 +504,9 @@ fn compile_regex_vec(patterns: Vec<String>) -> Result<Vec<Regex>, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::Write;
-    use std::fs::File;
     use std::env;
+    use std::fs::File;
+    use std::io::Write;
 
     fn write_temp(name: &str, contents: &str) -> std::path::PathBuf {
         let mut path = env::temp_dir();
@@ -444,9 +517,9 @@ mod tests {
     }
 
     #[test]
-    fn test_from_json_file_success_minimal() {
+    fn test_from_json_str_success_minimal() {
         let json = r#"{
-            "key": "au__test__acct",
+            "key": "au__test__acct__1",
             "bank_name": "Test Bank",
             "account_type": "Test Account",
             "account_number_patterns": ["\\b\\d+\\b"],
@@ -454,25 +527,26 @@ mod tests {
             "opening_balance_formats": ["format2"],
             "transaction_amount_formats": ["format1"]
         }"#;
-        let path = write_temp("cfg_success", json);
-        let cfg = StatementConfig::from_json_file(&path).expect("load config");
-        assert_eq!(cfg.key, "au__test__acct");
+        let cfg = StatementConfig::from_json_str(json).expect("load config");
+        assert_eq!(cfg.key, "au__test__acct__1");
         assert_eq!(cfg.bank_name, "Test Bank");
-        assert!(cfg.opening_balance_terms.contains(&"Opening balance".to_string()));
+        assert!(
+            cfg.opening_balance_terms
+                .contains(&"Opening balance".to_string())
+        );
         assert_eq!(cfg.transaction_amount_formats, vec!["format1".to_string()]);
     }
 
     #[test]
-    fn test_from_json_file_overlay_defaults() {
+    fn test_from_json_str_overlay_defaults() {
         let json = r#"{
-            "key": "k",
+            "key": "us__test__default__1",
             "bank_name": "B",
             "account_type": "T",
             "account_number_patterns": ["\\b\\d+\\b"]
         }"#;
-        let path = write_temp("cfg_defaults", json);
-        let cfg = StatementConfig::from_json_file(&path).expect("load config");
-        assert_eq!(cfg.key, "k");
+        let cfg = StatementConfig::from_json_str(json).expect("load config");
+        assert_eq!(cfg.key, "us__test__default__1");
         assert_eq!(cfg.bank_name, "B");
         assert_eq!(cfg.account_type, "T");
         // Defaults
@@ -481,28 +555,26 @@ mod tests {
     }
 
     #[test]
-    fn test_from_json_file_invalid_regex() {
+    fn test_from_json_str_invalid_regex() {
         let json = r#"{
-            "key": "k",
+            "key": "us__test__badregex__1",
             "bank_name": "B",
             "account_type": "T",
             "transaction_description_exclude": ["("]
         }"#;
-        let path = write_temp("cfg_bad_regex", json);
-        let err = StatementConfig::from_json_file(&path).unwrap_err();
+        let err = StatementConfig::from_json_str(json).unwrap_err();
         assert!(err.contains("Invalid regex"));
     }
 
     #[test]
-    fn test_from_json_file_unknown_field() {
+    fn test_from_json_str_unknown_field() {
         let json = r#"{
-            "key": "k",
+            "key": "us__test__unknown__1",
             "bank_name": "B",
             "account_type": "T",
             "unknown_field": 123
         }"#;
-        let path = write_temp("cfg_unknown", json);
-        let err = StatementConfig::from_json_file(&path).unwrap_err();
+        let err = StatementConfig::from_json_str(json).unwrap_err();
         assert!(err.contains("unknown field"));
     }
 }
