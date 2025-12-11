@@ -1,7 +1,7 @@
 {
     "key": "au__cba__loan__1",
     "bank_name": "Commonwealth Bank of Australia",
-    "account_type": "General Loan Account",
+    "account_type": "Loan",
     "account_terms": ["CommBank", "Account number"],
     "account_examples": [
         "Complete Home Loan"

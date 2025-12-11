@@ -18,6 +18,13 @@ pub trait DateFormat {
     fn parse(&self, input: &str, year_str: &str) -> Option<i64>;
 }
 
+
+/// Get a list of valid formats.
+pub fn get_valid_formats() -> Vec<&'static str> {
+    vec!["format1", "format2", "format3", "format4", "format5"]
+}
+
+
 /// Stores day, month, and year strings and can convert to a UTC timestamp.
 #[derive(Debug, Clone)]
 pub struct DateParts {

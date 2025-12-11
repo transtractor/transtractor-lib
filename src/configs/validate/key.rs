@@ -1,4 +1,4 @@
-use crate::configs::validate::iso_3166_1_alpha_2::is_valid_iso_3166_1_alpha_2;
+use crate::configs::validate::utils::iso_3166_1_alpha_2::is_valid_iso_3166_1_alpha_2;
 
 /// Validates a configuration key format.
 ///

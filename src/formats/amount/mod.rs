@@ -20,6 +20,12 @@ pub trait AmountFormat {
     fn parse(&self, input: &str) -> Option<f64>;
 }
 
+
+/// Get a list of valid formats.
+pub fn get_valid_formats() -> Vec<&'static str> {
+    vec!["format1", "format2", "format3", "format4", "format5"]
+}
+
 /// Dispatcher for multiple amount formats.
 pub struct MultiAmountFormatParser {
     parsers: Vec<Box<dyn AmountFormat>>,

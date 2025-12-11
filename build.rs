@@ -26,11 +26,8 @@ fn main() {
         // Skip any file we explicitly treat as generated or non-config
         if rel.ends_with("generated.rs") { continue; }
         writeln!(f, "    // Source: {rel}").unwrap();
-    writeln!(f, "    if let Ok(cfg) = crate::structs::StatementConfig::from_json_str(include_str!(concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/{rel}\"))) {{").unwrap();
-        writeln!(f, "        map.insert(cfg.key.clone(), cfg);").unwrap();
-        writeln!(f, "    }} else {{").unwrap();
-        writeln!(f, "        eprintln!(\"WARN: Failed to parse config {rel}\");").unwrap();
-        writeln!(f, "    }}").unwrap();
+        writeln!(f, "    let cfg = crate::parsers::flows::config_json_file_to_config::from_json_str(include_str!(concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/{rel}\"))).unwrap_or_else(|e| panic!(\"Failed to parse config file {rel}: {{}}\", e));").unwrap();
+        writeln!(f, "    map.insert(cfg.key.clone(), cfg);").unwrap();
     }
 
     writeln!(f, "    map").unwrap();

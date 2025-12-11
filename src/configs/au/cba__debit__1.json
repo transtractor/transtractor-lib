@@ -1,7 +1,7 @@
 {
     "key": "au__cba__debit__1",
     "bank_name": "Commonwealth Bank of Australia",
-    "account_type": "General Savings or Debit Account",
+    "account_type": "Savings",
     "account_terms": ["CommBank", "Account Number"],
     "account_examples": [
         "Streamline",

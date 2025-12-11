@@ -1,7 +1,7 @@
 {
     "key": "au__nab__classic_banking__1",
     "bank_name": "National Australia Bank",
-    "account_type": "Classic Banking",
+    "account_type": "Savings",
     "account_terms": ["NAB", "Classic Banking"],
     "account_examples": ["Classic Banking"],
 
