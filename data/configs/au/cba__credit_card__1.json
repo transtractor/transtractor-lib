@@ -34,6 +34,9 @@
         ["date", "description", "amount"],
         ["description", "amount"]
     ],
+    "transaction_new_line_tol": 5,
+    "transaction_start_date_required": true,
+    "transaction_alignment_tol": 10,
 
     "transaction_date_formats": ["format1"],
     "transaction_date_headers": ["Date"],
@@ -48,5 +51,10 @@
     "transaction_amount_formats": ["format1"],
     "transaction_amount_headers": ["Amount (A$)"],
     "transaction_amount_alignment": "x2",
-    "transaction_amount_invert": true
+    "transaction_amount_invert": true,
+
+    "transaction_balance_formats": [],
+    "transaction_balance_headers": [],
+    "transaction_balance_alignment": "x2",
+    "transaction_balance_invert": false
 }

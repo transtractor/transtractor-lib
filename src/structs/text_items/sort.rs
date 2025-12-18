@@ -14,12 +14,12 @@ fn average_char_width(item: &TextItem) -> f32 {
 
 // Return new array of items sorted by x position with close items merged
 fn fix_by_x(items: &mut Vec<TextItem>, x_gap: f32) -> Vec<TextItem> {
-    // Return if x_gap is zero
+    // Sort items by increasing X position
+    items.sort_by(|a, b| a.x1.cmp(&b.x1));
+    // Return if x_gap is zero, no merging needed
     if x_gap == 0.0 {
         return items.clone();
     }
-    // Sort items by increasing X position
-    items.sort_by(|a, b| a.x1.cmp(&b.x1));
     let mut fixed_items = Vec::new();
     for item in items {
         if let Some(last_item) = fixed_items.last_mut() {

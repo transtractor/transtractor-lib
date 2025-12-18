@@ -3,7 +3,7 @@ use crate::structs::text_item::TextItem;
 /// Splits each TextItem's text into separate tokens based on whitespace,
 /// creating a new TextItem for each token while preserving the original
 /// positional and page information.
-pub fn tokenise_items(items: Vec<TextItem>) -> Vec<TextItem> {
+pub fn tokenise_items(items: &Vec<TextItem>) -> Vec<TextItem> {
     let mut tokenised_items: Vec<TextItem> = Vec::new();
     for item in items {
         let parts = item.text.split_whitespace();

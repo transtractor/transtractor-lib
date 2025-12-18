@@ -6,21 +6,24 @@
     "account_examples": [
         "Complete Home Loan"
     ],
+    "fix_text_order": [0.0, 0.0],
 
     "account_number_terms": ["Account number"],
     "account_number_patterns": ["\\b\\d+\\b"],
     "account_number_alignment": "y1",
     "account_number_alignment_tol": 5,
 
-    "opening_balance_terms": ["Opening balance"],
+    "opening_balance_terms": ["Opening balance", "Opening Balance"],
     "opening_balance_formats": ["format3", "format5"],
     "opening_balance_alignment": "y1",
     "opening_balance_alignment_tol": 5,
+    "opening_balance_invert": false,
 
     "closing_balance_terms": ["Closing balance"],
     "closing_balance_formats": ["format3", "format5"],
     "closing_balance_alignment": "y1",
     "closing_balance_alignment_tol": 5,
+    "closing_balance_invert": false,
 
     "start_date_terms": ["Statement period"],
     "start_date_formats": ["format2"],
@@ -32,7 +35,9 @@
     "transaction_formats": [
         ["date", "description", "amount", "balance"]
     ],
-    "transaction_alignment_tol": 40,
+    "transaction_new_line_tol": 5,
+    "transaction_start_date_required": true,
+    "transaction_alignment_tol": 10,
 
     "transaction_date_formats": ["format1"],
     "transaction_date_headers": ["Date"],
@@ -42,13 +47,15 @@
     "transaction_description_alignment": "x1",
     "transaction_description_exclude": [" -$", " \\$$"],
 
-    "transaction_amount_formats": ["format1"],
+    "transaction_amount_formats": ["format1", "format2"],
     "transaction_amount_headers": ["Credits"],
     "transaction_amount_alignment": "x2",
     "transaction_amount_invert_headers": ["Debits"],
     "transaction_amount_invert_alignment": "x2",
+    "transaction_amount_invert": false,
 
     "transaction_balance_formats": ["format3"],
     "transaction_balance_headers": ["Balance"],
-    "transaction_balance_alignment": "x2"
+    "transaction_balance_alignment": "x2",
+    "transaction_balance_invert": false
 }

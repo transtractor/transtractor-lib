@@ -13,7 +13,7 @@ def pdf_to_text_items(pdf_path: str) -> List[dict]:
     items: List[dict] = []
     with pdfplumber.open(pdf_path) as pdf:
         for page_index, page in enumerate(pdf.pages):
-            for word in page.extract_words():
+            for word in page.extract_words(x_tolerance=2):
                 items.append({
                     "text": word.get("text", ""),
                     "x1": int(float(word["x0"])),
