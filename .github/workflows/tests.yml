@@ -1,0 +1,50 @@
+name: Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Build Rust
+      run: cargo build --verbose
+    
+    - name: Run Rust tests
+      run: cargo test --verbose
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install maturin pylint pytest pytest-cov
+    
+    - name: Build Python package
+      run: maturin develop --release
+    
+    - name: Run pylint
+      run: |
+        pylint python/transtractor --fail-under=10.0 --recursive=y
+        pylint tests/python --fail-under=10.0 --recursive=y
+    
+    - name: Run pytest with coverage
+      run: |
+        pytest tests/python/ --cov=transtractor --cov-report=term-missing
