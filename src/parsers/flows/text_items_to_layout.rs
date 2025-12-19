@@ -19,7 +19,7 @@ pub fn text_items_to_layout(
     let mut last_height = sorted_items[0].y2 - sorted_items[0].y1;
 
     // Start with the first page marker
-    output.push_str(&format!("[Page {}]\n", current_page));
+    output.push_str(&format!("[Page {}]", current_page));
 
     for item in &sorted_items {
         // Check if we're on a new page
