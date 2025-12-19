@@ -1,5 +1,8 @@
 # The Transtractor (pre-release)
 
+![Tests](https://github.com/transtractor/transtractor-lib/actions/workflows/tests.yml/badge.svg)
+![License](https://img.shields.io/github/license/transtractor/transtractor-lib)
+
 ## Universal PDF bank statement parsing
 
 The Transaction Extractor, or 'Transtractor', aspires to be a universal 
