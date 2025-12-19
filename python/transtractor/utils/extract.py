@@ -1,3 +1,5 @@
+"""Utilities for extracting text items from PDF files."""
+
 from typing import List
 
 import pdfplumber

@@ -1,10 +1,11 @@
 """Handle loading of default configurations for statement parsing."""
+
 from pathlib import Path
 
 from ..transtractor import LibConfigDB  # Rust PyO3 class
 
 
-# Register all configs in packages data/configs directory. Caching is 
+# Register all configs in packages data/configs directory. Caching is
 # disabled for the base config DB for minimal memory usage. Configs
 # are cached in the ConfigDB of a Parser instance when requested.
 BASE_CONFIG_DB = LibConfigDB(caching=False, str_caching=False)

@@ -1,31 +1,34 @@
+"""Python wrapper for the Transtractor PDF bank statement parser."""
+
 from typing import List
 
-from .transtractor import LibParser, NoErrorFreeStatementData
+from .exceptions import StatementNotSupported
 from .structs.statement_data import StatementData
-from .utils.extract import pdf_to_text_items
+from .transtractor import LibParser  # pylint: disable=no-name-in-module
 from .utils.default_configs import get_base_config_db
-import time
-from pathlib import Path
-
-class StatementNotSupported(Exception):
-    """Raised when the statement format is unsupported or unidentifiable."""
+from .utils.extract import pdf_to_text_items
+from .utils.testing import run_test_protocol
 
 
 class Parser:
-    """A bank statement parser capable of identifying statement types
-    and converting them to CSV.
+    """A PDF bank statement parser.
     
-    The parser is pre-configured to recognise and extract data 
-    from various bank statement PDFs. It can also be extended 
-    with custom parsing configurations in cases where a statement format
-    is not recognised by the core configurations.
+    This parser will be initialized with a set of default bank statement
+    extraction configurations. When parsing a PDF, it will attempt to identify
+    applicable configurations based on the text items extracted from the PDF. You
+    can also load custom configurations from JSON files for additional statement
+    formats.
 
     Example:
-        ...
+        parser = Parser()
+        parser.load('custom_config.json')
+        statement_data = parser.parse('statement.pdf')
+        print(statement_data)
+        statement_data.to_csv('output.csv')
     """
     def __init__(self):
+        """Initialise the Parser with default configurations."""
         self._inner = LibParser()
-        # Load typer with terms
         for key in get_base_config_db().get_all_config_keys():
             account_terms = get_base_config_db().get_account_terms(key)
             self._inner.add_account_terms(key, account_terms)
@@ -50,12 +53,13 @@ class Parser:
         """Parse the bank statement PDF and return a StatementData object.
 
         :param pdf_file_path: Path to the PDF file to be processed
-        :return: StatementData object representing the parsed bank statement
+        :return: StatementData object representing the parsed bank statement data
         :raises NoErrorFreeStatementData: If no error-free statement data could be found
         :raises StatementNotSupported: If the statement format is unsupported or unidentifiable
 
         NoErrorFreeStatementData is raised in the following cases:
-        - Quality check failure: no error-free parsed StatementData produced (e.g., unbalanced transactions).
+        - Quality check failure: no error-free parsed StatementData produced 
+            (e.g., unbalanced transactions).
         - Missing required transaction fields: a required date/amount/balance absent.
         """
         py_text_items = pdf_to_text_items(pdf_file_path)
@@ -85,12 +89,15 @@ class Parser:
         return result
 
     def layout(self, pdf_file_path: str, output_file: str, y_bin=0.0, x_gap=0.0) -> str:
-        """Extract and return a text layout representation of the PDF page.
+        """Extract, write and return a text layout representation of the PDF page.
 
         :param pdf_file_path: Path to the PDF file to be processed
         :param y_bin: Y coordinate bin size for sorting/merging text items
-        :param x_gap: X coordinate gap size for merging text items
+        :param x_gap: X coordinate gap size in number of characters for merging text items
         :return: A string representing the text layout of the page
+        
+        Note: The values of y_bin and x_gap are same same as those used for the
+        "fix_text_order" parameter in the configuration JSON files. 
         """
         py_text_items = pdf_to_text_items(pdf_file_path)
         layout_str: str = self._inner.py_text_items_to_layout_py_str(py_text_items, y_bin, x_gap)
@@ -98,46 +105,33 @@ class Parser:
             fh.write(layout_str)
         return layout_str
 
-    def test(self, pdf_dir: str) -> None:
-        """Detect all PDFs in a given directory and sub-directories
-        and attempt to parse them. Reports results to stdout.
+    def load(self, json_file_path: str) -> None:
+        """Load a custom parsing configuration from a JSON file.
 
+        Configurations loaded via this method will be registered in the
+        internal configuration database and will overwrite any existing
+        configuration with the same key.
+
+        :param json_file_path: Path to the JSON configuration file
+        :return: None
+        :raises ConfigLoadError: If the configuration file is invalid 
+            or cannot be loaded
+
+        See the docs for detailed instructions for creating custom 
+        configuration JSON files.
+        """
+        self._inner.import_config_from_file(json_file_path)
+
+    def test(self, pdf_dir: str, output_file: str = "", log_level: str = "INFO") -> None:
+        """Try to parse all PDFs in a given directory and sub-directories
+        using the current parser configuration database. Optionally outputs 
+        a CSV file summarising the test results.
+        
         :param pdf_dir: Path to the directory containing PDF files to be tested
+        :param output_file: Optional path to output CSV file for test results
+        :param log_level: Logging level for test output (e.g., "INFO", "WARNING")
         :return: None
         
-        Output format:
-            Testing {file_path}...
-            Transactions={#}\t'Key={config_keys}'\tTime={time}ms\tStatus={PASS|FAIL}
-            
-            Transactions: Number of successfully parsed transactions. 'Check Debug' if FAIL.
-            Key: The config keys used for parsing. 'None' if no applicable config found.
-            Time: Time taken to parse in milliseconds
-            Status: PASS if parsing was successful and error-free, FAIL otherwise
-        """        
-        # Get all PDF files in the directory and sub-directories
-        pdf_files: list[str] = [str(p) for p in Path(pdf_dir).rglob("*.pdf")]
-        
-        for pdf_file in pdf_files:
-            print(f"Testing {pdf_file}...")
-            num_transactions = 0
-            keys = ""
-            status = "FAIL"
-            start_time = time.time()
-            try:
-                py_text_items = pdf_to_text_items(pdf_file)
-                keys = self._identify(py_text_items)
-                sd: StatementData = self._inner.py_text_items_to_py_statement_data(
-                    py_text_items, keys
-                )
-                num_transactions = len(sd.transactions)
-                status = "PASS"
-            except StatementNotSupported:
-                keys = "None"
-            except NoErrorFreeStatementData:
-                pass
-            end_time = time.time()
-            elapsed_ms = int((end_time - start_time) * 1000)
-            print(
-                f"Transactions={num_transactions}\tKey={keys}\t"
-                f"Time={elapsed_ms}ms\tStatus={status}"
-            )
+        Note: Set log_level to "WARNING" or higher to suppress terminal output.
+        """
+        run_test_protocol(pdf_dir, self, output_file, log_level)
