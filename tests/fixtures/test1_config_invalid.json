@@ -1,0 +1,65 @@
+{
+    "key": "zz__gtb__fake_account__1",
+    "bank_name": "Gravy Toast Bank",
+    "account_type": "Savings",
+    "account_terms": ["Gravy Toast", "Fake"],
+    "account_examples": ["Fake Account Product", "Similar Product"],
+    "fix_text_order": [0.0, 0.0],
+
+    "account_number_terms": ["Account number:"],
+    "account_number_patterns": ["\\b\\d{4}\\s\\d{4}\\s\\d{4}\\s\\d{4}\\b"],
+    "account_number_alignment": "y1",
+    "account_number_alignment_tol": 5,
+
+    "opening_balance_terms": ["Opening balance:"],
+    "opening_balance_formats": ["format3"],
+    "opening_balance_alignment": "y1",
+    "opening_balance_alignment_tol": 5,
+    "opening_balance_invert": false,
+
+    "closing_balance_terms": ["Closing balance:"],
+    "closing_balance_formats": ["format3"],
+    "closing_balance_alignment": "y1",
+    "closing_balance_alignment_tol": 5,
+    "closing_balance_invert": false,
+
+    "start_date_terms": ["Statement Period:"],
+    "start_date_formats": ["format2"],
+    "start_date_alignment": "y1",
+    "start_date_alignment_tol": 5,
+
+    "transaction_terms": ["Transaction Details"],
+    "transaction_terms_stop": ["Transactions stop here."],
+    "transaction_formats": [
+        ["date", "description", "amount", "balance"],
+        ["date", "description", "amount"],
+        ["description", "amount", "balance"],
+        ["description", "amount"]
+    ],
+    "transaction_new_line_tol": 5,
+    "transaction_start_date_required": true,
+    "transaction_alignment_tol": 10,
+
+    "transaction_date_formats": ["format1"],
+    "transaction_date_headers": ["Date"],
+    "transaction_date_alignment": "x1",
+
+    "transaction_description_headers": ["Description"],
+    "transaction_description_alignment": "x1",
+    "transaction_description_exclude": [
+        " Annoying text",
+        " text to filter out"
+    ],
+
+    "transaction_amount_formats": ["format1", "format2"],
+    "transaction_amount_headers": ["Credit"],
+    "transaction_amount_alignment": "x2",
+    "transaction_amount_invert_headers": ["Debit"],
+    "transaction_amount_invert_alignment": "x2",
+    "transaction_amount_invert": false,
+
+    "transaction_balance_formats": ["format4"],
+    "transaction_balance_headers": ["Balance"],
+    "transaction_balance_alignment": "x2",
+    "transaction_balance_invert": false
+}

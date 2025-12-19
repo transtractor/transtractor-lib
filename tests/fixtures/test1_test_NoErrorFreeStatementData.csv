@@ -1,0 +1,2 @@
+PDF File,Pages,Transactions,Config Keys,Extract Time (ms),Identify Time (ms),Parse Time (ms),Total Time (ms),Status,Reason Failed
+tests/fixtures/test1.pdf,3,0,au__gtb__fake_account__1,365,0,243,608,FAIL,NoErrorFreeStatementData
