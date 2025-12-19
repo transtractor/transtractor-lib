@@ -1,0 +1,75 @@
+Debug output
+Found 1 StatementData result(s)
+
+=== StatementData Result 1 ===
+Statement Data:
+  Key: au__gtb__fake_account__1
+  Account Number: 1234 5678 9123 4567
+  Start Date: 01 Jan 2025
+  Opening Balance: 50000.00
+  Closing Balance: 11663.82
+  Proto Transactions:
+    1: 01 Jan 2025, "Transaction 1", 50000.00, 100000.00
+    2: 01 Jan 2025, "Transaction 2", -1000.00, 99000.00
+    3: 01 Jan 2025, "Transaction 3", -10000.00, 89000.00
+    4: 01 Jan 2025, "Transaction 4", 1350.00, 90350.00
+    5: 03 Jan 2025, "Transaction 5", -530.99, 89819.01
+    6: 03 Jan 2025, "Transaction 6", 1532.55, 91351.56
+    7: 04 Jan 2025, "Transaction 7", -568.01, 90783.55
+    8: 04 Jan 2025, "Transaction 8", -23.56, 90759.99
+    9: 04 Jan 2025, "Transaction 9", -2000.00, 88759.99
+    10: 04 Jan 2025, "Transaction 10", 600.35, 89360.34
+    11: 04 Jan 2025, "Transaction 11", -4.00, 89356.34
+    12: 04 Jan 2025, "Transaction 12", -800.36, 88555.98
+    13: 07 Jan 2025, "Transaction 13", -654.52, 87901.46
+    14: 07 Jan 2025, "Transaction 14", 500.22, 88401.68
+    15: 07 Jan 2025, "Transaction 15", -812.14, 87589.54
+    16: 07 Jan 2025, "Transaction 16", 5254.55, 92844.09
+    17: 09 Jan 2025, "Transaction 17", 2561.22, 95405.31
+    18: 09 Jan 2025, "Transaction 18", 1000.00, 96405.31
+    19: 09 Jan 2025, "Transaction 19", -31552.00, 64853.31
+    20: 09 Jan 2025, "Transaction 20", 20000.00, 84853.31
+    21: 09 Jan 2025, "Transaction 21", -1024.25, 83829.06
+    22: 09 Jan 2025, "Transaction 22", -0.32, 83828.74
+    23: 09 Jan 2025, "Transaction 23", -662.12, 83166.62
+    24: 09 Jan 2025, "Transaction 24", 1011.11, 84177.73
+    25: 13 Jan 2025, "Transaction 25", 200.33, 84378.06
+    26: 13 Jan 2025, "Transaction 26", 600.14, 84978.20
+    27: 13 Jan 2025, "Transaction 27", -9876.54, 75101.66
+    28: 13 Jan 2025, "Transaction 28", -1.33, 75100.33
+    29: 15 Jan 2025, "Transaction 29", -1122.33, 73978.00
+    30: 16 Jan 2025, "Transaction 30", 0.53, 73978.53
+    31: 17 Jan 2025, "Transaction 31 Goes over multiple pages", -0.00, 73978.53
+    32: 17 Jan 2025, "Transaction 32 Goes over multiple lines", 0.01, 73978.54
+    33: 17 Jan 2025, "Transaction 33", -80000.00, -6021.46
+    34: 17 Jan 2025, "Transaction 34", -10123.12, -16144.58
+    35: 18 Jan 2025, "Transaction 35", 12345.67, -3798.91
+    36: 18 Jan 2025, "Transaction 36", -567.54, -4366.45
+    37: 18 Jan 2025, "Transaction 37", 12000.00, 7633.55
+    38: 18 Jan 2025, "Transaction 38", 222.22, 7855.77
+    39: 18 Jan 2025, "Transaction 39", -23.00, 7832.77
+    40: 18 Jan 2025, "Transaction 40", -40.13, 7792.64
+    41: 18 Jan 2025, "Transaction 41", -2.33, 7790.31
+    42: 18 Jan 2025, "Transaction 42", 3333.01, 11123.32
+    43: 18 Jan 2025, "Transaction 43", 20.00, 11143.32
+    44: 18 Jan 2025, "Transaction 44", -10.11, 11133.21
+    45: 23 Jan 2025, "Transaction 45", -10000.99, 1132.22
+    46: 23 Jan 2025, "Transaction 46", -23.90, 1108.32
+    47: 23 Jan 2025, "Transaction 47", -0.99, 1107.33
+    48: 23 Jan 2025, "Transaction 48", 2001.22, 3108.55
+    49: 25 Jan 2025, "Transaction 49", -100.00, 3008.55
+    50: 25 Jan 2025, "Transaction 50", -50.05, 2958.50
+    51: 26 Jan 2025, "Transaction 51", -1000.00, 1958.50
+    52: 26 Jan 2025, "Transaction 52", -30.00, 1928.50
+    53: 27 Jan 2025, "Transaction 53", -1000.00, 928.50
+    54: 27 Jan 2025, "Transaction 54", 10123.45, 11051.95
+    55: 27 Jan 2025, "Transaction 55", -1.02, 11050.93
+    56: 27 Jan 2025, "Transaction 56", -4.00, 11046.93
+    57: 29 Jan 2025, "Transaction 57", -999.99, 10046.94
+    58: 29 Jan 2025, "Transaction 58", -30.12, 10016.82
+    59: 29 Jan 2025, "Transaction 59", -456.98, 9559.84
+    60: 29 Jan 2025, "Transaction 60", 2123.98, 11683.82
+    61: 31 Jan 2025, "Transaction 61", -30.00, 11653.82
+    62: 31 Jan 2025, "Transaction 62", 10.00, 11663.82
+  Errors: None
+
