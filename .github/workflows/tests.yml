@@ -32,19 +32,27 @@ jobs:
     - name: Run Rust tests
       run: cargo test --verbose
     
+    - name: Create virtual environment
+      run: python -m venv .venv
+    
     - name: Install Python dependencies
       run: |
+        source .venv/bin/activate
         python -m pip install --upgrade pip
         pip install maturin pylint pytest pytest-cov
     
     - name: Build Python package
-      run: maturin develop --release
+      run: |
+        source .venv/bin/activate
+        maturin develop --release
     
     - name: Run pylint
       run: |
+        source .venv/bin/activate
         pylint python/transtractor --fail-under=10.0 --recursive=y
         pylint tests/python --fail-under=10.0 --recursive=y
     
     - name: Run pytest with coverage
       run: |
+        source .venv/bin/activate
         pytest tests/python/ --cov=transtractor --cov-report=term-missing
