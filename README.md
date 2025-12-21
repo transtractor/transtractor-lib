@@ -1,10 +1,9 @@
-# The Transtractor (pre-release)
+# The Transtractor
 
 ![Tests](https://github.com/transtractor/transtractor-lib/actions/workflows/tests.yml/badge.svg)
 ![License](https://img.shields.io/github/license/transtractor/transtractor-lib)
 
 ## Universal PDF bank statement parsing
-
 The Transaction Extractor, or 'Transtractor', aspires to be a universal 
 library for extracting transaction data from PDF bank statements. Key features:
 
@@ -15,8 +14,6 @@ library for extracting transaction data from PDF bank statements. Key features:
 
 
 ## Installation
-
-Transtractor is currently under active development and has not yet been released on PyPI. For now, you'll need to compile from source.
 
 ### Compile from source
 
@@ -48,7 +45,7 @@ Transtractor is currently under active development and has not yet been released
    parser.parse('statement.pdf').to_csv('statement.csv')
    ```
 
-3. **Convert PDF the dictionary**: Load into a DataFrame for analysis
+3. **Convert PDF to DataFrame**: Load into a DataFrame for analysis
    ```python
    import pandas as pd
 
@@ -57,29 +54,19 @@ Transtractor is currently under active development and has not yet been released
    ```
 
 ## Supported statements
+See the documentation for a current list of [supported statements](https://transtractor-lib.readthedocs.io/en/latest/supported_statements.html). You may also
+create your own parsing configuration files by following these [instructions](https://transtractor-lib.readthedocs.io/en/latest/configuration.html)
+and loading it by:
 
-Only a limited number of PDF statements are supported. This should expand with community contributions.
+```python
+from transtractor import Parser
 
-Currently supported statements, and their config files (src/configs), include:
+parser = Parser()
+parser.load('my_config.json')
+parser.parse('statement.pdf').to_csv('statement.csv')
+```
 
-### Australia
-
-* **Commonwealth Bank**
-    * Credit Card (*au__cba__credit_card__1*)
-    * Debit/Savings (*au__cba__debit__1*)
-    * Loan (*au__cba__loan__1*)
-
-* **National Australia Bank**
-    * Classic Banking (*au__nab__classic_banking__1*)
-
-## Expanding support
-
-Stay tuned for proper guidance. But if you are really keen:
-
-1. Develop a config file for your bank statement and copy it into the src/configs folder. 
-2. Add new date or amount formats as required to the src/formats/date or src/formats/amount modules.
-3. Rebuild the package.
-
-## Contributing to the project
-
-Stay tuned.
+## Contributions
+New and well-tested configuration files are especially welcome. Please
+submit a pull request with them add to the *data/configs* directory, or
+email to develop@transtractor.net.
