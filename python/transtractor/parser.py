@@ -58,8 +58,9 @@ class Parser:
         :raises StatementNotSupported: If the statement format is unsupported or unidentifiable
 
         NoErrorFreeStatementData is raised in the following cases:
+        
         - Quality check failure: no error-free parsed StatementData produced 
-            (e.g., unbalanced transactions).
+          (e.g., unbalanced transactions).
         - Missing required transaction fields: a required date/amount/balance absent.
         """
         py_text_items = pdf_to_text_items(pdf_file_path)
