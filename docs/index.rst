@@ -3,7 +3,7 @@ Transtractor
 
 **Universal PDF Bank Statement Parsing**
 
-Transtractor (Transaction Extractor) is a high-performance library for extracting transaction data from PDF bank statements. 
+The Transtractor (Transaction Extractor) is a high-performance library for extracting transaction data from PDF bank statements. 
 Built with Rust for speed and wrapped with a Python API for ease of use.
 
 .. image:: https://github.com/transtractor/transtractor-lib/actions/workflows/tests.yml/badge.svg
