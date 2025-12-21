@@ -8,9 +8,9 @@ pub fn py_text_items_to_rust_text_items(
     py_text_items: &Bound<'_, PyAny>,
 ) -> PyResult<Vec<TextItem>> {
     let mut text_items = Vec::new();
-    let py_list = py_text_items.downcast::<PyList>()?;
+    let py_list = py_text_items.cast::<PyList>()?;
     for obj in py_list.iter() {
-        let dict = obj.downcast::<pyo3::types::PyDict>()?;
+        let dict = obj.cast::<pyo3::types::PyDict>()?;
         let text: String = dict
             .get_item("text")?
             .ok_or_else(|| PyRuntimeError::new_err("Missing 'text' field"))?
@@ -44,8 +44,8 @@ pub fn py_text_items_to_rust_text_items(
 /// Convert a Rust StatementData to a Python StatementData object
 pub fn rust_statement_data_to_py_statement_data(
     rust_statement_data: &crate::structs::StatementData,
-) -> PyResult<PyObject> {
-    Python::with_gil(|py| {
+) -> PyResult<Py<PyAny>> {
+    Python::attach(|py| {
         // Import the Python StatementData and Transaction classes
         let statement_data_module = py.import("transtractor.structs.statement_data")?;
         let statement_data_class = statement_data_module.getattr("StatementData")?;

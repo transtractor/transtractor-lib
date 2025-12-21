@@ -109,7 +109,7 @@ impl LibParser {
         &self,
         py_text_items: &Bound<'_, pyo3::types::PyAny>,
         applicable_config_keys: Vec<String>,
-    ) -> PyResult<PyObject> {
+    ) -> PyResult<Py<PyAny>> {
         let text_items = utils::py_text_items_to_rust_text_items(py_text_items)?;
         let configs = self
             .get_configs_from_keys(&applicable_config_keys)
