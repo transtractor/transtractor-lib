@@ -44,4 +44,4 @@ Issues = "https://github.com/transtractor/transtractor-lib/issues"
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
-include = ["data/**/*"]
+include = ["python/transtractor/configs/**/*"]

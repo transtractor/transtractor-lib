@@ -3,7 +3,7 @@ Supported Statements
 
 The Transtractor uses rules-based parsing to extract transaction data from bank statements. Each 
 supported statement format is defined by a specific set of parsing rules tailored to the bank 
-and account type. These files are located in the `data/configs` directory of 
+and account type. These files are located in the `python/transtractor/configs` directory of 
 the `source code <https://github.com/transtractor/transtractor-lib>`_.
 
 The following statements will be recognised and parsed authomatically. You must create and load 

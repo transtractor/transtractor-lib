@@ -68,5 +68,5 @@ parser.parse('statement.pdf').to_csv('statement.csv')
 
 ## Contributions
 New and well-tested configuration files are especially welcome. Please
-submit a pull request with them add to the *data/configs* directory, or
+submit a pull request with them add to the *python/transtractor/configs* directory, or
 email to develop@transtractor.net.
