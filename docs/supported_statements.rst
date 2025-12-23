@@ -23,16 +23,16 @@ Australia
    * - ``au__cba__credit_card__1``
      - Commonwealth Bank
      - Credit Card
-     - v1.0.0
+     - v0.9.0
    * - ``au__cba__debit__1``
      - Commonwealth Bank
      - Debit/Savings
-     - v1.0.0
+     - v0.9.0
    * - ``au__cba__loan__1``
      - Commonwealth Bank
      - Loan
-     - v1.0.0
+     - v0.9.0
    * - ``au__nab__classic_banking__1``
      - National Australia Bank
      - Classic Banking
-     - v1.0.0
+     - v0.9.0
