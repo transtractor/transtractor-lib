@@ -6,9 +6,21 @@ Transtractor
 The Transtractor (Transaction Extractor) is a high-performance library for extracting transaction data from PDF bank statements. 
 Built with Rust for speed and wrapped with a Python API for ease of use.
 
+.. image:: https://img.shields.io/pypi/v/transtractor
+   :target: https://pypi.org/project/transtractor/
+   :alt: PyPI version
+
+.. image:: https://img.shields.io/pypi/status/transtractor
+   :target: https://pypi.org/project/transtractor/
+   :alt: Development Status
+
 .. image:: https://github.com/transtractor/transtractor-lib/actions/workflows/tests.yml/badge.svg
    :target: https://github.com/transtractor/transtractor-lib/actions
    :alt: Tests
+
+.. image:: https://codecov.io/gh/transtractor/transtractor-lib/branch/main/graph/badge.svg
+   :target: https://codecov.io/gh/transtractor/transtractor-lib
+   :alt: codecov
 
 .. image:: https://img.shields.io/github/license/transtractor/transtractor-lib
    :target: https://github.com/transtractor/transtractor-lib/blob/main/LICENSE
