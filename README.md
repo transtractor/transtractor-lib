@@ -18,6 +18,16 @@ library for extracting transaction data from PDF bank statements. Key features:
 
 ## Installation
 
+### Install from PyPI
+
+Transtractor is available on PyPI and can be installed with pip:
+
+```bash
+pip install transtractor
+```
+
+**Requirements**: Python 3.9 or higher
+
 ### Compile from source
 
 1. **Install Rust**: Download and install Rust from [rustup.rs](https://rustup.rs/)
@@ -34,7 +44,7 @@ library for extracting transaction data from PDF bank statements. Key features:
    maturin develop --release
    ```
 
-### Basic usage (Python)
+### Basic usage
 
 1. **Import and initialise the parser**
    ```python
@@ -55,6 +65,9 @@ library for extracting transaction data from PDF bank statements. Key features:
    data = parser.parse('statement.pdf').to_pandas_dict()
    df = pd.DataFrame(data)
    ```
+
+## Advanced usage
+See the [documentation](https://transtractor-lib.readthedocs.io/en/latest/) maintained on Read the Docs.
 
 ## Supported statements
 See the documentation for a current list of [supported statements](https://transtractor-lib.readthedocs.io/en/latest/supported_statements.html). You may also
