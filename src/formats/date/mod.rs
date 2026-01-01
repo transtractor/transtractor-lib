@@ -213,7 +213,7 @@ mod tests {
     #[test]
     fn test_multi_date_format_parser() {
         let multi_fmt =
-            MultiDateFormatParser::new(&["format1", "format2", "format3", "format4", "format5"]);
+            MultiDateFormatParser::new(&["format1", "format2", "format3", "format4", "format5", "format6"]);
         // Should parse using format1
         assert!(multi_fmt.parse("24 mar", "2023").is_some());
         // Should parse using format2
