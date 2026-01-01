@@ -4,12 +4,13 @@ pub mod format3;
 pub mod format4;
 pub mod format5;
 pub mod format6;
+pub mod format7;
 pub mod generate;
 
 use crate::formats::date::generate::{parse_day, parse_month, parse_year};
 use crate::formats::date::{
     format1::Format1, format2::Format2, format3::Format3, format4::Format4, format5::Format5,
-    format6::Format6,
+    format6::Format6, format7::Format7,
 };
 
 /// Trait for date formats.
@@ -23,7 +24,7 @@ pub trait DateFormat {
 
 /// Get a list of valid formats.
 pub fn get_valid_formats() -> Vec<&'static str> {
-    vec!["format1", "format2", "format3", "format4", "format5", "format6"]
+    vec!["format1", "format2", "format3", "format4", "format5", "format6", "format7"]
 }
 
 /// Stores day, month, and year strings and can convert to a UTC timestamp.
@@ -100,6 +101,7 @@ impl MultiDateFormatParser {
                     "format4" => Format4.num_items(),
                     "format5" => Format5.num_items(),
                     "format6" => Format6.num_items(),
+                    "format7" => Format7.num_items(),
                     _ => 0,
                 };
                 (name, num_items)
@@ -119,6 +121,7 @@ impl MultiDateFormatParser {
                 "format4" => parsers.push(Box::new(Format4)),
                 "format5" => parsers.push(Box::new(Format5)),
                 "format6" => parsers.push(Box::new(Format6)),
+                "format7" => parsers.push(Box::new(Format7)),
                 _ => {}
             }
         }
@@ -213,7 +216,7 @@ mod tests {
     #[test]
     fn test_multi_date_format_parser() {
         let multi_fmt =
-            MultiDateFormatParser::new(&["format1", "format2", "format3", "format4", "format5", "format6"]);
+            MultiDateFormatParser::new(&["format1", "format2", "format3", "format4", "format5", "format6", "format7"]);
         // Should parse using format1
         assert!(multi_fmt.parse("24 mar", "2023").is_some());
         // Should parse using format2
@@ -226,6 +229,9 @@ mod tests {
         assert!(multi_fmt.parse("24/3/20", "").is_some());
         // Should parse using format6
         assert!(multi_fmt.parse("3/24", "2020").is_some());
+        // Should parse using format7
+        assert!(multi_fmt.parse("24-03-2020", "").is_some());
+        assert!(multi_fmt.parse("24-3-20", "").is_some());
         // Should not parse invalid
         assert_eq!(multi_fmt.parse("foo", "2023"), None);
     }

@@ -180,6 +180,8 @@ formats are supported:
      - "24/3/25" → 2025-03-24, "24/03/25" → 2025-03-25
    * - ``format6``
      - "3/24" → XXXX-03-24, "03/24" → XXXX-03-24
+   * - ``format7``
+     - "24-03-2023" → 2023-03-24, "24-3-2023" → 2023-03-24, "24-03-23" → 2023-03-24, "24-3-23" → 2023-03-24
 
 Formats with a "XXXX" year will infer the year based on the statement start date.
 
