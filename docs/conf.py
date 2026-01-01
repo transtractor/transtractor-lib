@@ -11,9 +11,9 @@ sys.path.insert(0, os.path.abspath('../python'))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Transtractor'
-copyright = '2025, Daniel Weber'
+copyright = '2026, Daniel Weber'
 author = 'Daniel Weber'
-release = '0.9.0'
+release = '0.9.2'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
