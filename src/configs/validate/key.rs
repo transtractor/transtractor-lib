@@ -45,13 +45,22 @@ pub fn key(key: &str) -> Result<(), String> {
         ));
     }
 
-    // Validate last component is an integer
+    // Validate last component is a non-zero positive integer
     let version = components[3];
-    if version.parse::<i32>().is_err() {
-        return Err(format!(
-            "Last component must be an integer. Found: '{}'",
-            version
-        ));
+    match version.parse::<i32>() {
+        Ok(v) if v > 0 => {}
+        Ok(v) => {
+            return Err(format!(
+                "Last component must be a positive, non-zero integer. Found: '{}'",
+                v
+            ));
+        }
+        Err(_) => {
+            return Err(format!(
+                "Last component must be an integer. Found: '{}'",
+                version
+            ));
+        }
     }
 
     Ok(())
@@ -134,14 +143,17 @@ mod tests {
     }
 
     #[test]
-    fn test_valid_zero_version() {
-        assert!(key("au__cba__credit_card__0").is_ok());
+    fn test_invalid_zero_version() {
+        let result = key("au__cba__credit_card__0");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("positive, non-zero integer"));
     }
 
     #[test]
-    fn test_valid_negative_version() {
-        // Negative integers are still valid integers
-        assert!(key("au__cba__credit_card__-1").is_ok());
+    fn test_invalid_negative_version() {
+        let result = key("au__cba__credit_card__-1");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("positive, non-zero integer"));
     }
 
     #[test]
