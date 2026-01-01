@@ -3,11 +3,14 @@ pub mod format2;
 pub mod format3;
 pub mod format4;
 pub mod format5;
+pub mod format6;
 pub mod generate;
 
-use crate::formats::date::{format1::Format1, format2::Format2, format3::Format3, format4::Format4, format5::Format5};
 use crate::formats::date::generate::{parse_day, parse_month, parse_year};
-
+use crate::formats::date::{
+    format1::Format1, format2::Format2, format3::Format3, format4::Format4, format5::Format5,
+    format6::Format6,
+};
 
 /// Trait for date formats.
 pub trait DateFormat {
@@ -18,12 +21,10 @@ pub trait DateFormat {
     fn parse(&self, input: &str, year_str: &str) -> Option<i64>;
 }
 
-
 /// Get a list of valid formats.
 pub fn get_valid_formats() -> Vec<&'static str> {
-    vec!["format1", "format2", "format3", "format4", "format5"]
+    vec!["format1", "format2", "format3", "format4", "format5", "format6"]
 }
-
 
 /// Stores day, month, and year strings and can convert to a UTC timestamp.
 #[derive(Debug, Clone)]
@@ -63,7 +64,7 @@ impl DateParts {
 
         // Try to create the date
         let date = chrono::NaiveDate::from_ymd_opt(year, month, day);
-        
+
         // If parsing failed and we have February 29, try adding 1 year (leap year fix)
         let date = match date {
             Some(d) => d,
@@ -71,10 +72,10 @@ impl DateParts {
                 // Feb 29 failed, likely because current year is not a leap year
                 // Try adding 1 year to handle year crossover issue with leap years
                 chrono::NaiveDate::from_ymd_opt(year + 1, month, day)?
-            },
+            }
             None => return None,
         };
-        
+
         let datetime = date.and_hms_opt(0, 0, 0)?;
         Some(datetime.and_utc().timestamp_millis())
     }
@@ -89,17 +90,21 @@ impl MultiDateFormatParser {
     /// Create a new dispatcher from a list of format names.
     pub fn new(format_names: &[&str]) -> Self {
         // Collect (name, num_items) pairs
-        let mut formats: Vec<(&str, usize)> = format_names.iter().map(|&name| {
-            let num_items = match name {
-                "format1" => Format1.num_items(),
-                "format2" => Format2.num_items(),
-                "format3" => Format3.num_items(),
-                "format4" => Format4.num_items(),
-                "format5" => Format5.num_items(),
-                _ => 0,
-            };
-            (name, num_items)
-        }).collect();
+        let mut formats: Vec<(&str, usize)> = format_names
+            .iter()
+            .map(|&name| {
+                let num_items = match name {
+                    "format1" => Format1.num_items(),
+                    "format2" => Format2.num_items(),
+                    "format3" => Format3.num_items(),
+                    "format4" => Format4.num_items(),
+                    "format5" => Format5.num_items(),
+                    "format6" => Format6.num_items(),
+                    _ => 0,
+                };
+                (name, num_items)
+            })
+            .collect();
 
         // Sort by num_items descending
         formats.sort_by(|a, b| b.1.cmp(&a.1));
@@ -113,6 +118,7 @@ impl MultiDateFormatParser {
                 "format3" => parsers.push(Box::new(Format3)),
                 "format4" => parsers.push(Box::new(Format4)),
                 "format5" => parsers.push(Box::new(Format5)),
+                "format6" => parsers.push(Box::new(Format6)),
                 _ => {}
             }
         }
@@ -131,7 +137,11 @@ impl MultiDateFormatParser {
 
     /// Returns the maximum number of items among all formats.
     pub fn max_items(&self) -> usize {
-        self.parsers.iter().map(|p| p.num_items()).max().unwrap_or(0)
+        self.parsers
+            .iter()
+            .map(|p| p.num_items())
+            .max()
+            .unwrap_or(0)
     }
 }
 
@@ -202,7 +212,8 @@ mod tests {
 
     #[test]
     fn test_multi_date_format_parser() {
-        let multi_fmt = MultiDateFormatParser::new(&["format1", "format2", "format3", "format4", "format5"]);
+        let multi_fmt =
+            MultiDateFormatParser::new(&["format1", "format2", "format3", "format4", "format5"]);
         // Should parse using format1
         assert!(multi_fmt.parse("24 mar", "2023").is_some());
         // Should parse using format2
@@ -213,6 +224,8 @@ mod tests {
         assert!(multi_fmt.parse("24/3/2020", "").is_some());
         // Should parse using format5
         assert!(multi_fmt.parse("24/3/20", "").is_some());
+        // Should parse using format6
+        assert!(multi_fmt.parse("3/24", "2020").is_some());
         // Should not parse invalid
         assert_eq!(multi_fmt.parse("foo", "2023"), None);
     }
@@ -225,11 +238,11 @@ mod tests {
             month_str: "Feb".to_string(),
             year_str: "2023".to_string(), // 2023 is not a leap year
         };
-        
+
         // Should automatically try 2024 (which is a leap year) when 2023 fails
         let result = dp.to_utc_timestamp("");
         assert!(result.is_some());
-        
+
         // Verify it's actually 2024-02-29
         let expected_2024_feb_29 = chrono::NaiveDate::from_ymd_opt(2024, 2, 29)
             .unwrap()
@@ -248,10 +261,10 @@ mod tests {
             month_str: "Feb".to_string(),
             year_str: "2024".to_string(), // 2024 is a leap year
         };
-        
+
         let result = dp.to_utc_timestamp("");
         assert!(result.is_some());
-        
+
         // Should be exactly 2024-02-29
         let expected_2024_feb_29 = chrono::NaiveDate::from_ymd_opt(2024, 2, 29)
             .unwrap()
