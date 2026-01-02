@@ -5,6 +5,52 @@ Configuration files specify the parsing parameters that the Transtractor uses to
 data from bank statements. This guide explains how to create your own configuration files 
 for unsupported banks or account types.
 
+TL;DR
+--------------
+Use an IDE with an AI agent (e.g., GitHub Copilot) to do this for you.
+First clone the repository and set up the development environment 
+so that your agent has enough context to work with:
+
+.. code-block:: shell
+
+    # Install Rust
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+    # Clone the repository and set up the Python dev environment
+    git clone https://github.com/transtractor/transtractor-lib.git
+    cd transtractor-lib
+    python -m venv venv
+    source venv/bin/activate
+    pip install pytest maturin
+
+    # Compile the Rust code and install into the Python environment
+    maturin develop --release
+
+Now create a "pdfs" folder in the root of the repository and add
+your sample bank statement PDF files into it. 
+
+.. warning::
+   
+   You will be uploading sensitive financial data to 
+   a third-party AI service. Make sure you are comfortable with this
+   before proceeding.
+
+Then prompt your agent with something like:
+
+*"Create a Transtractor configuration file in JSON format to parse 
+the bank statement PDF file 'pdfs/my_bank_statement.pdf'. Use the
+instructions in 'docs/configuration.rst' as a guide. Save the 
+configuration file in the 'python/transtractor/configs' folder.
+Test if the configuration works by parsing the PDF file
+in Python. Debug as appropriate, but do not modify any of 
+the Rust or Python source code. If there are multiple 
+PDFs in the "pdfs" folder, run the Parser.test() method to 
+confirm the configuration works across all files. Finally,
+make sure the package still passes
+cargo test and pytest."*
+
+Please submit a pull request or email the configuration file
+to the project maintainer for inclusion in future releases.
 
 Basic Template
 --------------
@@ -223,7 +269,7 @@ These parameters are used to identify the statement and configuration setting,
 and control any pre-processing of the text before extraction begins.
 
 *key*
-****
+*********************
 Descriptive unique identifier for the configuration file. This must follow the format 
 ``<country_code>__<bank_code>__<account_type>__<version>``. The country_code
 must be a valid lowercase 
@@ -234,7 +280,7 @@ string such as "debit", "credit_card", or "loan". The version is an integer star
 that is incremented for each new version of the configuration file.
 
 *bank_name*
-*****************
+*********************
 Full name of the bank. Max. 100 characters.
 
 *account_type*
@@ -590,13 +636,13 @@ Here are some common issues you may encounter when creating configuration files,
 and how to resolve them.
 
 Zero-Balances
-^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Somtimes statements will show zero balances as "nil", "zero", or similar text.
 Ensure you include *format5* in the relevant *_formats* fields to handle these cases.
 This is a common case for you first statement of a new account.
 
 Hidden Characters
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 PDFs may contain characters that are not visible when viewing the statement, but
 are extracted by the parser. These hidden characters can interfere with pattern matching.
 To identify hidden characters, extract the layout text using the `layout` method
@@ -604,7 +650,7 @@ To identify hidden characters, extract the layout text using the `layout` method
 to adjust your regex patterns to account for these hidden characters.
 
 Unexpected Text Order
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 If the parser is not finding expected terms or fields, the text order extracted
 from the PDF may not match the visual order. Use the *fix_text_order* parameter
 to adjust the text ordering based on *y_bin* and *x_gap* values. Experiment
@@ -612,7 +658,7 @@ with different values to achieve the correct ordering. inspect the layout text
 to understand how the text items are ordered.
 
 Missing Date or Amount Formats
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The Transtractor is still growing its library of supported date and amount formats. If you encounter
 a date or amount format that is not recognised, you may need to add a new format parser
 to the Rust source code (as described above). Contact the project maintainers if you need
