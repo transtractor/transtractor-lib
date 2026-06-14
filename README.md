@@ -40,7 +40,7 @@ pip install transtractor
 3. **Build and install Transtractor**: Clone the repository and build
    ```bash
    git clone https://github.com/gravytoast/transtractor.git
-   cd transtractor
+   cd transtractor-lib
    maturin develop --release
    ```
 
