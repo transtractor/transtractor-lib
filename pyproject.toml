@@ -55,9 +55,9 @@ include = ["python/transtractor/configs/**/*"]
 
 [tool.pyright]
 include = ["src"]
-exclude = ["**/.venv", "**/__pycache__"]
+exclude = ["**/.venv", "**/__pycache__", "**/node_modules", "**/.*"]
 typeCheckingMode = "basic"
-pythonVersion = "3.11"
+pythonVersion = "3.14"
 reportMissingTypeStubs = false
 venvPath = "."
 venv = ".venv"
