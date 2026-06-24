@@ -3,9 +3,8 @@
 from pathlib import Path
 
 import pytest
-
 from transtractor.parser import Parser
-from transtractor.transtractor import ConfigLoadError # pylint: disable=no-name-in-module
+from transtractor.transtractor import ConfigLoadError
 
 
 def test_load_raises_config_load_error_with_invalid_config():

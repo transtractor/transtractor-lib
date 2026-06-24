@@ -4,11 +4,11 @@ import csv
 import logging
 import time
 from pathlib import Path
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING
 
 from ..exceptions import StatementNotSupported
 from ..structs.statement_data import StatementData
-from ..transtractor import NoErrorFreeStatementData # pylint: disable=no-name-in-module
+from ..transtractor import NoErrorFreeStatementData
 from .extract import pdf_to_text_items
 
 if TYPE_CHECKING:
@@ -18,9 +18,8 @@ if TYPE_CHECKING:
 class TestData:
     """Class for managing test data files and directories."""
 
-    # pylint: disable=too-many-instance-attributes
-    def __init__(self, pdf_file_path: str, parser: 'Parser'):
-        self.pdf_file_path = pdf_file_path # The PDF file being tested
+    def __init__(self, pdf_file_path: str, parser: "Parser"):
+        self.pdf_file_path = pdf_file_path  # The PDF file being tested
         self.parser = parser  # The Parser instance used for testing
         self.num_pages: int = 0  # Number of pages in the PDF
         self.num_transactions: int = 0  # Number of transactions extracted
@@ -33,7 +32,7 @@ class TestData:
         self.reason_failed: str = ""  # Error message if any
 
     @staticmethod
-    def get_header_all() -> List[str]:
+    def get_header_all() -> list[str]:
         """Get all headers for writing CSV file."""
         return [
             "PDF File",
@@ -45,11 +44,11 @@ class TestData:
             "Parse Time (ms)",
             "Total Time (ms)",
             "Status",
-            "Reason Failed"
+            "Reason Failed",
         ]
 
     @staticmethod
-    def get_header_log() -> List[str]:
+    def get_header_log() -> list[str]:
         """Get headers for writing log file."""
         return [
             "Status",
@@ -58,7 +57,7 @@ class TestData:
             "PDF File",
         ]
 
-    def get_all(self) -> List[str]:
+    def get_all(self) -> list[str]:
         """Get all data fields as strings for writing CSV file."""
         return [
             self.pdf_file_path,
@@ -70,10 +69,10 @@ class TestData:
             str(self.parse_time),
             str(self.total_time),
             self.status,
-            self.reason_failed
+            self.reason_failed,
         ]
 
-    def get_log(self) -> List[str]:
+    def get_log(self) -> list[str]:
         """Get data fields as strings for writing log file."""
         return [
             self.status,
@@ -82,7 +81,6 @@ class TestData:
             self.pdf_file_path,
         ]
 
-    # pylint: disable=protected-access
     def run(self) -> None:
         """Run the test on the PDF file using the provided parser."""
         start_total = time.time()
@@ -129,35 +127,31 @@ class TestData:
         self.total_time = int((end_total - start_total) * 1000)
 
 
-# pylint: disable=too-many-locals
 def run_test_protocol(
-    pdf_dir: str,
-    parser: 'Parser',
-    output_file: str = "",
-    log_level: str = "INFO"
-) -> List[TestData]:
+    pdf_dir: str, parser: "Parser", output_file: str = "", log_level: str = "INFO"
+) -> list[TestData]:
     """Run test protocol on all PDFs in a given directory and sub-directories.
-    
+
     :param pdf_dir: Path to the directory containing PDF files to be tested
     :param parser: Parser instance to use for testing
     :param output_file: Optional path to output CSV file for test results
     :param log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-    
+
     Note: Set log_level to "WARNING" or higher to suppress terminal output.
     """
     # Set up logging
     numeric_level = getattr(logging, log_level.upper(), None)
     if not isinstance(numeric_level, int):
         raise ValueError(f"Invalid log level: {log_level}")
-    logging.basicConfig(level=numeric_level, format='%(message)s')
+    logging.basicConfig(level=numeric_level, format="%(message)s")
     logger = logging.getLogger()
 
     # Get all PDF files in the directory and sub-directories
-    pdf_files: List[str] = [str(p) for p in Path(pdf_dir).rglob("*.pdf")]
+    pdf_files: list[str] = [str(p) for p in Path(pdf_dir).rglob("*.pdf")]
     num_files = len(pdf_files)
     num_passed = 0
     num_failed = 0
-    test_results: List[TestData] = []
+    test_results: list[TestData] = []
     log_header = "\t".join(["Test"] + TestData.get_header_log())
     logger.info(log_header)
 
@@ -173,7 +167,7 @@ def run_test_protocol(
             test_data.status,
             test_data.num_transactions,
             test_data.total_time,
-            test_data.pdf_file_path
+            test_data.pdf_file_path,
         )
         if test_data.status == "PASS":
             num_passed += 1
@@ -183,12 +177,17 @@ def run_test_protocol(
 
     # Write results to output CSV file if specified
     if output_file:
-        with open(output_file, mode='w', newline='', encoding='utf-8') as csvfile:
+        with open(output_file, mode="w", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(TestData.get_header_all())
             for result in test_results:
                 writer.writerow(result.get_all())
 
-    logger.info("Summary: %s passed, %s failed out of %s files.", num_passed, num_failed, num_files)
+    logger.info(
+        "Summary: %s passed, %s failed out of %s files.",
+        num_passed,
+        num_failed,
+        num_files,
+    )
 
     return test_results

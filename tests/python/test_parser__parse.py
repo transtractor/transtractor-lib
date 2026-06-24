@@ -1,16 +1,13 @@
 """Tests for the Parser parse method."""
 
-# pylint: disable=duplicate-code
-
 import tempfile
 from pathlib import Path
 
 import pytest
-
 from transtractor.exceptions import StatementNotSupported
 from transtractor.parser import Parser
 from transtractor.structs.statement_data import StatementData
-from transtractor.transtractor import NoErrorFreeStatementData # pylint: disable=no-name-in-module
+from transtractor.transtractor import NoErrorFreeStatementData
 
 
 def test_parse_generates_correct_csv():
@@ -27,16 +24,18 @@ def test_parse_generates_correct_csv():
     statement_data: StatementData = parser.parse(str(test_pdf))
 
     # Generate CSV in a temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False, newline='') as tmp_file:
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".csv", delete=False, newline=""
+    ) as tmp_file:
         tmp_csv_path = tmp_file.name
         statement_data.to_csv(tmp_csv_path)
 
     try:
         # Read both CSV files
-        with open(tmp_csv_path, 'r', encoding='utf-8') as generated:
+        with open(tmp_csv_path, encoding="utf-8") as generated:
             generated_lines = generated.readlines()
 
-        with open(expected_csv, 'r', encoding='utf-8') as expected:
+        with open(expected_csv, encoding="utf-8") as expected:
             expected_lines = expected.readlines()
 
         # Compare line by line
@@ -45,7 +44,9 @@ def test_parse_generates_correct_csv():
             f"expected {len(expected_lines)} lines"
         )
 
-        for i, (generated_line, expected_line) in enumerate(zip(generated_lines, expected_lines)):
+        for i, (generated_line, expected_line) in enumerate(
+            zip(generated_lines, expected_lines)
+        ):
             assert generated_line == expected_line, (
                 f"CSV content mismatch at line {i + 1}:\n"
                 f"Generated: {generated_line}\n"

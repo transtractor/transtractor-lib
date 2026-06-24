@@ -16,17 +16,17 @@ def test_layout_generates_correct_output_default_settings():
     expected_layout = fixtures_dir / "test1_layout.txt"
 
     # Generate layout output in a temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as tmp_file:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as tmp_file:
         tmp_layout_path = tmp_file.name
 
     try:
         parser.layout(str(test_pdf), tmp_layout_path, y_bin=0.0, x_gap=0.0)
 
         # Read both layout files
-        with open(tmp_layout_path, 'r', encoding='utf-8') as generated:
+        with open(tmp_layout_path, encoding="utf-8") as generated:
             generated_content = generated.read()
 
-        with open(expected_layout, 'r', encoding='utf-8') as expected:
+        with open(expected_layout, encoding="utf-8") as expected:
             expected_content = expected.read()
 
         # Compare content
@@ -41,7 +41,8 @@ def test_layout_generates_correct_output_default_settings():
 
 
 def test_layout_generates_correct_output_custom_settings():
-    """Test that layout for test1.pdf with y_bin=5.0, x_gap=2.0 matches test1_layout_5_2.txt."""
+    """Test that layout for test1.pdf with y_bin=5.0, x_gap=2.0 matches
+    test1_layout_5_2.txt."""
     parser = Parser()
 
     # Generate layout for the test PDF with custom settings
@@ -50,17 +51,17 @@ def test_layout_generates_correct_output_custom_settings():
     expected_layout = fixtures_dir / "test1_layout_5_2.txt"
 
     # Generate layout output in a temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.txt', delete=False) as tmp_file:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False) as tmp_file:
         tmp_layout_path = tmp_file.name
 
     try:
         parser.layout(str(test_pdf), tmp_layout_path, y_bin=5.0, x_gap=2.0)
 
         # Read both layout files
-        with open(tmp_layout_path, 'r', encoding='utf-8') as generated:
+        with open(tmp_layout_path, encoding="utf-8") as generated:
             generated_content = generated.read()
 
-        with open(expected_layout, 'r', encoding='utf-8') as expected:
+        with open(expected_layout, encoding="utf-8") as expected:
             expected_content = expected.read()
 
         # Compare content

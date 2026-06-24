@@ -5,13 +5,13 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
 from transtractor.parser import Parser
 
 
 def normalize_csv_for_comparison(csv_path: str, fixtures_dir: Path) -> list[list[str]]:
-    """Read CSV and normalize by zeroing out timing columns and converting paths to relative."""
-    with open(csv_path, 'r', encoding='utf-8') as f:
+    """Read CSV and normalize by zeroing out timing columns and converting paths to
+    relative."""
+    with open(csv_path, encoding="utf-8") as f:
         reader = csv.reader(f)
         rows = list(reader)
 
@@ -32,7 +32,8 @@ def normalize_csv_for_comparison(csv_path: str, fixtures_dir: Path) -> list[list
             if row[0]:  # PDF File column
                 pdf_path = Path(row[0])
                 try:
-                    # Make path relative to project root to get "tests/fixtures/test1.pdf"
+                    # Make path relative to project root to get
+                    # "tests/fixtures/test1.pdf"
                     relative_path = pdf_path.relative_to(project_root)
                     row[0] = str(relative_path)
                 except ValueError:
@@ -41,8 +42,8 @@ def normalize_csv_for_comparison(csv_path: str, fixtures_dir: Path) -> list[list
 
             # Zero out timing columns if they contain non-zero values
             for timing_idx in [4, 5, 6, 7]:
-                if row[timing_idx] and row[timing_idx] != '0':
-                    row[timing_idx] = '0'
+                if row[timing_idx] and row[timing_idx] != "0":
+                    row[timing_idx] = "0"
 
     return rows
 
@@ -58,7 +59,9 @@ def test_test_generates_correct_csv_with_valid_config():
     expected_csv = fixtures_dir / "test1_test.csv"
 
     # Generate test output in a temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False, newline='') as tmp_file:
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".csv", delete=False, newline=""
+    ) as tmp_file:
         tmp_csv_path = tmp_file.name
 
     try:
@@ -74,7 +77,9 @@ def test_test_generates_correct_csv_with_valid_config():
             f"expected {len(expected_rows)} rows"
         )
 
-        for i, (generated_row, expected_row) in enumerate(zip(generated_rows, expected_rows)):
+        for i, (generated_row, expected_row) in enumerate(
+            zip(generated_rows, expected_rows)
+        ):
             assert generated_row == expected_row, (
                 f"CSV content mismatch at row {i + 1}:\n"
                 f"Generated: {generated_row}\n"
@@ -86,7 +91,7 @@ def test_test_generates_correct_csv_with_valid_config():
 
 
 def test_test_generates_correct_csv_with_misconfigured_config():
-    """Test that parser.test with misconfigured config matches 
+    """Test that parser.test with misconfigured config matches
     test1_test_NoErrorFreeStatementData.csv."""
     parser = Parser()
 
@@ -97,7 +102,9 @@ def test_test_generates_correct_csv_with_misconfigured_config():
     expected_csv = fixtures_dir / "test1_test_NoErrorFreeStatementData.csv"
 
     # Generate test output in a temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False, newline='') as tmp_file:
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".csv", delete=False, newline=""
+    ) as tmp_file:
         tmp_csv_path = tmp_file.name
 
     try:
@@ -113,7 +120,9 @@ def test_test_generates_correct_csv_with_misconfigured_config():
             f"expected {len(expected_rows)} rows"
         )
 
-        for i, (generated_row, expected_row) in enumerate(zip(generated_rows, expected_rows)):
+        for i, (generated_row, expected_row) in enumerate(
+            zip(generated_rows, expected_rows)
+        ):
             assert generated_row == expected_row, (
                 f"CSV content mismatch at row {i + 1}:\n"
                 f"Generated: {generated_row}\n"
@@ -125,7 +134,8 @@ def test_test_generates_correct_csv_with_misconfigured_config():
 
 
 def test_test_generates_correct_csv_without_config():
-    """Test that parser.test without config matches test1_test_StatementNotSupported.csv."""
+    """Test that parser.test without config matches
+    test1_test_StatementNotSupported.csv."""
     parser = Parser()
 
     # Don't load any config
@@ -133,7 +143,9 @@ def test_test_generates_correct_csv_without_config():
     expected_csv = fixtures_dir / "test1_test_StatementNotSupported.csv"
 
     # Generate test output in a temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False, newline='') as tmp_file:
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".csv", delete=False, newline=""
+    ) as tmp_file:
         tmp_csv_path = tmp_file.name
 
     try:
@@ -149,7 +161,9 @@ def test_test_generates_correct_csv_without_config():
             f"expected {len(expected_rows)} rows"
         )
 
-        for i, (generated_row, expected_row) in enumerate(zip(generated_rows, expected_rows)):
+        for i, (generated_row, expected_row) in enumerate(
+            zip(generated_rows, expected_rows)
+        ):
             assert generated_row == expected_row, (
                 f"CSV content mismatch at row {i + 1}:\n"
                 f"Generated: {generated_row}\n"
@@ -167,13 +181,17 @@ def test_test_raises_value_error_with_invalid_log_level():
     fixtures_dir = Path(__file__).parent.parent / "fixtures"
 
     # Generate test output in a temporary file
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.csv', delete=False, newline='') as tmp_file:
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".csv", delete=False, newline=""
+    ) as tmp_file:
         tmp_csv_path = tmp_file.name
 
     try:
         # Should raise ValueError for invalid log level
         with pytest.raises(ValueError):
-            parser.test(str(fixtures_dir), output_file=tmp_csv_path, log_level="INVALID")
+            parser.test(
+                str(fixtures_dir), output_file=tmp_csv_path, log_level="INVALID"
+            )
     finally:
         # Clean up temporary file
         Path(tmp_csv_path).unlink(missing_ok=True)

@@ -31,7 +31,6 @@ class LibConfigDB:
         :raises ConfigLoadError: If the configuration file cannot be loaded
         """
 
-
     def get_config_json_str(self, key: str) -> str:
         """
         Get JSON configuration string for a given key from the parser database.
@@ -42,7 +41,6 @@ class LibConfigDB:
         :rtype: str
         :raises ConfigAccessError: If the configuration key is not found
         """
-
 
     def get_account_terms(self, key: str) -> list[str]:
         """
@@ -55,7 +53,6 @@ class LibConfigDB:
         :raises ConfigAccessError: If the configuration key is not found
         """
 
-
     def get_all_config_keys(self) -> list[str]:
         """
         Get list of all registered config keys.
@@ -63,7 +60,6 @@ class LibConfigDB:
         :returns: List of all configuration keys
         :rtype: list[str]
         """
-
 
     def has_config(self, key: str) -> bool:
         """
@@ -75,28 +71,25 @@ class LibConfigDB:
         :rtype: bool
         """
 
-
-
 class LibParser:
     """Parser for extracting statement data from text items."""
 
     def __init__(self) -> None:
         """Create a new LibParser instance."""
 
-
     def import_config_from_json_str(self, py_json_str: str) -> None:
         """
-        Import JSON configuration string into the parser database and update the StatementTyper.
+        Import JSON configuration string into the parser database and update the
+        StatementTyper.
 
         :param py_json_str: JSON string containing the configuration
         :type py_json_str: str
         :raises ConfigLoadError: If the configuration cannot be loaded
         """
 
-
     def register_config_from_json_str(self, py_json_str: str) -> None:
         """
-        Register JSON configuration string into the parser database without 
+        Register JSON configuration string into the parser database without
         updating the StatementTyper.
 
         :param py_json_str: JSON string containing the configuration
@@ -104,27 +97,25 @@ class LibParser:
         :raises ConfigLoadError: If the configuration cannot be loaded
         """
 
-
     def import_config_from_file(self, py_file_path: str) -> None:
         """
-        Import JSON configuration file into the parser database and update the StatementTyper.
+        Import JSON configuration file into the parser database and update the
+        StatementTyper.
 
         :param py_file_path: Path to the JSON configuration file
         :type py_file_path: str
         :raises ConfigLoadError: If the configuration file cannot be loaded
         """
 
-
     def add_account_terms(self, key: str, terms: list[str]) -> None:
         """
-        Add account terms (list of strings) to the StatementTyper for a given config key.
+        Add account terms to the StatementTyper for a given config key.
 
         :param key: The configuration key
         :type key: str
         :param terms: List of account term strings
         :type terms: list[str]
         """
-
 
     def get_applicable_config_keys(self, py_text_items: list[dict]) -> list[str]:
         """
@@ -136,7 +127,6 @@ class LibParser:
         :rtype: list[str]
         """
 
-
     def get_unregistered_config_keys(self, keys: list[str]) -> list[str]:
         """
         Return a list of keys not yet registered in the parser database.
@@ -146,7 +136,6 @@ class LibParser:
         :returns: List of unregistered keys
         :rtype: list[str]
         """
-
 
     def py_text_items_to_py_statement_data(
         self, py_text_items: list[dict], applicable_config_keys: list[str]
@@ -160,9 +149,8 @@ class LibParser:
         :type applicable_config_keys: list[str]
         :returns: StatementData object
         :rtype: object
-        :raises NoErrorFreeStatementData: If no error-free statement data could be found
+        :raises NoErrorFreeStatementData: No error-free statement data could be found
         """
-
 
     def py_text_items_to_debug_py_str(
         self, py_text_items: list[dict], applicable_config_keys: list[str]
@@ -177,7 +165,6 @@ class LibParser:
         :returns: Debug information string
         :rtype: str
         """
-
 
     def py_text_items_to_layout_py_str(
         self, py_text_items: list[dict], y_bin: float, x_gap: float
@@ -195,14 +182,11 @@ class LibParser:
         :rtype: str
         """
 
-
 class NoErrorFreeStatementData(Exception):
     """Raised when no error-free statement data could be found."""
 
-
 class ConfigLoadError(Exception):
     """Raised when a configuration cannot be loaded."""
-
 
 class ConfigAccessError(Exception):
     """Raised when a configuration cannot be accessed."""
