@@ -135,12 +135,6 @@ def generate_markdown(coverage_data: dict, language: str = "Code") -> str:
 
     lines.append("")
 
-    # Coverage legend
-    lines.append("## Coverage Legend\n")
-    lines.append("- 🟢 **90-100%**: Excellent coverage")
-    lines.append("- 🟡 **70-89%**: Good coverage")
-    lines.append("- 🔴 **Below 70%**: Needs improvement\n")
-
     return "\n".join(lines)
 
 
