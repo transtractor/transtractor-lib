@@ -10,7 +10,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -18,7 +18,7 @@ jobs:
         python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
@@ -27,7 +27,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v3
+        uses: astral-sh/setup-uv@v8
         with:
           enable-cache: true
           python-version: ${{ matrix.python-version }}
@@ -50,10 +50,80 @@ jobs:
       - name: Run ruff format check
         run: uv run ruff format --check python tests
 
-      - name: Run pytest with coverage
-        run: uv run pytest tests/python/
+      - name: Run pytest
+        run: uv run pytest
 
-      - name: Upload coverage reports to Codecov
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+
+      - name: Cache Rust Build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: .
+
+      - name: Install cargo-llvm-cov
+        run: cargo install cargo-llvm-cov
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          python-version: 3.14
+
+      - name: Sync Python dev environment
+        run: uv sync --group dev
+
+      - name: Build Python package
+        run: uv run maturin develop --release
+
+      - name: Generate Rust Coverage (Cobertura XML)
+        run: cargo llvm-cov --all-features --cobertura --output-path cov-rust.xml
+
+      - name: Generate Python Coverage (pytest, Cobertura XML)
+        run: uv run pytest
+
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./cov-rust.xml,./cov-python.xml
+          flags: rust,python
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Generate Detailed Rust Coverage Report
+        run: python3 scripts/render-coverage.py \
+          --coverage-xml cov-rust.xml \
+          --output-md cov-rust.md
+        continue-on-error: true
+
+      - name: Write Rust Coverage to Job Summary
+        run: cat cov-rust.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate Detailed Python Coverage Report
+        run: python3 scripts/render-coverage.py \
+          --coverage-xml cov-python.xml \
+          --output-md cov-python.md
+        continue-on-error: true
+
+      - name: Write Python Coverage to Job Summary
+        run: cat cov-python.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-results
+          path: |
+            cov-rust.xml
+            cov-rust.md
+            cov-python.xml
+            cov-python.md
+          if-no-files-found: warn
