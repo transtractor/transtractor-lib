@@ -1,11 +1,13 @@
 {
     "recommendations": [
+        "charliermarsh.ruff",
         "ms-python.vscode-pylance",
         "ms-python.vscode-python-envs",
-        "charliermarsh.ruff",
+        "oderwat.indent-rainbow",
+        "rust-lang.rust-analyzer",
         "ryanluker.vscode-coverage-gutters",
+        "serayuzgur.crates",
         "streetsidesoftware.code-spell-checker",
-        "streetsidesoftware.code-spell-checker-australian-english",
-        "oderwat.indent-rainbow"
+        "streetsidesoftware.code-spell-checker-australian-english"
     ]
 }

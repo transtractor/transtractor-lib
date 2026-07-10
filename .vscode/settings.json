@@ -1,9 +1,10 @@
 {
+    "editor.inlayHints.enabled": "offUnlessPressed",
+    "editor.renderWhitespace": "all",
     "editor.rulers": [
         88,
         120
     ],
-    "editor.renderWhitespace": "all",
     "[python]": {
         "editor.tabSize": 4,
         "editor.detectIndentation": false,
@@ -14,6 +15,13 @@
             "source.organizeImports.ruff": "explicit"
         },
         "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "[rust]": {
+        "editor.tabSize": 4,
+        "editor.detectIndentation": false,
+        "editor.insertSpaces": true,
+        "editor.formatOnSave": false,
+        "editor.defaultFormatter": "rust-lang.rust-analyzer"
     },
     "cSpell.language": "en-AU",
     "cSpell.words": [
@@ -47,4 +55,5 @@
     "python.testing.pytestEnabled": true,
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
     "python.analysis.diagnosticMode": "workspace",
+    "rust-analyzer.check.command": "clippy"
 }
