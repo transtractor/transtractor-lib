@@ -147,15 +147,13 @@ def generate_markdown(coverage_data: dict) -> str:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        "--coverage-xml",
+        "coverage_xml",
         type=Path,
-        default=Path("cov.xml"),
         help="Path to Cobertura XML file",
     )
     parser.add_argument(
-        "--output-md",
+        "output_md",
         type=Path,
-        default=Path("coverage-report.md"),
         help="Path to output Markdown file",
     )
     args = parser.parse_args()
