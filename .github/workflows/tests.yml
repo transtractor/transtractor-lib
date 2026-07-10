@@ -99,7 +99,7 @@ jobs:
           verbose: true
 
       - name: Generate Detailed Rust Coverage Report
-        run: python3 scripts/render-coverage.py \
+        run: uv run python scripts/render-coverage.py \
           --coverage-xml cov-rust.xml \
           --output-md cov-rust.md
         continue-on-error: true
@@ -108,7 +108,7 @@ jobs:
         run: cat cov-rust.md >> $GITHUB_STEP_SUMMARY
 
       - name: Generate Detailed Python Coverage Report
-        run: python3 scripts/render-coverage.py \
+        run: uv run python scripts/render-coverage.py \
           --coverage-xml cov-python.xml \
           --output-md cov-python.md
         continue-on-error: true
