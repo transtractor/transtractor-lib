@@ -46,9 +46,6 @@ jobs:
       - name: Run Clippy linter
         run: cargo clippy --all-targets --all-features -- -D warnings
 
-      - name: Build Rust
-        run: cargo build --verbose
-
       - name: Run Rust tests
         run: cargo test --verbose
 
