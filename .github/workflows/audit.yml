@@ -1,10 +1,13 @@
 # Run a scan of all Python and Rust dependencies for known vulnerabilities and licenses.
-# Workflow is triggered manually via the "Run workflow" button in the Actions tab or 
-# automatically on pushes and pull requests targeting the main branch.
+# Workflow is scheduled to run weekly, triggered manually via the "Run workflow" button 
+# in the Actions tab or automatically on pushes and pull requests targeting the main 
+# branch. The workflow will fail if any vulnerabilities are found in the dependencies.
 
 name: Dependency Audit
 
 on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays at 06:00 UTC
   push:
     branches: ["main"]
   pull_request:
@@ -40,7 +43,23 @@ jobs:
         run: cargo audit --json > cargo-audit.json || true
 
       - name: Render Rust audit findings
+        id: render-cargo-audit
         run: uv run python scripts/render-cargo-audit.py cargo-audit.json cargo-audit.md
 
       - name: Append findings to workflow summary
         run: cat cargo-audit.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-results
+          path: |
+            cargo-audit.json
+            cargo-audit.md
+          if-no-files-found: warn
+      
+      - name: Fail workflow if vulnerabilities found
+        if: always()
+        run: bash scripts/handle-audit-findings.sh \
+          "${{ steps.render-cargo-audit.outputs.has_findings }}"

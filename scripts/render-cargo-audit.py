@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from collections import Counter
 from pathlib import Path
 
@@ -22,19 +23,19 @@ def load_json(path: Path) -> dict | None:
     return json.loads(text)
 
 
-def render(data: dict | None) -> str:
+def render(data: dict | None) -> tuple[str, int]:
     """Render cargo audit JSON data as Markdown."""
     lines = ["## Rust Dependency Audit (cargo-audit)", ""]
 
     if data is None:
         lines.append("_Audit produced no output._")
-        return "\n".join(lines)
+        raise ValueError("cargo audit output is empty or missing")
 
     vulnerabilities = data.get("vulnerabilities", {}).get("vulnerabilities", [])
 
     if not vulnerabilities:
         lines.append("✅ No known vulnerabilities found.")
-        return "\n".join(lines)
+        return "\n".join(lines), 0
 
     # Count vulnerabilities by severity
     by_severity = Counter(
@@ -81,7 +82,14 @@ def render(data: dict | None) -> str:
             title = advisory.get("title", "N/A")
             lines.append(f"| `{pkg_name}` | `{severity}` | {advisory_id} | {title} |")
 
-    return "\n".join(lines)
+    return "\n".join(lines), len(vulnerabilities)
+
+
+def write_github_output(name: str, value: str) -> None:
+    output_path = os.environ.get("GITHUB_OUTPUT")
+    if output_path:
+        with open(output_path, "a", encoding="utf-8") as fh:
+            fh.write(f"{name}={value}\n")
 
 
 def main() -> None:
@@ -91,8 +99,11 @@ def main() -> None:
     parser.add_argument("output", type=Path, help="Path to output Markdown file")
     args = parser.parse_args()
 
-    body = render(load_json(args.input))
+    body, vulnerability_count = render(load_json(args.input))
     args.output.write_text(body + "\n", encoding="utf-8")
+
+    has_findings = "true" if (vulnerability_count) > 0 else "false"
+    write_github_output("has_findings", has_findings)
 
 
 if __name__ == "__main__":
