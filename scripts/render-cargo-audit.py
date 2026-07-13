@@ -48,18 +48,6 @@ def render(data: dict | None) -> tuple[str, int]:
     lines.append(f"**{total} known vulnerability{plural}** found.")
     lines.append("")
 
-    # Severity summary
-    severity_order = ["critical", "high", "medium", "low"]
-    lines.append("### Summary by Severity")
-    lines.append("")
-    lines.append("| Severity | Count |")
-    lines.append("| --- | ---: |")
-    for severity in severity_order:
-        if severity in by_severity:
-            count = by_severity[severity]
-            lines.append(f"| `{severity.upper()}` | {count} |")
-    lines.append("")
-
     # Details grouped by package
     by_package = {}
     for v in vulnerabilities:
