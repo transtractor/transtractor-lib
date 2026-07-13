@@ -16,6 +16,9 @@ fi
 # Validate all arguments are "true" or "false"
 has_findings=false
 for arg in "$@"; do
+    # Trim whitespace
+    arg="${arg##+([[:space:]])}"
+    arg="${arg%%+([[:space:]])}"
     if [[ "$arg" != "true" && "$arg" != "false" ]]; then
         echo "Error: Invalid argument '$arg'. Expected 'true' or 'false'."
         exit 1
