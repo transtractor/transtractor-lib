@@ -83,5 +83,9 @@ parser.parse('statement.pdf').to_csv('statement.csv')
 
 ## Contributions
 New and well-tested configuration files are especially welcome. Please
-submit a pull request with them add to the *python/transtractor/configs* directory, or
+submit a pull request with them add to the `python/transtractor/configs` directory, or
 email to develop@transtractor.net.
+
+The following pages provide further information about how this package is built and developed:
+
+* [Architecture Guide](md/architecture.md): Overview of key application components and design principles.
