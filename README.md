@@ -6,7 +6,7 @@
 ![codecov](https://codecov.io/gh/transtractor/transtractor-lib/branch/main/graph/badge.svg)
 ![License](https://img.shields.io/github/license/transtractor/transtractor-lib)
 
-## Universal PDF bank statement parsing
+## Universal PDF Bank Statement Parsing
 The Transaction Extractor, or 'Transtractor', aspires to be a universal 
 library for extracting transaction data from PDF bank statements. Key features:
 
@@ -26,7 +26,7 @@ pip install transtractor
 
 **Requirements**: Python 3.10 or higher
 
-### Compile from source
+### Compile from Source
 1. **Install Rust**: Download and install Rust from [rustup.rs](https://rustup.rs/)
 
 2. **Install uv**: Follow instructions from [Astral](https://docs.astral.sh/uv/getting-started/installation/)
@@ -44,7 +44,7 @@ pip install transtractor
    uv run pytest
    ```
 
-### Basic usage
+### Basic Usage
 1. **Import and initialise the parser**
    ```python
    from transtractor import Parser
@@ -65,10 +65,10 @@ pip install transtractor
    df = pd.DataFrame(data)
    ```
 
-## Advanced usage
+## Advanced Usage
 See the [documentation](https://transtractor-lib.readthedocs.io/en/latest/) maintained on Read the Docs.
 
-## Supported statements
+## Supported Statements
 See the documentation for a current list of [supported statements](https://transtractor-lib.readthedocs.io/en/latest/supported_statements.html). You may also
 create your own parsing configuration files by following these [instructions](https://transtractor-lib.readthedocs.io/en/latest/configuration.html)
 and loading it by:
