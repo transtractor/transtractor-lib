@@ -37,7 +37,7 @@ jobs:
           python-version: 3.14
 
       - name: Sync Python dev environment
-        run: uv sync --locked --all-extras --group dev
+        run: uv sync --locked --group dev
 
       - name: Scan Rust binaries for vulnerabilities
         run: cargo audit --json > cargo-audit.json || true
