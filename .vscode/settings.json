@@ -23,6 +23,12 @@
         "editor.formatOnSave": false,
         "editor.defaultFormatter": "rust-lang.rust-analyzer"
     },
+    "coverage-gutters.coverageFileNames": [
+        "cov-python.xml",
+        "cov-rust.xml"
+    ],
+    "coverage-gutters.showLineCoverage": true,
+    "coverage-gutters.showRulerCoverage": true,
     "cSpell.language": "en-AU",
     "cSpell.words": [
         "addopts",
