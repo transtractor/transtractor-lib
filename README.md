@@ -35,7 +35,7 @@ pip install transtractor
    ```shell
    git clone https://github.com/transtractor/transtractor.git
    cd transtractor-lib
-   uv sync --locked --all-extras --group dev
+   uv sync --locked --group dev
    ```
 
 4. **Test the package**: Run Rust and Python unit tests
