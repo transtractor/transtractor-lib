@@ -216,6 +216,7 @@ cov-python.xml
 cov-python-md
 cov-rust.xml
 cov-rust.md
+htmlcov-python/
 
 # Audit reports
 cargo-audit.json
