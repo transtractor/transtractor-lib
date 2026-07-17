@@ -41,7 +41,7 @@ dependencies = ["pdfplumber>=0.11.10,<0.12.0"]
 [dependency-groups]
 dev = [
     "defusedxml",
-    "maturin>=1.14,<2.0",
+    "maturin>=1.9,<2.0",
     "pyright",
     "pytest",
     "pytest-cov",
