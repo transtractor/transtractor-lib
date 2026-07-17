@@ -20,7 +20,7 @@
         "editor.tabSize": 4,
         "editor.detectIndentation": false,
         "editor.insertSpaces": true,
-        "editor.formatOnSave": false,
+        "editor.formatOnSave": true,
         "editor.defaultFormatter": "rust-lang.rust-analyzer"
     },
     "coverage-gutters.coverageFileNames": [
