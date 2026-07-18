@@ -84,6 +84,22 @@ jobs:
       - name: Append Python findings to workflow summary
         run: cat pip-audit.md >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Scan Python dependencies for licenses
+        shell: bash
+        run: |
+          PACKAGES=$(grep -oE '^[A-Za-z0-9][A-Za-z0-9._-]*' requirements-audit.txt | sort -u | xargs)
+          uv run pip-licenses \
+            --from=mixed \
+            --packages "$PACKAGES" \
+            --format=json > pip-licenses.json || true
+
+      - name: Render Python license findings
+        id: render-pip-licenses
+        run: uv run python scripts/render-pip-licenses.py pip-licenses.json pip-licenses.md
+
+      - name: Append Python license findings to workflow summary
+        run: cat pip-licenses.md >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload audit artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -96,6 +112,8 @@ jobs:
             cargo-deny.md
             pip-audit.json
             pip-audit.md
+            pip-licenses.json
+            pip-licenses.md
           if-no-files-found: warn
       
       - name: Fail workflow if vulnerabilities found
@@ -105,3 +123,4 @@ jobs:
             "${{ steps.render-cargo-audit.outputs.has_findings }}"
             "${{ steps.render-cargo-deny.outputs.has_findings }}"
             "${{ steps.render-pip-audit.outputs.has_findings }}"
+            "${{ steps.render-pip-licenses.outputs.has_findings }}"

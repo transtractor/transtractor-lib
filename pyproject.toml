@@ -43,6 +43,7 @@ dev = [
     "defusedxml",
     "maturin>=1.9,<2.0",
     "pip-audit",
+    "pip-licenses",
     "pyright",
     "pytest",
     "pytest-cov",

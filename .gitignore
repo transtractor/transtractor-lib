@@ -225,4 +225,6 @@ cargo-deny.json
 cargo-deny.md
 pip-audit.json
 pip-audit.md
+pip-licenses.json
+pip-licenses.md
 requirements-audit.txt
