@@ -34,8 +34,7 @@ def normalize_csv_for_comparison(csv_path: str, fixtures_dir: Path) -> list[list
                 try:
                     # Make path relative to project root to get
                     # "tests/fixtures/test1.pdf"
-                    relative_path = pdf_path.relative_to(project_root)
-                    row[0] = str(relative_path)
+                    row[0] = pdf_path.relative_to(project_root).as_posix()
                 except ValueError:
                     # Path is not relative to project_root, keep as is
                     pass
