@@ -78,7 +78,7 @@ class TestData:
             self.status,
             str(self.num_transactions),
             str(self.total_time),
-            self._normalized_pdf_file_path(),
+            Path(self.pdf_file_path).as_posix(),
         ]
 
     def run(self) -> None:
