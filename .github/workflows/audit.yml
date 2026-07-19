@@ -119,8 +119,8 @@ jobs:
       - name: Fail workflow if vulnerabilities found
         if: always()
         run: |
-          bash scripts/handle-audit-findings.sh
-            "${{ steps.render-cargo-audit.outputs.has_findings }}"
-            "${{ steps.render-cargo-deny.outputs.has_findings }}"
-            "${{ steps.render-pip-audit.outputs.has_findings }}"
+          bash scripts/handle-audit-findings.sh \
+            "${{ steps.render-cargo-audit.outputs.has_findings }}" \
+            "${{ steps.render-cargo-deny.outputs.has_findings }}" \
+            "${{ steps.render-pip-audit.outputs.has_findings }}" \
             "${{ steps.render-pip-licenses.outputs.has_findings }}"
