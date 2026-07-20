@@ -77,7 +77,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
-          python-version: ${{ matrix.python-version }}
+          python-version: 3.14
 
       - name: Sync Python dev environment
         run: uv sync --locked --group dev
