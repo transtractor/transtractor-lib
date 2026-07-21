@@ -71,6 +71,27 @@ class Parser:
         sd.set_filename(pdf_file_path)
         return sd
 
+    def parse_layout(self, layout_file_path: str) -> StatementData:
+        """Parse the bank statement layout string and return a StatementData object.
+
+        :param layout_file_path: Path to the layout file to be processed
+        :return: StatementData object representing the parsed bank statement data
+        :raises NoErrorFreeStatementData: Statement format recognised but could be
+            processed without failing quality checks
+        :raises StatementNotSupported: Statement format is unsupported or not properly
+            identified
+        """
+        py_layout_str = open(layout_file_path, encoding="utf-8").read()
+        py_text_items = self._inner.py_layout_py_str_to_py_text_items(py_layout_str)
+        applicable_keys = self._identify(py_text_items)
+        sd: StatementData = cast(
+            StatementData,
+            self._inner.py_text_items_to_py_statement_data(
+                py_text_items, applicable_keys
+            ),
+        )
+        return sd
+
     def debug(self, pdf_file_path: str, output_file: str) -> str:
         """Write a summary of the statement data and quality checks for
         each statement extraction configuration applied.

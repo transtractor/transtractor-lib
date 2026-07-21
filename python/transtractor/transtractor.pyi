@@ -182,6 +182,16 @@ class LibParser:
         :rtype: str
         """
 
+    def py_layout_py_str_to_py_text_items(self, layout_str: str) -> list[dict]:
+        """
+        Process a layout text string and return a Python list of text item dictionaries.
+
+        :param layout_str: Layout text string
+        :type layout_str: str
+        :returns: List of text item dictionaries
+        :rtype: list[dict]
+        """
+
 class NoErrorFreeStatementData(Exception):
     """Raised when no error-free statement data could be found."""
 

@@ -1,6 +1,7 @@
 use crate::configs::db::ConfigDB;
 use crate::configs::typer::StatementTyper;
 use crate::parsers::flows::config_json_file_to_config;
+use crate::parsers::flows::layout_to_text_items::layout_to_text_items;
 use crate::parsers::flows::text_items_to_debug::text_items_to_debug;
 use crate::parsers::flows::text_items_to_layout::text_items_to_layout;
 use crate::parsers::flows::text_items_to_statement_datas::text_items_to_statement_datas;
@@ -173,5 +174,20 @@ impl LibParser {
             Ok(layout_str) => Ok(layout_str),
             Err(e) => Err(pyo3::exceptions::PyRuntimeError::new_err(e)),
         }
+    }
+
+    /// Process a Python layout text string and return a Python list of text item dictionaries.
+    pub fn py_layout_py_str_to_py_text_items(
+        &self,
+        py_layout_str: &Bound<'_, PyAny>,
+    ) -> PyResult<Py<PyAny>> {
+        let rust_layout_str = py_layout_str.extract::<String>()?;
+        let text_items = layout_to_text_items(&rust_layout_str).map_err(|e| {
+            pyo3::exceptions::PyRuntimeError::new_err(format!(
+                "Failed to convert layout string to text items: {}",
+                e
+            ))
+        })?;
+        utils::rust_text_items_to_py_text_items(&text_items)
     }
 }
