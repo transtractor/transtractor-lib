@@ -2,7 +2,7 @@
 
 ![PyPI version](https://img.shields.io/pypi/v/transtractor)
 ![Development Status](https://img.shields.io/pypi/status/transtractor)
-![Tests](https://github.com/transtractor/transtractor-lib/actions/workflows/tests.yml/badge.svg)
+![Tests](https://github.com/transtractor/transtractor-lib/actions/workflows/ci.yml/badge.svg)
 ![codecov](https://codecov.io/gh/transtractor/transtractor-lib/branch/main/graph/badge.svg)
 ![License](https://img.shields.io/github/license/transtractor/transtractor-lib)
 
