@@ -22,27 +22,24 @@ def normalize_csv_for_comparison(csv_path: str, fixtures_dir: Path) -> list[list
 
     # Zero out timing columns (indices 4, 5, 6, 7 based on header:
     # "PDF File", "Pages", "Transactions", "Config Keys",
-    # "Extract Time (ms)", "Identify Time (ms)", "Parse Time (ms)", "Total Time (ms)",
+    # "Total Time (ms)",
     # "Status", "Reason Failed"
     for i, row in enumerate(rows):
-        if i == 0:  # Skip header
+        if i == 0 or not row:  # Skip header and empty rows
             continue
-        if len(row) >= 8:
-            # Convert absolute path to relative path from project root
-            if row[0]:  # PDF File column
-                pdf_path = Path(row[0])
-                try:
-                    # Make path relative to project root to get
-                    # "tests/fixtures/test1.pdf"
-                    row[0] = pdf_path.relative_to(project_root).as_posix()
-                except ValueError:
-                    # Path is not relative to project_root, keep as is
-                    pass
+        # Convert absolute path to relative path from project root
+        if row[0]:  # PDF File column
+            pdf_path = Path(row[0])
+            try:
+                # Make path relative to project root to get
+                # "tests/fixtures/test1.pdf"
+                row[0] = pdf_path.relative_to(project_root).as_posix()
+            except ValueError:
+                # Path is not relative to project_root, keep as is
+                pass
 
-            # Zero out timing columns if they contain non-zero values
-            for timing_idx in [4, 5, 6, 7]:
-                if row[timing_idx] and row[timing_idx] != "0":
-                    row[timing_idx] = "0"
+        # Zero out timing columns if they contain non-zero values
+        row[3] = "0"
 
     return rows
 

@@ -6,10 +6,8 @@ import time
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
-from ..exceptions import StatementNotSupported
 from ..structs.statement_data import StatementData
-from ..transtractor import NoErrorFreeStatementData
-from .extract import pdf_to_text_items
+from ..transtractor import NoErrorFreeStatementData, StatementNotSupported
 
 if TYPE_CHECKING:
     from ..parser import Parser
@@ -21,12 +19,8 @@ class TestData:
     def __init__(self, pdf_file_path: str, parser: "Parser"):
         self.pdf_file_path = pdf_file_path  # The PDF file being tested
         self.parser = parser  # The Parser instance used for testing
-        self.num_pages: int = 0  # Number of pages in the PDF
         self.num_transactions: int = 0  # Number of transactions extracted
-        self.config_keys: str = ""  # Config keys used for parsing
-        self.extract_time: int = 0  # Time taken to extract text items from PDF
-        self.identify_time: int = 0  # Time taken to identify config keys
-        self.parse_time: int = 0  # Time taken for parsing in ms
+        self.config_key: str = ""  # Config key used for parsing
         self.total_time: int = 0  # Total time taken for the test in ms
         self.status: str = ""  # Status of the test (PASS/FAIL)
         self.reason_failed: str = ""  # Error message if any
@@ -36,12 +30,8 @@ class TestData:
         """Get all headers for writing CSV file."""
         return [
             "PDF File",
-            "Pages",
             "Transactions",
-            "Config Keys",
-            "Extract Time (ms)",
-            "Identify Time (ms)",
-            "Parse Time (ms)",
+            "Config Key",
             "Total Time (ms)",
             "Status",
             "Reason Failed",
@@ -61,12 +51,8 @@ class TestData:
         """Get all data fields as strings for writing CSV file."""
         return [
             Path(self.pdf_file_path).as_posix(),
-            str(self.num_pages),
             str(self.num_transactions),
-            self.config_keys,
-            str(self.extract_time),
-            str(self.identify_time),
-            str(self.parse_time),
+            self.config_key,
             str(self.total_time),
             self.status,
             self.reason_failed,
@@ -85,46 +71,21 @@ class TestData:
         """Run the test on the PDF file using the provided parser."""
         start_total = time.time()
 
-        # Extract text items
-        start_extract = time.time()
-        py_text_items = pdf_to_text_items(self.pdf_file_path)
-        end_extract = time.time()
-        self.extract_time = int((end_extract - start_extract) * 1000)
-        if py_text_items:
-            self.num_pages = py_text_items[-1]["page"] - py_text_items[0]["page"] + 1
-
-        # Try to identify config keys to use
-        start_identify = time.time()
-        try:
-            keys = self.parser._identify(py_text_items)
-        except StatementNotSupported:
-            self.status = "FAIL"
-            self.reason_failed = "StatementNotSupported"
-            keys = ""
-        end_identify = time.time()
-        self.identify_time = int((end_identify - start_identify) * 1000)
-        self.config_keys = ", ".join(keys)
-        if keys == "":
-            end_total = time.time()
-            self.total_time = int((end_total - start_total) * 1000)
-            return
-
         # Try to parse the statement
-        start_parse = time.time()
         try:
             sd: StatementData = cast(
                 StatementData,
-                self.parser._inner.py_text_items_to_py_statement_data(
-                    py_text_items, keys
-                ),
+                self.parser.parse(self.pdf_file_path),
             )
+            self.config_key = sd.key if sd.key else ""
             self.num_transactions = len(sd.transactions)
             self.status = "PASS"
         except NoErrorFreeStatementData:
             self.status = "FAIL"
             self.reason_failed = "NoErrorFreeStatementData"
-        end_parse = time.time()
-        self.parse_time = int((end_parse - start_parse) * 1000)
+        except StatementNotSupported:
+            self.status = "FAIL"
+            self.reason_failed = "StatementNotSupported"
 
         end_total = time.time()
         self.total_time = int((end_total - start_total) * 1000)

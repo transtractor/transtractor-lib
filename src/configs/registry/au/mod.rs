@@ -1,0 +1,16 @@
+use crate::structs::StatementConfig;
+
+pub mod cba_credit_card_1;
+pub mod cba_debit_1;
+pub mod cba_loan_1;
+pub mod nab_classic_banking_1;
+
+pub fn get_all_configs() -> Vec<StatementConfig> {
+    let configs = vec![
+        cba_credit_card_1::get_config(),
+        cba_debit_1::get_config(),
+        cba_loan_1::get_config(),
+        nab_classic_banking_1::get_config(),
+    ];
+    configs
+}

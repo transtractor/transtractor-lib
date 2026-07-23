@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
-from transtractor.exceptions import StatementNotSupported
+from transtractor import StatementNotSupported
 from transtractor.parser import Parser
 from transtractor.structs.statement_data import StatementData
 from transtractor.transtractor import NoErrorFreeStatementData

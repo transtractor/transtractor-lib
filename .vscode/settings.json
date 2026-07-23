@@ -47,6 +47,7 @@
         "maturin",
         "outputjson",
         "pdfplumber",
+        "pdfsink",
         "prototransaction",
         "pycache",
         "pycodestyle",

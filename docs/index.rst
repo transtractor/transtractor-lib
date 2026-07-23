@@ -97,7 +97,7 @@ Community & Support
 
 * **Website**: `transtractor.net <https://transtractor.net>`_
 * **GitHub Repository**: `transtractor/transtractor-lib <https://github.com/transtractor/transtractor-lib>`_
-* **Contributions**: Pull requests with new statement configurations are very welcome! Or email them to Daniel at `develop@transtractor.net`.
+* **Contributions**: Pull requests with new statement configurations are very welcome! Or email them to Daniel at `gravytoast@pm.me`.
 
 
 License

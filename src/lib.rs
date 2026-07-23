@@ -6,8 +6,7 @@ pub mod parsers;
 pub mod python;
 pub mod structs;
 
-use crate::python::exceptions::{ConfigLoadError, NoErrorFreeStatementData};
-use crate::python::lib_config_db::LibConfigDB;
+use crate::python::exceptions::{ConfigLoadError, NoErrorFreeStatementData, StatementNotSupported};
 use crate::python::lib_parser::LibParser;
 use pyo3::prelude::*;
 
@@ -15,10 +14,13 @@ use pyo3::prelude::*;
 #[pymodule]
 fn transtractor(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<LibParser>()?;
-    m.add_class::<LibConfigDB>()?;
     m.add(
         "NoErrorFreeStatementData",
         m.py().get_type::<NoErrorFreeStatementData>(),
+    )?;
+    m.add(
+        "StatementNotSupported",
+        m.py().get_type::<StatementNotSupported>(),
     )?;
     m.add("ConfigLoadError", m.py().get_type::<ConfigLoadError>())?;
     Ok(())

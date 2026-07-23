@@ -1,63 +1,6 @@
-use crate::structs::TextItem;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyList};
-
-/// Converts a Python list of text item dictionaries to a Rust TextItems struct
-pub fn py_text_items_to_rust_text_items(
-    py_text_items: &Bound<'_, PyAny>,
-) -> PyResult<Vec<TextItem>> {
-    let mut text_items = Vec::new();
-    let py_list = py_text_items.cast::<PyList>()?;
-    for obj in py_list.iter() {
-        let dict = obj.cast::<pyo3::types::PyDict>()?;
-        let text: String = dict
-            .get_item("text")?
-            .ok_or_else(|| PyRuntimeError::new_err("Missing 'text' field"))?
-            .extract()?;
-        let x1: i32 = dict
-            .get_item("x1")?
-            .ok_or_else(|| PyRuntimeError::new_err("Missing 'x1' field"))?
-            .extract()?;
-        let y1: i32 = dict
-            .get_item("y1")?
-            .ok_or_else(|| PyRuntimeError::new_err("Missing 'y1' field"))?
-            .extract()?;
-        let x2: i32 = dict
-            .get_item("x2")?
-            .ok_or_else(|| PyRuntimeError::new_err("Missing 'x2' field"))?
-            .extract()?;
-        let y2: i32 = dict
-            .get_item("y2")?
-            .ok_or_else(|| PyRuntimeError::new_err("Missing 'y2' field"))?
-            .extract()?;
-        let page: i32 = dict
-            .get_item("page")?
-            .ok_or_else(|| PyRuntimeError::new_err("Missing 'page' field"))?
-            .extract()?;
-        let text_item = TextItem::new(text, x1, y1, x2, y2, page);
-        text_items.push(text_item);
-    }
-    Ok(text_items)
-}
-
-/// Convert Rust Text Items to a Python list of text item dictionaries
-pub fn rust_text_items_to_py_text_items(rust_text_items: &[TextItem]) -> PyResult<Py<PyAny>> {
-    Python::attach(|py| {
-        let py_list = PyList::empty(py);
-        for text_item in rust_text_items {
-            let dict = pyo3::types::PyDict::new(py);
-            dict.set_item("text", &text_item.text)?;
-            dict.set_item("x1", text_item.x1)?;
-            dict.set_item("y1", text_item.y1)?;
-            dict.set_item("x2", text_item.x2)?;
-            dict.set_item("y2", text_item.y2)?;
-            dict.set_item("page", text_item.page)?;
-            py_list.append(dict)?;
-        }
-        Ok(py_list.into())
-    })
-}
 
 /// Convert a Rust StatementData to a Python StatementData object
 pub fn rust_statement_data_to_py_statement_data(

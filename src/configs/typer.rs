@@ -105,7 +105,7 @@ impl StatementTyper {
         }
 
         // Return list of keys that have all terms satisfied
-        let complete_keys: Vec<String> = matches_by_key
+        let mut complete_keys: Vec<String> = matches_by_key
             .iter()
             .filter_map(|(key, &count)| {
                 if let Some(&expected) = self.expected_terms_by_key.get(key)
@@ -116,6 +116,16 @@ impl StatementTyper {
                 None
             })
             .collect();
+
+        complete_keys.sort_by_cached_key(|key| {
+            if let Some((prefix, suffix)) = key.rsplit_once("__")
+                && let Ok(number) = suffix.parse::<u64>()
+            {
+                return (prefix.to_string(), number, key.to_string());
+            }
+
+            (key.to_string(), 0, key.to_string())
+        });
 
         complete_keys
     }

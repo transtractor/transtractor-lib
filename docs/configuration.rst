@@ -651,8 +651,8 @@ assistance with this process.
 Contributing Your Configuration
 --------------------------------------
 If you have created a well-tested configuration file for a bank or account type that is not
-currently supported, please consider contributing it to the project! You can submit a
+currently supported, please consider contributing it to the project. You can submit a
 pull request on the
-`GitHub repository <https://github.com/transtractor/transtractor-lib>`_, including your configuration
-file in the *python/transtractor/configs* directory. Otherwise, feel free to email it to the project maintainers
-for inclusion (develop@transtractor.net).
+`GitHub repository <https://github.com/transtractor/transtractor-lib>`_, registering your configuration
+as a Rust module under *src/configs/registry*. Otherwise, feel free to email it to the project maintainers
+for inclusion (gravytoast@pm.me).

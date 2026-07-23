@@ -36,7 +36,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dynamic = ["version"]
-dependencies = ["pdfplumber>=0.11.10,<0.12.0"]
+dependencies = []
 
 [dependency-groups]
 dev = [
@@ -63,7 +63,6 @@ Issues = "https://github.com/transtractor/transtractor-lib/issues"
 [tool.maturin]
 features = ["pyo3/extension-module"]
 python-source = "python"
-include = ["python/transtractor/configs/**/*"]
 
 [tool.pyright]
 include = ["python"]

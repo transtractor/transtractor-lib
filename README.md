@@ -81,7 +81,7 @@ parser.parse('statement.pdf').to_csv('statement.csv')
 
 ## Contributions
 New and well-tested configuration files are especially welcome. Please
-submit a pull request with them add to the `python/transtractor/configs` directory, or
+submit a pull request with them registered as a Rust module under `src/configs/registry`, or
 email to gravytoast@pm.me.
 
 The following pages provide further information about how this package is built and developed:
