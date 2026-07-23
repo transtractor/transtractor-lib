@@ -39,7 +39,7 @@ def normalize_csv_for_comparison(csv_path: str, fixtures_dir: Path) -> list[list
                 pass
 
         # Zero out timing columns if they contain non-zero values
-        row[4] = "0"
+        row[3] = "0"
 
     return rows
 
