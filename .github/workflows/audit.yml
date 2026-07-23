@@ -87,11 +87,7 @@ jobs:
       - name: Scan Python dependencies for licenses
         shell: bash
         run: |
-          PACKAGES=$(grep -oE '^[A-Za-z0-9][A-Za-z0-9._-]*' requirements-audit.txt | sort -u | xargs)
-          if [ -z "$PACKAGES" ]; then
-            echo "No Python packages found, skipping pip-licenses scan"
-            exit 0
-          fi
+          PACKAGES=$(grep -oE '^[A-Za-z0-9][A-Za-z0-9._-]*' requirements-audit.txt | sort -u | xargs || true)
           uv run pip-licenses \
             --from=mixed \
             --packages "$PACKAGES" \
