@@ -1,2 +1,2 @@
-PDF File,Pages,Transactions,Config Key,Total Time (ms),Status,Reason Failed
-tests/fixtures/test1.pdf,3,62,au__gtb__fake_account__1,603,PASS,
+PDF File,Transactions,Config Key,Total Time (ms),Status,Reason Failed
+tests/fixtures/test1.pdf,62,au__gtb__fake_account__1,603,PASS,

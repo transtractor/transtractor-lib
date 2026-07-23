@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, cast
 
 from ..structs.statement_data import StatementData
 from ..transtractor import NoErrorFreeStatementData, StatementNotSupported
-from .extract import pdf_to_text_items
 
 if TYPE_CHECKING:
     from ..parser import Parser
@@ -20,7 +19,6 @@ class TestData:
     def __init__(self, pdf_file_path: str, parser: "Parser"):
         self.pdf_file_path = pdf_file_path  # The PDF file being tested
         self.parser = parser  # The Parser instance used for testing
-        self.num_pages: int = 0  # Number of pages in the PDF
         self.num_transactions: int = 0  # Number of transactions extracted
         self.config_key: str = ""  # Config key used for parsing
         self.total_time: int = 0  # Total time taken for the test in ms
@@ -32,7 +30,6 @@ class TestData:
         """Get all headers for writing CSV file."""
         return [
             "PDF File",
-            "Pages",
             "Transactions",
             "Config Key",
             "Total Time (ms)",
@@ -54,7 +51,6 @@ class TestData:
         """Get all data fields as strings for writing CSV file."""
         return [
             Path(self.pdf_file_path).as_posix(),
-            str(self.num_pages),
             str(self.num_transactions),
             self.config_key,
             str(self.total_time),
@@ -75,16 +71,11 @@ class TestData:
         """Run the test on the PDF file using the provided parser."""
         start_total = time.time()
 
-        # Extract text items
-        py_text_items = pdf_to_text_items(self.pdf_file_path)
-        if py_text_items:
-            self.num_pages = py_text_items[-1]["page"] - py_text_items[0]["page"] + 1
-
         # Try to parse the statement
         try:
             sd: StatementData = cast(
                 StatementData,
-                self.parser._inner.py_text_items_to_py_statement_data(py_text_items),
+                self.parser.parse(self.pdf_file_path),
             )
             self.config_key = sd.key if sd.key else ""
             self.num_transactions = len(sd.transactions)
