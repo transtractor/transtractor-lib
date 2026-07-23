@@ -88,6 +88,10 @@ jobs:
         shell: bash
         run: |
           PACKAGES=$(grep -oE '^[A-Za-z0-9][A-Za-z0-9._-]*' requirements-audit.txt | sort -u | xargs)
+          if [ -z "$PACKAGES" ]; then
+            echo "No Python packages found, skipping pip-licenses scan"
+            exit 0
+          fi
           uv run pip-licenses \
             --from=mixed \
             --packages "$PACKAGES" \
